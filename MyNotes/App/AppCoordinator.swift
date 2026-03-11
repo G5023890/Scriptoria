@@ -10,9 +10,11 @@ enum AppSceneID: String {
 @Observable
 final class AppCoordinator {
     var selectedNoteID: NoteID?
+    var selectedToDoID: ToDoID?
     var requestedSidebarSelection: SidebarSelection?
     var currentSidebarSelection: SidebarSelection = .collection(.allNotes)
     var emptyTrashRequestID: UUID?
+    var newNoteRequestID: UUID?
 
     func openMainWindow(using openWindow: OpenWindowAction) {
         openWindow(id: AppSceneID.mainWindow.rawValue)
@@ -22,9 +24,28 @@ final class AppCoordinator {
         openWindow(id: AppSceneID.quickCapture.rawValue)
     }
 
-    func revealNoteFromQuickCapture(_ note: Note, using openWindow: OpenWindowAction? = nil) {
+    func requestNewNote(using openWindow: OpenWindowAction? = nil) {
+        newNoteRequestID = UUID()
+        selectedToDoID = nil
+
+        if let openWindow {
+            openMainWindow(using: openWindow)
+        }
+    }
+
+    func revealNote(_ note: Note, using openWindow: OpenWindowAction? = nil) {
         requestedSidebarSelection = .collection(.allNotes)
         selectedNoteID = note.id
+        selectedToDoID = nil
+
+        if let openWindow {
+            openMainWindow(using: openWindow)
+        }
+    }
+
+    func revealToDo(noteID: NoteID, toDoID: ToDoID, using openWindow: OpenWindowAction? = nil) {
+        selectedNoteID = noteID
+        selectedToDoID = toDoID
 
         if let openWindow {
             openMainWindow(using: openWindow)
@@ -43,6 +64,11 @@ final class AppCoordinator {
     func consumeEmptyTrashRequest() -> UUID? {
         defer { emptyTrashRequestID = nil }
         return emptyTrashRequestID
+    }
+
+    func consumeNewNoteRequest() -> UUID? {
+        defer { newNoteRequestID = nil }
+        return newNoteRequestID
     }
 
     func triggerSync(using environment: AppEnvironment) {

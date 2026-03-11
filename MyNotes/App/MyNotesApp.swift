@@ -18,13 +18,13 @@ struct MyNotesApp: App {
         .defaultSize(width: 520, height: 460)
         .windowResizability(.contentSize)
 
-        MenuBarExtra {
-            MyNotesMenuBarExtra(coordinator: coordinator, environment: environment)
-        } label: {
-            Image(systemName: "text.pad.header.badge.plus")
-        }
         .commands {
             CommandMenu("Notes") {
+                Button("New Note") {
+                    coordinator.requestNewNote()
+                }
+                .keyboardShortcut("n", modifiers: [.command])
+
                 Button("Empty Trash") {
                     coordinator.requestEmptyTrash()
                 }

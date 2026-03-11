@@ -5,7 +5,9 @@ struct SnippetSectionView: View {
     let snippets: [SnippetItem]
     let emptyText: String?
     let syntaxHighlightService: any SyntaxHighlightService
+    let showsInlineCode: Bool
     let onCopy: (NoteSnippet) -> Void
+    let onPreviewSnippet: ((NoteSnippet) -> Void)?
     let onEdit: ((NoteSnippet) -> Void)?
     let onRemove: ((NoteSnippet) -> Void)?
 
@@ -26,9 +28,13 @@ struct SnippetSectionView: View {
                     ForEach(snippets) { item in
                         SnippetRowView(
                             item: item,
-                            syntaxHighlightService: syntaxHighlightService,
+                            showsInlineCode: showsInlineCode,
                             onPreview: {
-                                activePreviewItem = item
+                                if let onPreviewSnippet {
+                                    onPreviewSnippet(item.snippet)
+                                } else {
+                                    activePreviewItem = item
+                                }
                             },
                             onCopy: { onCopy(item.snippet) },
                             onEdit: onEdit.map { action in
@@ -56,7 +62,7 @@ struct SnippetSectionView: View {
 
 private struct SnippetRowView: View {
     let item: SnippetItem
-    let syntaxHighlightService: any SyntaxHighlightService
+    let showsInlineCode: Bool
     let onPreview: () -> Void
     let onCopy: () -> Void
     let onEdit: (() -> Void)?
@@ -100,12 +106,16 @@ private struct SnippetRowView: View {
                 .fixedSize()
             }
 
-            SyntaxHighlightedCodeView(
-                code: item.code,
-                language: item.selectedLanguage,
-                syntaxHighlightService: syntaxHighlightService,
-                lineLimit: 4
-            )
+            if showsInlineCode {
+                Text(item.code)
+                    .font(.system(size: 12, weight: .regular, design: .monospaced))
+                    .textSelection(.enabled)
+                    .lineLimit(4)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 8)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color(.sRGB, red: 0.95, green: 0.96, blue: 0.98, opacity: 1), in: RoundedRectangle(cornerRadius: 10))
+            }
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 8)

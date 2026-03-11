@@ -12,6 +12,7 @@ struct NoteDetailHeaderView: View {
     let isCreatingLabel: Bool
     let onToggleLabel: (Label) -> Void
     let onCreateLabel: () -> Void
+    let onAddTask: () -> Void
     let onAddSnippet: () -> Void
     let onAddAttachment: () -> Void
     let onDelete: () -> Void
@@ -28,7 +29,7 @@ struct NoteDetailHeaderView: View {
                     .textFieldStyle(.roundedBorder)
                     .font(AppTypography.hero)
             } else {
-                Text(snapshot.note.title)
+                Text(snapshot.note.displayTitle)
                     .font(AppTypography.hero)
             }
 
@@ -71,8 +72,11 @@ struct NoteDetailHeaderView: View {
             HStack(spacing: AppSpacing.small) {
                 labelsButton
 
+                labeledToolbarButton(title: "Add Task", systemImage: AppIcons.tasks, action: onAddTask)
+                    .disabled(snapshot.note.isDeleted)
+
                 labeledToolbarButton(title: "Add Snippet", systemImage: AppIcons.code, action: onAddSnippet)
-                    .disabled(snapshot.note.isDeleted || titleBinding == nil)
+                    .disabled(snapshot.note.isDeleted)
 
                 labeledToolbarButton(title: "Add Attachment", systemImage: AppIcons.attachment, action: onAddAttachment)
                     .disabled(snapshot.note.isDeleted)
@@ -120,7 +124,7 @@ struct NoteDetailHeaderView: View {
         compactToolbarButton(systemImage: "tag") {
             isShowingLabelsPopover.toggle()
         }
-        .disabled(snapshot.note.isDeleted || newLabelName == nil)
+        .disabled(snapshot.note.isDeleted)
         .popover(isPresented: $isShowingLabelsPopover, arrowEdge: .bottom) {
             labelsPopover
         }

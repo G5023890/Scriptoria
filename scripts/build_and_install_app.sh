@@ -165,11 +165,11 @@ ${ICON_PLIST_BLOCK}
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>CFBundleShortVersionString</key>
-  <string>1.0</string>
+  <string>0.0.1</string>
   <key>CFBundleVersion</key>
   <string>1</string>
   <key>LSMinimumSystemVersion</key>
-  <string>14.0</string>
+  <string>26.0</string>
   <key>NSPrincipalClass</key>
   <string>NSApplication</string>
 </dict>
@@ -190,7 +190,7 @@ if [[ "$LEGACY_INSTALL_DIR" != "$INSTALL_DIR" ]]; then
   rm -rf "$LEGACY_INSTALL_DIR"
 fi
 
-xattr -cr "$INSTALL_DIR" || true
+xattr -cr "$INSTALL_DIR" >/dev/null 2>&1 || true
 sign_bundle_if_needed "$INSTALL_DIR"
 
 log "Built: $APP_DIR"

@@ -6,17 +6,19 @@ final class SearchViewModel {
     enum QuickFilter: CaseIterable, Identifiable {
         case pinned
         case favorite
+        case tasks
         case attachments
         case code
 
         var id: String { token }
 
-        var title: String {
+        var symbolName: String {
             switch self {
-            case .pinned: "Pinned"
-            case .favorite: "Favorites"
-            case .attachments: "Attachments"
-            case .code: "Code"
+            case .pinned: "pin"
+            case .favorite: "star"
+            case .tasks: "checklist"
+            case .attachments: "paperclip.badge.ellipsis"
+            case .code: "chevron.left.slash.chevron.right"
             }
         }
 
@@ -24,6 +26,7 @@ final class SearchViewModel {
             switch self {
             case .pinned: "is:pinned"
             case .favorite: "is:favorite"
+            case .tasks: "has:tasks"
             case .attachments: "has:attachments"
             case .code: "has:snippets"
             }
@@ -32,7 +35,6 @@ final class SearchViewModel {
 
     var queryText = ""
     var results: [SearchResult] = []
-    var activeFilterLabels: [String] = []
     var isLoading = false
 
     private let searchNotesUseCase: SearchNotesUseCase
@@ -48,7 +50,6 @@ final class SearchViewModel {
 
     func updateQuery(_ query: String) {
         queryText = query
-        activeFilterLabels = filterLabels(for: query)
         searchTask?.cancel()
 
         guard isSearching else {
@@ -103,40 +104,15 @@ final class SearchViewModel {
             .filters
             .contains(where: { currentFilter in
                 switch (filter, currentFilter) {
-                case (.pinned, .pinned), (.favorite, .favorite), (.attachments, .withAttachments), (.code, .withSnippets):
+                case (.pinned, .pinned),
+                    (.favorite, .favorite),
+                    (.tasks, .withTasks),
+                    (.attachments, .withAttachments),
+                    (.code, .withSnippets):
                     true
                 default:
                     false
                 }
             })
-    }
-
-    private func filterLabels(for query: String) -> [String] {
-        searchNotesUseCase.parse(rawQuery: query).filters.map { filter in
-            switch filter {
-            case .pinned:
-                "Pinned"
-            case .favorite:
-                "Favorite"
-            case .withAttachments:
-                "Has Attachments"
-            case .withSnippets:
-                "Has Snippets"
-            case .label(let label):
-                "Label: \(label)"
-            case .type(let type):
-                "Type: \(type.rawValue)"
-            case .updatedToday:
-                "Updated Today"
-            case .updatedThisWeek:
-                "Updated This Week"
-            case .language(let language):
-                "Language: \(language)"
-            case .field(let field):
-                "In \(field.title)"
-            case .resultKind(let kind):
-                "Kind: \(kind.rawValue.capitalized)"
-            }
-        }
     }
 }

@@ -7,7 +7,6 @@ struct AttachmentSectionView: View {
     let attachments: [AttachmentItem]
     let emptyText: String
     let allowsRemoval: Bool
-    let syntaxHighlightService: any SyntaxHighlightService
     let onPreview: (Attachment) -> Void
     let onOpen: (Attachment) -> Void
     let onRemove: ((Attachment) -> Void)?
@@ -29,7 +28,6 @@ struct AttachmentSectionView: View {
                         AttachmentRowView(
                             item: item,
                             allowsRemoval: allowsRemoval,
-                            syntaxHighlightService: syntaxHighlightService,
                             onPreview: { onPreview(item.attachment) },
                             onOpen: { onOpen(item.attachment) },
                             onRemove: onRemove.map { action in
@@ -46,7 +44,6 @@ struct AttachmentSectionView: View {
 private struct AttachmentRowView: View {
     let item: AttachmentItem
     let allowsRemoval: Bool
-    let syntaxHighlightService: any SyntaxHighlightService
     let onPreview: () -> Void
     let onOpen: () -> Void
     let onRemove: (() -> Void)?
@@ -84,14 +81,6 @@ private struct AttachmentRowView: View {
                 actionStrip
             }
 
-            if let codePreview = item.codePreview, let codeLanguage = item.codeLanguage {
-                SyntaxHighlightedCodeView(
-                    code: codePreview,
-                    language: codeLanguage,
-                    syntaxHighlightService: syntaxHighlightService,
-                    lineLimit: 6
-                )
-            }
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 8)

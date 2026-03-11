@@ -18,131 +18,310 @@ struct NoteDetailView: View {
                 EmptySelectionView(coordinator: coordinator)
             }
         }
-        .task(id: viewModel.snapshot?.note.id) {
+        .task(id: editorPreparationTaskID) {
             await prepareEditor()
         }
+    }
+
+    private var editorPreparationTaskID: String {
+        let noteID = viewModel.snapshot?.note.id.rawValue ?? "none"
+        return "\(noteID)::\(viewModel.mode.rawValue)"
     }
 
     private func detailShell(snapshot: NoteSnapshot) -> some View {
         let isDeleted = snapshot.note.isDeleted
         let effectiveMode: NoteDetailMode = isDeleted ? .read : viewModel.mode
+        let readToDoItems = editorViewModel?.toDoItems ?? viewModel.toDoItems
+        let readDeletedToDoItems: [NoteToDoItem] = effectiveMode == .read
+            ? []
+            : (editorViewModel?.deletedToDoItems ?? viewModel.deletedToDoItems)
+        let readAttachmentItems = editorViewModel?.attachmentItems ?? viewModel.attachmentItems
+        let readSnippetItems = editorViewModel?.snippetItems ?? viewModel.snippetItems
         let headerModeBinding = Binding<NoteDetailMode>(
             get: { isDeleted ? .read : viewModel.mode },
             set: { nextMode in
                 guard !isDeleted else { return }
                 viewModel.mode = nextMode
+                guard nextMode == .read else { return }
+
+                Task {
+                    await viewModel.reloadCurrent()
+                }
             }
         )
 
-        let content = Group {
+        let content = AnyView(Group {
             if effectiveMode == .read {
-                NoteReadView(markdown: snapshot.note.bodyMarkdown)
-                NoteMetadataSectionsView(
-                    attachmentItems: viewModel.attachmentItems,
-                    snippetItems: viewModel.snippetItems,
-                    allowsAttachmentRemoval: false,
-                    syntaxHighlightService: viewModel.syntaxHighlightService,
-                    onPreviewAttachment: viewModel.previewAttachment,
-                    onOpenAttachment: viewModel.openAttachment,
-                    onRemoveAttachment: { _ in },
-                    onCopySnippet: viewModel.copySnippet,
-                    onEditSnippet: nil,
-                    onRemoveSnippet: nil
-                )
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: AppSpacing.medium) {
+                            if snapshot.note.bodyMarkdown.isEmpty {
+                                ContentUnavailableView(
+                                    "No Content",
+                                    systemImage: "doc.text",
+                                    description: Text("Switch to Edit mode to start writing.")
+                                )
+                                .frame(maxWidth: .infinity)
+                            } else {
+                                NoteRenderedContentView(markdown: snapshot.note.bodyMarkdown)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+
+                            NoteMetadataSectionsView(
+                                toDoItems: readToDoItems,
+                                deletedToDoItems: readDeletedToDoItems,
+                                attachmentItems: readAttachmentItems,
+                                snippetItems: readSnippetItems,
+                                allowsTaskMutation: false,
+                                allowsTaskCompletionToggle: !snapshot.note.isDeleted,
+                                allowsAttachmentRemoval: false,
+                                focusedToDoID: coordinator.selectedToDoID,
+                                onToggleToDoCompletion: { todo in
+                                    await viewModel.toggleToDoCompletion(todo)
+                                    await onNoteChanged(snapshot.note.id)
+                                },
+                                onEditToDo: viewModel.presentEditToDoSheet,
+                                onDeleteToDo: { todo in
+                                    await viewModel.deleteToDo(todo)
+                                    await onNoteChanged(snapshot.note.id)
+                                },
+                                onRemoveToDo: { todo in
+                                    await viewModel.removeToDo(todo)
+                                    await onNoteChanged(snapshot.note.id)
+                                },
+                                onRestoreToDo: { todo in
+                                    await viewModel.restoreToDo(todo)
+                                    await onNoteChanged(snapshot.note.id)
+                                },
+                                onMoveToDo: { todo, direction in
+                                    await viewModel.moveToDo(todo, direction: direction)
+                                    await onNoteChanged(snapshot.note.id)
+                                },
+                                onFocusRequest: { toDoID in
+                                    withAnimation(.easeInOut(duration: 0.2)) {
+                                        proxy.scrollTo(toDoID, anchor: .center)
+                                    }
+                                },
+                                syntaxHighlightService: viewModel.syntaxHighlightService,
+                                onPreviewAttachment: viewModel.previewAttachment,
+                                onOpenAttachment: viewModel.openAttachment,
+                                onRemoveAttachment: { _ in },
+                                onCopySnippet: viewModel.copySnippet,
+                                onPreviewSnippet: viewModel.previewSnippet,
+                                onEditSnippet: nil,
+                                onRemoveSnippet: nil
+                            )
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
             } else if let editorViewModel {
-                NoteEditorPane(viewModel: editorViewModel, mode: viewModel.mode)
+                NoteEditorPane(
+                    viewModel: editorViewModel,
+                    mode: viewModel.mode,
+                    focusedToDoID: coordinator.selectedToDoID
+                )
             } else {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-        }
+        })
 
-        return VStack(alignment: .leading, spacing: AppSpacing.large) {
-            NoteDetailHeaderView(
-                snapshot: snapshot,
-                mode: headerModeBinding,
-                titleBinding: titleBinding(for: snapshot, mode: effectiveMode),
-                availableLabels: editorViewModel?.availableLabels ?? [],
-                selectedLabels: editorViewModel?.draft?.labels ?? snapshot.labels,
-                newLabelName: newLabelBinding(),
-                saveStatusText: editorViewModel?.lastSavedText,
-                isSaving: editorViewModel?.isSaving ?? false,
-                isCreatingLabel: editorViewModel?.isCreatingLabel ?? false,
-                onToggleLabel: { label in
+        let header = AnyView(NoteDetailHeaderView(
+            snapshot: snapshot,
+            mode: headerModeBinding,
+            titleBinding: titleBinding(for: snapshot, mode: effectiveMode),
+            availableLabels: effectiveMode == .read ? viewModel.availableLabels : (editorViewModel?.availableLabels ?? []),
+            selectedLabels: effectiveMode == .read ? snapshot.labels : (editorViewModel?.draft?.labels ?? snapshot.labels),
+            newLabelName: newLabelBinding(),
+            saveStatusText: editorViewModel?.lastSavedText,
+            isSaving: editorViewModel?.isSaving ?? false,
+            isCreatingLabel: effectiveMode == .read ? viewModel.isCreatingLabel : (editorViewModel?.isCreatingLabel ?? false),
+            onToggleLabel: { label in
+                if effectiveMode == .read {
+                    Task {
+                        await viewModel.toggleLabel(label)
+                        await onNoteChanged(snapshot.note.id)
+                    }
+                } else {
                     editorViewModel?.toggleLabel(label)
-                },
-                onCreateLabel: {
+                }
+            },
+            onCreateLabel: {
+                if effectiveMode == .read {
+                    Task {
+                        await viewModel.createLabel()
+                        await onNoteChanged(snapshot.note.id)
+                    }
+                } else {
                     Task {
                         await editorViewModel?.createLabel()
                     }
-                },
-                onAddSnippet: {
-                    editorViewModel?.presentManualSnippetSheet()
-                },
-                onAddAttachment: {
-                    editorViewModel?.presentAttachmentImporter()
-                },
-                onDelete: {
-                    Task {
-                        await viewModel.deleteCurrentNote()
-                        await onNoteChanged(snapshot.note.id)
-                    }
-                },
-                onRestore: {
-                    Task {
-                        await viewModel.restoreCurrentNote()
-                        await onNoteChanged(snapshot.note.id)
-                    }
-                },
-                onTogglePin: {
-                    Task {
-                        await viewModel.togglePin()
-                        await onNoteChanged(snapshot.note.id)
-                    }
-                },
-                onToggleFavorite: {
-                    Task {
-                        await viewModel.toggleFavorite()
-                        await onNoteChanged(snapshot.note.id)
-                    }
                 }
-            )
-            content
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .padding(AppSpacing.large)
-        .fileImporter(
-            isPresented: Binding(
-                get: { editorViewModel?.isImportingAttachments ?? false },
-                set: { newValue in
-                    if !newValue {
+            },
+            onAddTask: {
+                if effectiveMode == .read {
+                    viewModel.presentNewToDoSheet()
+                } else {
+                    editorViewModel?.presentNewToDoSheet()
+                }
+            },
+            onAddSnippet: {
+                if effectiveMode == .read {
+                    viewModel.presentManualSnippetSheet()
+                } else {
+                    editorViewModel?.presentManualSnippetSheet()
+                }
+            },
+            onAddAttachment: {
+                if effectiveMode == .read {
+                    viewModel.presentAttachmentImporter()
+                } else {
+                    editorViewModel?.presentAttachmentImporter()
+                }
+            },
+            onDelete: {
+                Task {
+                    await viewModel.deleteCurrentNote()
+                    await onNoteChanged(snapshot.note.id)
+                }
+            },
+            onRestore: {
+                Task {
+                    await viewModel.restoreCurrentNote()
+                    await onNoteChanged(snapshot.note.id)
+                }
+            },
+            onTogglePin: {
+                Task {
+                    await viewModel.togglePin()
+                    await onNoteChanged(snapshot.note.id)
+                }
+            },
+            onToggleFavorite: {
+                Task {
+                    await viewModel.toggleFavorite()
+                    await onNoteChanged(snapshot.note.id)
+                }
+            }
+        ))
+
+        let attachmentImporterBinding = Binding(
+            get: {
+                effectiveMode == .read
+                    ? viewModel.isImportingAttachments
+                    : (editorViewModel?.isImportingAttachments ?? false)
+            },
+            set: { newValue in
+                if !newValue {
+                    if effectiveMode == .read {
+                        viewModel.isImportingAttachments = false
+                    } else {
                         editorViewModel?.isImportingAttachments = false
                     }
                 }
-            ),
+            }
+        )
+
+        let toDoSheetBinding = Binding<ToDoDraft?>(
+            get: { editorViewModel?.activeToDoDraft ?? viewModel.activeToDoDraft },
+            set: { _ in
+                editorViewModel?.dismissToDoSheet()
+                viewModel.dismissToDoSheet()
+            }
+        )
+
+        let attachmentPreviewBinding = Binding(
+            get: { editorViewModel?.activeAttachmentPreview ?? viewModel.activeAttachmentPreview },
+            set: { (_: AttachmentPreviewState?) in
+                editorViewModel?.dismissAttachmentPreview()
+                viewModel.dismissAttachmentPreview()
+            }
+        )
+
+        let snippetPreviewBinding = Binding<NoteSnippet?>(
+            get: { viewModel.activeSnippetPreview },
+            set: { _ in
+                viewModel.dismissSnippetPreview()
+            }
+        )
+
+        let manualSnippetSheetBinding = Binding(
+            get: {
+                effectiveMode == .read
+                    ? viewModel.isShowingManualSnippetSheet
+                    : (editorViewModel?.isShowingManualSnippetSheet ?? false)
+            },
+            set: { newValue in
+                if !newValue {
+                    if effectiveMode == .read {
+                        viewModel.isShowingManualSnippetSheet = false
+                    } else {
+                        editorViewModel?.isShowingManualSnippetSheet = false
+                    }
+                }
+            }
+        )
+
+        let baseShell = NoteDetailShellBody(header: header, content: content)
+
+        let shellWithImporter = baseShell.fileImporter(
+            isPresented: attachmentImporterBinding,
             allowedContentTypes: [.item],
             allowsMultipleSelection: true
         ) { result in
-            guard let editorViewModel else { return }
-
             switch result {
             case .success(let urls):
                 Task {
-                    await editorViewModel.importAttachments(from: urls)
+                    if effectiveMode == .read {
+                        let didImport = await self.viewModel.importAttachments(from: urls)
+                        if didImport {
+                            await onNoteChanged(snapshot.note.id)
+                        }
+                    } else if let editorViewModel {
+                        await editorViewModel.importAttachments(from: urls)
+                    }
                 }
             case .failure(let error):
-                editorViewModel.errorMessage = "Import failed: \(error.localizedDescription)"
+                if effectiveMode == .read {
+                    viewModel.errorMessage = "Import failed: \(error.localizedDescription)"
+                } else {
+                    editorViewModel?.errorMessage = "Import failed: \(error.localizedDescription)"
+                }
             }
         }
-        .sheet(
-            item: Binding(
-                get: { editorViewModel?.activeAttachmentPreview ?? viewModel.activeAttachmentPreview },
-                set: { _ in
-                    editorViewModel?.dismissAttachmentPreview()
-                    viewModel.dismissAttachmentPreview()
+
+        let shellWithTaskSheet = shellWithImporter.sheet(item: toDoSheetBinding) { draft in
+            ToDoEditorSheet(
+                draft: draft,
+                onCancel: {
+                    editorViewModel?.dismissToDoSheet()
+                    viewModel.dismissToDoSheet()
+                },
+                onSave: { draft in
+                    Task {
+                        if effectiveMode == .read {
+                            if draft.toDoID == nil {
+                                await viewModel.createToDo(draft: draft)
+                            } else {
+                                await viewModel.updateToDo(draft: draft)
+                            }
+                        } else if let editorViewModel {
+                            if draft.toDoID == nil {
+                                await editorViewModel.createToDo(draft: draft)
+                            } else {
+                                await editorViewModel.updateToDo(draft: draft)
+                            }
+                        }
+                        editorViewModel?.dismissToDoSheet()
+                        viewModel.dismissToDoSheet()
+                        await onNoteChanged(snapshot.note.id)
+                    }
                 }
             )
-        ) { preview in
+        }
+
+        let shellWithAttachmentPreview = shellWithTaskSheet.sheet(item: attachmentPreviewBinding) { preview in
             VStack(alignment: .leading, spacing: AppSpacing.medium) {
                 HStack {
                     Text(preview.title)
@@ -159,17 +338,39 @@ struct NoteDetailView: View {
             }
             .padding(AppSpacing.large)
         }
-        .sheet(
-            isPresented: Binding(
-                get: { editorViewModel?.isShowingManualSnippetSheet ?? false },
-                set: { newValue in
-                    if !newValue {
-                        editorViewModel?.isShowingManualSnippetSheet = false
-                    }
+
+        let shellWithSnippetPreview = shellWithAttachmentPreview.sheet(item: snippetPreviewBinding) { snippet in
+            SnippetPreviewSheet(
+                snippet: snippet,
+                syntaxHighlightService: viewModel.syntaxHighlightService,
+                onCopy: {
+                    viewModel.copySnippet(snippet)
                 }
             )
-        ) {
-            if let editorViewModel {
+        }
+
+        let shell = shellWithSnippetPreview.sheet(isPresented: manualSnippetSheetBinding) {
+            if effectiveMode == .read {
+                ManualSnippetSheet(
+                    draft: Binding(
+                        get: { viewModel.manualSnippetDraft },
+                        set: { viewModel.manualSnippetDraft = $0 }
+                    ),
+                    isSaving: viewModel.isSavingManualSnippet,
+                    isEditing: false,
+                    onCancel: {
+                        viewModel.isShowingManualSnippetSheet = false
+                    },
+                    onSave: {
+                        Task {
+                            let didCreate = await viewModel.createManualSnippet()
+                            if didCreate {
+                                await onNoteChanged(snapshot.note.id)
+                            }
+                        }
+                    }
+                )
+            } else if let editorViewModel {
                 ManualSnippetSheet(
                     draft: Binding(
                         get: { editorViewModel.manualSnippetDraft },
@@ -210,6 +411,8 @@ struct NoteDetailView: View {
         } message: {
             Text(editorViewModel?.errorMessage ?? viewModel.errorMessage ?? "Unknown error")
         }
+
+        return AnyView(shell)
     }
 
     private func titleBinding(for snapshot: NoteSnapshot, mode: NoteDetailMode) -> Binding<String>? {
@@ -224,7 +427,18 @@ struct NoteDetailView: View {
     }
 
     private func newLabelBinding() -> Binding<String>? {
-        guard let editorViewModel, viewModel.snapshot?.note.isDeleted != true else {
+        guard viewModel.snapshot?.note.isDeleted != true else {
+            return nil
+        }
+
+        if viewModel.mode == .read {
+            return Binding(
+                get: { viewModel.newLabelName },
+                set: { viewModel.newLabelName = $0 }
+            )
+        }
+
+        guard let editorViewModel else {
             return nil
         }
 
@@ -237,6 +451,13 @@ struct NoteDetailView: View {
     private func prepareEditor() async {
         guard let noteID = viewModel.snapshot?.note.id else {
             editorViewModel = nil
+            return
+        }
+
+        guard viewModel.mode != .read, viewModel.snapshot?.note.isDeleted != true else {
+            if editorViewModel?.noteID != noteID {
+                editorViewModel = nil
+            }
             return
         }
 
@@ -256,8 +477,80 @@ struct NoteDetailView: View {
     }
 }
 
+private struct NoteDetailShellBody: View {
+    let header: AnyView
+    let content: AnyView
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: AppSpacing.large) {
+            header
+            content
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .padding(AppSpacing.large)
+    }
+}
+
+private struct SnippetPreviewSheet: View {
+    let snippet: NoteSnippet
+    let syntaxHighlightService: any SyntaxHighlightService
+    let onCopy: () -> Void
+    @Environment(\.dismiss) private var dismiss
+    @State private var previewLanguage: String
+
+    init(
+        snippet: NoteSnippet,
+        syntaxHighlightService: any SyntaxHighlightService,
+        onCopy: @escaping () -> Void
+    ) {
+        self.snippet = snippet
+        self.syntaxHighlightService = syntaxHighlightService
+        self.onCopy = onCopy
+        _previewLanguage = State(initialValue: SnippetPresentationBuilder.selectedLanguage(for: snippet))
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: AppSpacing.medium) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(snippet.title ?? "Snippet")
+                        .font(AppTypography.section)
+                    Text(SnippetSyntaxLanguage.displayName(for: previewLanguage))
+                        .font(AppTypography.caption)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+                Menu("Syntax: \(SnippetSyntaxLanguage.displayName(for: previewLanguage))") {
+                    ForEach(SnippetSyntaxLanguage.supportedOptions) { option in
+                        Button(option.title) {
+                            previewLanguage = option.id
+                        }
+                    }
+                }
+                Button("Copy", action: onCopy)
+                Button("Done") {
+                    dismiss()
+                }
+            }
+
+            ScrollView {
+                SyntaxHighlightedCodeView(
+                    code: snippet.code,
+                    language: previewLanguage,
+                    syntaxHighlightService: syntaxHighlightService,
+                    lineLimit: nil
+                )
+                .padding(AppSpacing.medium)
+            }
+            .modifier(PanelSurfaceModifier())
+        }
+        .padding(AppSpacing.large)
+        .frame(minWidth: 680, minHeight: 520)
+    }
+}
+
 private struct ManualSnippetSheet: View {
-    @Binding var draft: NoteEditorViewModel.ManualSnippetDraft
+    @Binding var draft: ManualSnippetDraft
     let isSaving: Bool
     let isEditing: Bool
     let onCancel: () -> Void
@@ -300,6 +593,7 @@ private struct ManualSnippetSheet: View {
                 Spacer()
                 Button("Cancel", action: onCancel)
                 Button(isEditing ? "Update" : "Save", action: onSave)
+                    .keyboardShortcut(.return, modifiers: [.command])
                     .disabled(isSaving || draft.code.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
         }

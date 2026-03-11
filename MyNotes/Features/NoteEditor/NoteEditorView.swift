@@ -4,6 +4,7 @@ import SwiftUI
 struct NoteEditorPane: View {
     @Bindable var viewModel: NoteEditorViewModel
     let mode: NoteDetailMode
+    let focusedToDoID: ToDoID?
 
     var body: some View {
         Group {
@@ -22,72 +23,101 @@ struct NoteEditorPane: View {
     }
 
     private var editor: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: AppSpacing.medium) {
-                TextEditor(
-                    text: Binding(
-                        get: { viewModel.draft?.bodyMarkdown ?? "" },
-                        set: viewModel.updateBody
+        ScrollViewReader { proxy in
+            ScrollView {
+                VStack(alignment: .leading, spacing: AppSpacing.medium) {
+                    TextEditor(
+                        text: Binding(
+                            get: { viewModel.draft?.bodyMarkdown ?? "" },
+                            set: viewModel.updateBody
+                        )
                     )
-                )
-                .font(.system(.body, design: .monospaced))
-                .frame(minHeight: 320)
-                .modifier(PanelSurfaceModifier())
+                    .font(.system(.body, design: .monospaced))
+                    .frame(minHeight: 320)
+                    .modifier(PanelSurfaceModifier())
 
-                VStack(alignment: .leading, spacing: AppSpacing.small) {
-                    if !viewModel.attachmentItems.isEmpty {
-                        AttachmentSectionView(
-                            title: "",
-                            attachments: viewModel.attachmentItems,
-                            emptyText: "Attachments will appear here after import.",
-                            allowsRemoval: true,
+                    if viewModel.draft != nil {
+                        NoteMetadataSectionsView(
+                            toDoItems: viewModel.toDoItems,
+                            deletedToDoItems: viewModel.deletedToDoItems,
+                            attachmentItems: viewModel.attachmentItems,
+                            snippetItems: viewModel.snippetItems,
+                            allowsTaskMutation: true,
+                            allowsTaskCompletionToggle: true,
+                            allowsAttachmentRemoval: true,
+                            focusedToDoID: focusedToDoID,
+                            onToggleToDoCompletion: viewModel.toggleToDoCompletion,
+                            onEditToDo: viewModel.presentEditToDoSheet,
+                            onDeleteToDo: viewModel.deleteToDo,
+                            onRemoveToDo: viewModel.removeToDo,
+                            onRestoreToDo: viewModel.restoreToDo,
+                            onMoveToDo: viewModel.moveToDo,
+                            onFocusRequest: { toDoID in
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    proxy.scrollTo(toDoID, anchor: .center)
+                                }
+                            },
                             syntaxHighlightService: viewModel.syntaxHighlightService,
-                            onPreview: viewModel.previewAttachment,
-                            onOpen: viewModel.openAttachment,
-                            onRemove: { attachment in
+                            onPreviewAttachment: viewModel.previewAttachment,
+                            onOpenAttachment: viewModel.openAttachment,
+                            onRemoveAttachment: { attachment in
                                 Task {
                                     await viewModel.removeAttachment(attachment)
                                 }
                             },
-                            headerAction: nil
-                        )
-                    }
-
-                    if !viewModel.snippetItems.isEmpty {
-                        SnippetSectionView(
-                            title: "",
-                            snippets: viewModel.snippetItems,
-                            emptyText: "Snippets are stored separately from the main note body.",
-                            syntaxHighlightService: viewModel.syntaxHighlightService,
-                            onCopy: viewModel.copySnippet,
-                            onEdit: viewModel.presentEditSnippetSheet,
-                            onRemove: { snippet in
+                            onCopySnippet: viewModel.copySnippet,
+                            onPreviewSnippet: nil,
+                            onEditSnippet: viewModel.presentEditSnippetSheet,
+                            onRemoveSnippet: { snippet in
                                 Task {
                                     await viewModel.removeSnippet(snippet)
                                 }
                             }
                         )
                     }
-                }
 
-                HStack {
-                    Text("Autosave persists note content. Attachments and snippets are managed as separate note containers.")
-                        .font(AppTypography.caption)
-                        .foregroundStyle(.secondary)
-                    Spacer()
+                    HStack {
+                        Text("Autosave persists note content. Tasks, attachments and snippets are managed as separate note containers.")
+                            .font(AppTypography.caption)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                    }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
         }
         .frame(maxHeight: .infinity, alignment: .top)
+        .sheet(
+            item: Binding(
+                get: { viewModel.activeToDoDraft },
+                set: { _ in
+                    viewModel.dismissToDoSheet()
+                }
+            )
+        ) { draft in
+            ToDoEditorSheet(
+                draft: draft,
+                onCancel: {
+                    viewModel.dismissToDoSheet()
+                },
+                onSave: { draft in
+                    Task {
+                        if draft.toDoID == nil {
+                            await viewModel.createToDo(draft: draft)
+                        } else {
+                            await viewModel.updateToDo(draft: draft)
+                        }
+                        viewModel.dismissToDoSheet()
+                    }
+                }
+            )
+        }
     }
 
     private var preview: some View {
         ScrollView {
             if let markdown = viewModel.draft?.bodyMarkdown, !markdown.isEmpty {
-                Text(.init(markdown))
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .textSelection(.enabled)
+                NoteRenderedContentView(markdown: markdown)
                     .padding(AppSpacing.medium)
             } else {
                 ContentUnavailableView(

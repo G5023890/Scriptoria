@@ -7,20 +7,6 @@ struct SearchResultsView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: AppSpacing.medium) {
-            if !viewModel.activeFilterLabels.isEmpty {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: AppSpacing.small) {
-                        ForEach(viewModel.activeFilterLabels, id: \.self) { label in
-                            Text(label)
-                                .font(AppTypography.caption)
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 4)
-                                .background(Color.secondary.opacity(0.08), in: Capsule())
-                        }
-                    }
-                }
-            }
-
             List(viewModel.results, selection: $coordinator.selectedNoteID) { result in
                 VStack(alignment: .leading, spacing: AppSpacing.small) {
                     HStack(spacing: AppSpacing.small) {

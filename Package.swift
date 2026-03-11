@@ -4,13 +4,13 @@ import PackageDescription
 let package = Package(
     name: "MyNotes",
     platforms: [
-        .macOS(.v14)
+        .macOS("26.0")
     ],
     products: [
         .executable(name: "MyNotes", targets: ["MyNotes"])
     ],
     dependencies: [
-        .package(url: "https://github.com/raspu/Highlightr.git", from: "2.1.2")
+        .package(path: "Vendor/Highlightr")
     ],
     targets: [
         .executableTarget(

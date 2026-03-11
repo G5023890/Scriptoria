@@ -35,7 +35,7 @@ struct IndexNoteForSearchUseCase {
 
         let document = SearchDocument(
             id: snapshot.note.id,
-            title: snapshot.note.title,
+            title: snapshot.note.displayTitle,
             bodyPlainText: snapshot.note.bodyPlainText,
             labelsText: snapshot.labels.map(\.name).joined(separator: " "),
             snippetsText: snippetsText,
@@ -45,6 +45,7 @@ struct IndexNoteForSearchUseCase {
             updatedAt: snapshot.note.updatedAt,
             isPinned: snapshot.note.isPinned,
             isFavorite: snapshot.note.isFavorite,
+            hasTasks: snapshot.todos.contains(where: { !$0.isDeleted }),
             hasAttachments: snapshot.hasAttachments,
             languagesText: snapshot.snippets.map(\.language).joined(separator: " ")
         )

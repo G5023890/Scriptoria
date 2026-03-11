@@ -1,19 +1,17 @@
 import SwiftUI
 
 struct EmptySelectionView: View {
-    @Environment(\.openWindow) private var openWindow
-
     let coordinator: AppCoordinator
 
     var body: some View {
         VStack(alignment: .leading, spacing: AppSpacing.large) {
             Text("Select a note")
                 .font(AppTypography.hero)
-            Text("Choose a note from the middle column or use Quick Capture to create one immediately.")
+            Text("Choose a note from the middle column or create a new one directly in this window.")
                 .foregroundStyle(.secondary)
             HStack(spacing: AppSpacing.medium) {
-                Button("Quick Create") {
-                    coordinator.openQuickCaptureWindow(using: openWindow)
+                Button("New Note") {
+                    coordinator.requestNewNote()
                 }
                 .buttonStyle(.borderedProminent)
 

@@ -91,6 +91,67 @@ enum SchemaDefinition {
     );
     """
 
+    static let snippetsTableV1 = """
+    CREATE TABLE IF NOT EXISTS snippets (
+        id TEXT PRIMARY KEY,
+        note_id TEXT NOT NULL,
+        language TEXT NOT NULL,
+        title TEXT,
+        code TEXT NOT NULL,
+        start_offset INTEGER,
+        end_offset INTEGER,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        is_deleted INTEGER NOT NULL DEFAULT 0,
+        deleted_at TEXT,
+        version INTEGER NOT NULL DEFAULT 1,
+        FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE
+    );
+    """
+
+    static let todosTable = """
+    CREATE TABLE IF NOT EXISTS todos (
+        id TEXT PRIMARY KEY,
+        note_id TEXT NOT NULL,
+        title TEXT NOT NULL,
+        details TEXT,
+        is_completed INTEGER NOT NULL DEFAULT 0,
+        due_date TEXT,
+        has_time_component INTEGER NOT NULL DEFAULT 0,
+        snoozed_until TEXT,
+        priority TEXT,
+        sort_order INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        completed_at TEXT,
+        is_deleted INTEGER NOT NULL DEFAULT 0,
+        deleted_at TEXT,
+        version INTEGER NOT NULL DEFAULT 1,
+        FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE
+    );
+    """
+
+    static let todosTableV4 = """
+    CREATE TABLE IF NOT EXISTS todos (
+        id TEXT PRIMARY KEY,
+        note_id TEXT NOT NULL,
+        title TEXT NOT NULL,
+        details TEXT,
+        is_completed INTEGER NOT NULL DEFAULT 0,
+        due_date TEXT,
+        has_time_component INTEGER NOT NULL DEFAULT 0,
+        priority TEXT,
+        sort_order INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        completed_at TEXT,
+        is_deleted INTEGER NOT NULL DEFAULT 0,
+        deleted_at TEXT,
+        version INTEGER NOT NULL DEFAULT 1,
+        FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE
+    );
+    """
+
     static let syncQueueTable = """
     CREATE TABLE IF NOT EXISTS sync_queue (
         id TEXT PRIMARY KEY,
@@ -124,6 +185,10 @@ enum SchemaDefinition {
         "CREATE INDEX IF NOT EXISTS idx_attachments_note_id ON attachments(note_id);",
         "CREATE INDEX IF NOT EXISTS idx_snippets_note_id ON snippets(note_id);",
         "CREATE INDEX IF NOT EXISTS idx_snippets_language ON snippets(language);",
+        "CREATE INDEX IF NOT EXISTS idx_todos_note_id ON todos(note_id);",
+        "CREATE INDEX IF NOT EXISTS idx_todos_due_date ON todos(due_date);",
+        "CREATE INDEX IF NOT EXISTS idx_todos_completed ON todos(is_completed);",
+        "CREATE INDEX IF NOT EXISTS idx_todos_sort_order ON todos(note_id, sort_order);",
         "CREATE INDEX IF NOT EXISTS idx_sync_queue_status_created_at ON sync_queue(status, created_at);",
         "CREATE INDEX IF NOT EXISTS idx_sync_queue_entity ON sync_queue(entity_type, entity_id);",
         "CREATE INDEX IF NOT EXISTS idx_sync_queue_next_retry_at ON sync_queue(next_retry_at);"
@@ -135,7 +200,20 @@ enum SchemaDefinition {
         noteLabelsTable,
         attachmentsTable,
         snippetsTable,
+        todosTable,
         syncQueueTable,
         syncStateTable
     ] + indexes
+
+    static let baseStatementsV1: [String] = [
+        notesTable,
+        labelsTable,
+        noteLabelsTable,
+        attachmentsTable,
+        snippetsTableV1
+    ]
+
+    static let baseIndexesV1: [String] = indexes.filter {
+        !$0.contains("idx_todos_") && !$0.contains("idx_sync_queue_")
+    }
 }

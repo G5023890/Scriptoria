@@ -10,6 +10,7 @@ struct LoadNoteDraftUseCase {
         return NoteDraft(
             note: snapshot.note,
             labels: snapshot.labels,
+            todos: snapshot.todos,
             attachments: snapshot.attachments,
             snippets: snapshot.snippets
         )

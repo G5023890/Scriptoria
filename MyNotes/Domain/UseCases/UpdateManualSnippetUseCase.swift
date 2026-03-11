@@ -16,7 +16,7 @@ struct UpdateManualSnippetUseCase {
         let trimmedCode = code.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedCode.isEmpty else { return nil }
 
-        var snippets = try await attachmentsRepository.snippets(for: noteID)
+        var snippets = try await attachmentsRepository.snippets(for: noteID, includeCode: true)
         guard let index = snippets.firstIndex(where: { $0.id == snippetID }) else {
             return nil
         }

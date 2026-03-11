@@ -4,6 +4,7 @@ struct LoadSidebarDataUseCase {
     let notesRepository: any NotesRepository
     let labelsRepository: any LabelsRepository
     let attachmentsRepository: any AttachmentsRepository
+    let toDoRepository: any ToDoRepository
 
     func execute() async throws -> SidebarData {
         let labels = try await labelsRepository.allLabels()
@@ -11,13 +12,17 @@ struct LoadSidebarDataUseCase {
         let collections = SmartCollection.allCases
         var counts: [SmartCollection: Int] = [:]
         for collection in collections {
-            let notes = try await notesRepository.listNotes(
-                query: NoteQuery(
-                    collection: collection,
-                    includeDeleted: collection == .trash
+            if collection == .tasks {
+                counts[collection] = try await toDoRepository.countForSidebar()
+            } else {
+                let notes = try await notesRepository.listNotes(
+                    query: NoteQuery(
+                        collection: collection,
+                        includeDeleted: collection == .trash
+                    )
                 )
-            )
-            counts[collection] = notes.count
+                counts[collection] = notes.count
+            }
         }
 
         var labelSummaries: [SidebarLabelSummary] = []

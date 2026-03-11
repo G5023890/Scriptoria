@@ -32,9 +32,10 @@ struct SearchLocalDataSource {
                     updated_at,
                     is_pinned,
                     is_favorite,
+                    has_tasks,
                     has_attachments,
                     languages_text
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
                 """,
                 bindings: [
                     .text(document.id.rawValue),
@@ -48,6 +49,7 @@ struct SearchLocalDataSource {
                     .text(DatabaseDateCodec.encode(document.updatedAt)),
                     .integer(document.isPinned ? 1 : 0),
                     .integer(document.isFavorite ? 1 : 0),
+                    .integer(document.hasTasks ? 1 : 0),
                     .integer(document.hasAttachments ? 1 : 0),
                     .text(document.languagesText)
                 ]
@@ -115,6 +117,7 @@ struct SearchLocalDataSource {
             f.updated_at,
             f.is_pinned,
             f.is_favorite,
+            f.has_tasks,
             f.has_attachments,
             f.languages_text,
             \(rankExpression) AS rank
@@ -149,6 +152,7 @@ struct SearchLocalDataSource {
             updatedAt: try DatabaseDateCodec.decode(try row.requiredString("updated_at")),
             isPinned: try row.bool("is_pinned"),
             isFavorite: try row.bool("is_favorite"),
+            hasTasks: try row.bool("has_tasks"),
             hasAttachments: try row.bool("has_attachments"),
             languagesText: try row.requiredString("languages_text")
         )

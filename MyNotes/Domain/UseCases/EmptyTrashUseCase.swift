@@ -5,6 +5,7 @@ struct EmptyTrashUseCase {
     let databaseManager: DatabaseManager
     let fileService: any FileService
     let searchIndexRepository: any SearchIndexRepository
+    let refreshToDoNotificationsUseCase: RefreshToDoNotificationsUseCase
 
     func execute() async throws {
         let trashedNotes = try await notesRepository.listNotes(
@@ -35,6 +36,10 @@ struct EmptyTrashUseCase {
                     bindings: [.text(note.id.rawValue)]
                 )
                 try db.execute(
+                    statement: "DELETE FROM todos WHERE note_id = ?;",
+                    bindings: [.text(note.id.rawValue)]
+                )
+                try db.execute(
                     statement: "DELETE FROM notes_fts WHERE note_id = ?;",
                     bindings: [.text(note.id.rawValue)]
                 )
@@ -48,5 +53,7 @@ struct EmptyTrashUseCase {
         for note in trashedNotes {
             try await searchIndexRepository.remove(noteID: note.id)
         }
+
+        await refreshToDoNotificationsUseCase.execute(promptIfNeeded: false)
     }
 }

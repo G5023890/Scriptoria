@@ -16,7 +16,7 @@ struct CreateManualSnippetUseCase {
         guard !trimmedCode.isEmpty else { return nil }
 
         let now = dateService.now()
-        var snippets = try await attachmentsRepository.snippets(for: noteID)
+        var snippets = try await attachmentsRepository.snippets(for: noteID, includeCode: true)
         let snippet = NoteSnippet(
             id: UUID().uuidString.lowercased(),
             noteID: noteID,

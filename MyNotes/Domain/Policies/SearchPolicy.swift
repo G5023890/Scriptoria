@@ -13,6 +13,8 @@ struct SearchPolicy {
                 filters.append(.pinned)
             } else if lowercased == "favorite" || lowercased == "favorites" || lowercased == "is:favorite" {
                 filters.append(.favorite)
+            } else if lowercased == "task" || lowercased == "tasks" || lowercased == "has:task" || lowercased == "has:tasks" {
+                filters.append(.withTasks)
             } else if lowercased == "attachments" || lowercased == "has:attachment" || lowercased == "has:attachments" {
                 filters.append(.withAttachments)
             } else if lowercased == "snippets" || lowercased == "snippet" || lowercased == "has:snippet" || lowercased == "has:snippets" {
@@ -106,6 +108,8 @@ struct SearchPolicy {
                 return document.isPinned
             case .favorite:
                 return document.isFavorite
+            case .withTasks:
+                return document.hasTasks
             case .withAttachments:
                 return document.hasAttachments
             case .withSnippets:

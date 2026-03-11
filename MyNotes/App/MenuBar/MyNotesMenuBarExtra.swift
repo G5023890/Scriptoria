@@ -21,6 +21,10 @@ struct MyNotesMenuBarExtra: View {
                 coordinator.openMainWindow(using: openWindow)
             }
 
+            Button("New Note") {
+                coordinator.requestNewNote(using: openWindow)
+            }
+
             Button("Quick Capture") {
                 coordinator.openQuickCaptureWindow(using: openWindow)
             }

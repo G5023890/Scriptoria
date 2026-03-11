@@ -125,7 +125,7 @@ final class NotesListViewModel {
         case .allNotes:
             EmptyState(
                 title: "No Notes Yet",
-                message: "Use Quick Capture to create your first note."
+                message: "Create your first note right in the main window."
             )
         case .favorites:
             EmptyState(
@@ -141,6 +141,11 @@ final class NotesListViewModel {
             EmptyState(
                 title: "No Recent Notes",
                 message: "Notes updated in the last week will appear here."
+            )
+        case .tasks:
+            EmptyState(
+                title: "No Tasks Yet",
+                message: "This collection is rendered by the dedicated tasks list."
             )
         case .attachments:
             EmptyState(
@@ -184,6 +189,8 @@ final class NotesListViewModel {
         case .recent:
             let sevenDaysAgo = Date().addingTimeInterval(-7 * 24 * 60 * 60)
             return !note.isDeleted && !note.isArchived && note.updatedAt >= sevenDaysAgo
+        case .tasks:
+            return false
         case .attachments:
             return !note.isDeleted && !note.isArchived && snapshot.hasAttachments
         case .snippets:

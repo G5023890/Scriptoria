@@ -11,6 +11,7 @@ struct ListNoteSnapshotsUseCase {
     let notesRepository: any NotesRepository
     let labelsRepository: any LabelsRepository
     let attachmentsRepository: any AttachmentsRepository
+    let toDoRepository: any ToDoRepository
 
     func executeListItems(collection: SmartCollection, labelID: LabelID?) async throws -> [NoteListItem] {
         let notes = try await notesRepository.listNotes(
@@ -27,7 +28,7 @@ struct ListNoteSnapshotsUseCase {
             do {
                 let labels = try await labelsRepository.labels(for: note.id)
                 let attachmentCount = try await attachmentsRepository.attachments(for: note.id).count
-                let snippetCount = try await attachmentsRepository.snippets(for: note.id).count
+                let snippetCount = try await attachmentsRepository.snippets(for: note.id, includeCode: false).count
 
                 items.append(
                     NoteListItem(
@@ -61,12 +62,13 @@ struct ListNoteSnapshotsUseCase {
             do {
                 let labels = try await labelsRepository.labels(for: note.id)
                 let attachments = try await attachmentsRepository.attachments(for: note.id)
-                let snippets = try await attachmentsRepository.snippets(for: note.id)
+                let snippets = try await attachmentsRepository.snippets(for: note.id, includeCode: false)
 
                 snapshots.append(
                     NoteSnapshot(
                         note: note,
                         labels: labels,
+                        todos: try await toDoRepository.listForNote(noteID: note.id, includeDeleted: true),
                         attachments: attachments,
                         snippets: snippets
                     )

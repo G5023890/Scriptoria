@@ -10,7 +10,8 @@ struct SnippetMutationResult: Sendable {
 protocol AttachmentsRepository {
     func attachment(id: AttachmentID) async throws -> Attachment?
     func attachments(for noteID: NoteID) async throws -> [Attachment]
-    func snippets(for noteID: NoteID) async throws -> [NoteSnippet]
+    func snippet(id: String) async throws -> NoteSnippet?
+    func snippets(for noteID: NoteID, includeCode: Bool) async throws -> [NoteSnippet]
     func add(attachment: Attachment) async throws
     func remove(attachmentID: AttachmentID) async throws
     func replaceSnippets(_ snippets: [NoteSnippet], for noteID: NoteID) async throws -> SnippetMutationResult
@@ -29,8 +30,12 @@ struct LocalAttachmentsRepository: AttachmentsRepository {
         try dataSource.attachments(for: noteID)
     }
 
-    func snippets(for noteID: NoteID) async throws -> [NoteSnippet] {
-        try dataSource.snippets(for: noteID)
+    func snippet(id: String) async throws -> NoteSnippet? {
+        try dataSource.snippet(id: id)
+    }
+
+    func snippets(for noteID: NoteID, includeCode: Bool = true) async throws -> [NoteSnippet] {
+        try dataSource.snippets(for: noteID, includeCode: includeCode)
     }
 
     func add(attachment: Attachment) async throws {
@@ -61,8 +66,12 @@ struct SyncAwareAttachmentsRepository: AttachmentsRepository {
         try await base.attachments(for: noteID)
     }
 
-    func snippets(for noteID: NoteID) async throws -> [NoteSnippet] {
-        try await base.snippets(for: noteID)
+    func snippet(id: String) async throws -> NoteSnippet? {
+        try await base.snippet(id: id)
+    }
+
+    func snippets(for noteID: NoteID, includeCode: Bool = true) async throws -> [NoteSnippet] {
+        try await base.snippets(for: noteID, includeCode: includeCode)
     }
 
     func add(attachment: Attachment) async throws {

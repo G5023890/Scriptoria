@@ -17,6 +17,11 @@ struct Note: Identifiable, Codable, Hashable, Sendable {
     var isDeleted: Bool
     var deletedAt: Date?
     var version: Int
+
+    var displayTitle: String {
+        let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmedTitle.isEmpty ? "Untitled" : title
+    }
 }
 
 struct NoteDraft: Equatable, Sendable {
@@ -24,6 +29,7 @@ struct NoteDraft: Equatable, Sendable {
     var title: String
     var bodyMarkdown: String
     var labels: [Label]
+    var todos: [ToDo]
     var attachments: [Attachment]
     var snippets: [NoteSnippet]
     var hasChanges: Bool
@@ -31,6 +37,7 @@ struct NoteDraft: Equatable, Sendable {
     init(
         note: Note,
         labels: [Label] = [],
+        todos: [ToDo] = [],
         attachments: [Attachment] = [],
         snippets: [NoteSnippet] = []
     ) {
@@ -38,6 +45,7 @@ struct NoteDraft: Equatable, Sendable {
         title = note.title
         bodyMarkdown = note.bodyMarkdown
         self.labels = labels
+        self.todos = todos
         self.attachments = attachments
         self.snippets = snippets
         hasChanges = false
@@ -47,6 +55,7 @@ struct NoteDraft: Equatable, Sendable {
 struct NoteSnapshot: Identifiable, Sendable {
     let note: Note
     let labels: [Label]
+    let todos: [ToDo]
     let attachments: [Attachment]
     let snippets: [NoteSnippet]
 

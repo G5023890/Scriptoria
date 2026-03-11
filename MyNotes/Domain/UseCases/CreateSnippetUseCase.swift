@@ -9,10 +9,12 @@ struct CreateSnippetUseCase {
     func execute(for note: Note) async throws -> [NoteSnippet] {
         let now = dateService.now()
         let detectedSnippets = snippetDetectionPolicy.extractSnippets(from: note, createdAt: now)
-        let existingSnippets = try await attachmentsRepository.snippets(for: note.id)
-        let existingByID = Dictionary(uniqueKeysWithValues: existingSnippets.map { ($0.id, $0) })
+        let existingSnippets = try await attachmentsRepository.snippets(for: note.id, includeCode: true)
+        let existingManualSnippets = existingSnippets.filter { $0.sourceType == .manual }
+        let existingAutomaticSnippets = existingSnippets.filter { $0.sourceType == .automatic }
+        let existingByID = Dictionary(uniqueKeysWithValues: existingAutomaticSnippets.map { ($0.id, $0) })
 
-        let mergedSnippets = detectedSnippets.map { detected -> NoteSnippet in
+        let mergedAutomaticSnippets = detectedSnippets.map { detected -> NoteSnippet in
             guard let existing = existingByID[detected.id] else {
                 return detected
             }
@@ -49,6 +51,7 @@ struct CreateSnippetUseCase {
             )
         }
 
+        let mergedSnippets = existingManualSnippets + mergedAutomaticSnippets
         _ = try await attachmentsRepository.replaceSnippets(mergedSnippets, for: note.id)
         try await indexNoteForSearchUseCase.execute(noteID: note.id)
         return mergedSnippets

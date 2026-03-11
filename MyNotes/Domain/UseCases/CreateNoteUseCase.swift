@@ -15,7 +15,7 @@ struct CreateNoteUseCase {
         let now = dateService.now()
         let note = Note(
             id: NoteID(),
-            title: title.isEmpty ? "Untitled" : title,
+            title: title,
             bodyMarkdown: bodyMarkdown,
             bodyPlainText: markdownService.plainText(from: bodyMarkdown),
             previewText: markdownService.previewText(from: bodyMarkdown, limit: 160),

@@ -18,7 +18,7 @@ struct QuickCaptureWindowScene: View {
         QuickCaptureView(
             viewModel: viewModel,
             onCaptured: { note in
-                coordinator.revealNoteFromQuickCapture(note, using: openWindow)
+                coordinator.revealNote(note, using: openWindow)
                 dismiss()
             }
         )

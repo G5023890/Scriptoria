@@ -7,8 +7,6 @@ struct AttachmentItem: Identifiable, Equatable {
     let iconName: String
     let previewURL: URL?
     let showsInlinePreview: Bool
-    let codePreview: String?
-    let codeLanguage: String?
 
     var id: AttachmentID { attachment.id }
 }
@@ -22,9 +20,7 @@ struct AttachmentPreviewState: Identifiable, Equatable {
 enum AttachmentPresentationBuilder {
     static func make(
         attachment: Attachment,
-        previewURL: URL?,
-        codePreview: String? = nil,
-        codeLanguage: String? = nil
+        previewURL: URL?
     ) -> AttachmentItem {
         AttachmentItem(
             attachment: attachment,
@@ -32,9 +28,7 @@ enum AttachmentPresentationBuilder {
             subtitle: subtitle(for: attachment),
             iconName: iconName(for: attachment.category),
             previewURL: previewURL,
-            showsInlinePreview: attachment.category == .image && previewURL != nil,
-            codePreview: codePreview,
-            codeLanguage: codeLanguage
+            showsInlinePreview: attachment.category == .image && previewURL != nil
         )
     }
 
@@ -95,7 +89,6 @@ struct SnippetItem: Identifiable, Equatable {
     let title: String
     let subtitle: String
     let code: String
-    let highlightedCode: AttributedString
     let selectedLanguage: String
     let displayLanguage: String
 
@@ -104,7 +97,7 @@ struct SnippetItem: Identifiable, Equatable {
 
 @MainActor
 enum SnippetPresentationBuilder {
-    static func make(snippet: NoteSnippet, syntaxHighlightService: any SyntaxHighlightService) -> SnippetItem {
+    static func make(snippet: NoteSnippet) -> SnippetItem {
         let selectedLanguage = selectedLanguage(for: snippet)
         let displayLanguage = SnippetSyntaxLanguage.displayName(for: selectedLanguage)
         var detailParts: [String] = [displayLanguage]
@@ -122,7 +115,6 @@ enum SnippetPresentationBuilder {
             title: snippet.title ?? "Snippet",
             subtitle: detailParts.joined(separator: " • "),
             code: snippet.code,
-            highlightedCode: syntaxHighlightService.highlight(code: snippet.code, language: selectedLanguage),
             selectedLanguage: selectedLanguage,
             displayLanguage: displayLanguage
         )

@@ -23,7 +23,7 @@ struct NoteRowModel: Identifiable {
     }
 
     var id: NoteID { note.id }
-    var title: String { note.title }
+    var title: String { note.displayTitle }
     var previewText: String { note.previewText }
     var visibleLabels: [Label] { Array(labels.prefix(2)) }
     var extraLabelCount: Int { max(0, labels.count - visibleLabels.count) }

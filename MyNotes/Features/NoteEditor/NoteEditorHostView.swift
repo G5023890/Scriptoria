@@ -16,6 +16,6 @@ struct NoteEditorHostView: View {
     }
 
     var body: some View {
-        NoteEditorPane(viewModel: viewModel, mode: mode)
+        NoteEditorPane(viewModel: viewModel, mode: mode, focusedToDoID: nil)
     }
 }

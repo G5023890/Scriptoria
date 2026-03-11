@@ -22,6 +22,7 @@ enum SmartCollection: String, CaseIterable, Hashable, Sendable, Identifiable {
     case favorites
     case pinned
     case recent
+    case tasks
     case attachments
     case snippets
     case trash
@@ -34,6 +35,7 @@ enum SmartCollection: String, CaseIterable, Hashable, Sendable, Identifiable {
         case .favorites: "Favorites"
         case .pinned: "Pinned"
         case .recent: "Recent"
+        case .tasks: "Tasks"
         case .attachments: "Attachments"
         case .snippets: "Snippets"
         case .trash: "Trash"
@@ -46,6 +48,7 @@ enum SmartCollection: String, CaseIterable, Hashable, Sendable, Identifiable {
         case .favorites: "star"
         case .pinned: "pin"
         case .recent: "clock"
+        case .tasks: "checklist"
         case .attachments: "paperclip.circle"
         case .snippets: "curlybraces.square"
         case .trash: "trash"
@@ -79,6 +82,7 @@ enum NoteDetailMode: String, CaseIterable, Hashable, Sendable, Identifiable {
 enum SearchFilter: Hashable, Sendable {
     case pinned
     case favorite
+    case withTasks
     case withAttachments
     case withSnippets
     case label(String)

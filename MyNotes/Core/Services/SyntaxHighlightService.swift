@@ -22,6 +22,11 @@ final class HighlightrSyntaxHighlightService: SyntaxHighlightService {
     private let highlightr: Highlightr?
 
     init(themeName: String = "github") {
+        guard Self.hasBundledResources else {
+            self.highlightr = nil
+            return
+        }
+
         let highlightr = Highlightr()
         _ = highlightr?.setTheme(to: themeName)
         #if os(macOS)
@@ -64,5 +69,18 @@ final class HighlightrSyntaxHighlightService: SyntaxHighlightService {
     private func normalizedHighlightLanguage(for rawLanguage: String?) -> String? {
         let normalized = SnippetSyntaxLanguage.normalizedID(for: rawLanguage)
         return normalized == SnippetSyntaxLanguage.auto ? nil : normalized
+    }
+
+    private static var hasBundledResources: Bool {
+        let bundleName = "Highlightr_Highlightr.bundle"
+        let candidateURLs = [
+            Bundle.main.bundleURL.appendingPathComponent(bundleName, isDirectory: true),
+            Bundle.main.resourceURL?.appendingPathComponent(bundleName, isDirectory: true),
+            Bundle.main.executableURL?
+                .deletingLastPathComponent()
+                .appendingPathComponent(bundleName, isDirectory: true)
+        ].compactMap { $0 }
+
+        return candidateURLs.contains { FileManager.default.fileExists(atPath: $0.path) }
     }
 }

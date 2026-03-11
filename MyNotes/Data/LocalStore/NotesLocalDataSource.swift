@@ -257,6 +257,8 @@ struct NotesLocalDataSource {
             predicates.append("n.is_archived = 0")
             predicates.append("n.updated_at >= ?")
             bindings.append(.text(DatabaseDateCodec.encode(Date().addingTimeInterval(-7 * 24 * 60 * 60))))
+        case .tasks:
+            predicates.append("n.is_archived = 0")
         case .attachments:
             predicates.append("n.is_archived = 0")
             predicates.append("""

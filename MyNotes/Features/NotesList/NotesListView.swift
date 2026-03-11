@@ -2,14 +2,12 @@ import Observation
 import SwiftUI
 
 struct NotesListView: View {
-    @Environment(\.openWindow) private var openWindow
-
     @Bindable var viewModel: NotesListViewModel
     @Bindable var searchViewModel: SearchViewModel
     @Bindable var coordinator: AppCoordinator
 
     var body: some View {
-        VStack(alignment: .leading, spacing: AppSpacing.medium) {
+        VStack(alignment: .leading, spacing: 0) {
             searchFilterBar
             content
         }
@@ -31,10 +29,12 @@ struct NotesListView: View {
                     Button {
                         searchViewModel.toggleQuickFilter(filter)
                     } label: {
-                        Text(filter.title)
-                            .font(AppTypography.caption)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 6)
+                        Image(systemName: filter.symbolName)
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(
+                                searchViewModel.isQuickFilterActive(filter) ? Color.accentColor : .secondary
+                            )
+                            .frame(width: 36, height: 36)
                             .background(
                                 searchViewModel.isQuickFilterActive(filter)
                                     ? AppColors.chipBackground
@@ -43,9 +43,13 @@ struct NotesListView: View {
                             )
                     }
                     .buttonStyle(.plain)
+                    .help(filter.token)
                 }
             }
+            .frame(maxWidth: .infinity, minHeight: 42, alignment: .leading)
             .padding(.horizontal, AppSpacing.small)
+            .padding(.top, 14)
+            .padding(.bottom, 2)
         }
     }
 
@@ -67,8 +71,8 @@ struct NotesListView: View {
                     } description: {
                         Text(viewModel.emptyState.message)
                     } actions: {
-                        Button("Quick Capture") {
-                            coordinator.openQuickCaptureWindow(using: openWindow)
+                        Button("New Note") {
+                            coordinator.requestNewNote()
                         }
                     }
                 }

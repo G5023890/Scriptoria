@@ -5,6 +5,8 @@ extension AppEnvironment {
     func makeSidebarViewModel(onEmptyTrashRequested: @escaping @MainActor () -> Void) -> SidebarViewModel {
         SidebarViewModel(
             loadSidebarDataUseCase: loadSidebarDataUseCase,
+            renameLabelUseCase: renameLabelUseCase,
+            deleteLabelUseCase: deleteLabelUseCase,
             onEmptyTrashRequested: onEmptyTrashRequested
         )
     }
@@ -16,18 +18,34 @@ extension AppEnvironment {
         )
     }
 
+    func makeToDosListViewModel() -> ToDosListViewModel {
+        ToDosListViewModel(listAllToDosUseCase: listAllToDosUseCase)
+    }
+
     func makeNoteDetailViewModel() -> NoteDetailViewModel {
         NoteDetailViewModel(
             getNoteSnapshotUseCase: getNoteSnapshotUseCase,
+            listLabelsUseCase: listLabelsUseCase,
+            createLabelUseCase: createLabelUseCase,
+            assignLabelsUseCase: assignLabelsUseCase,
             deleteNoteUseCase: deleteNoteUseCase,
             restoreNoteUseCase: restoreNoteUseCase,
             togglePinUseCase: togglePinUseCase,
             toggleFavoriteUseCase: toggleFavoriteUseCase,
+            createToDoUseCase: createToDoUseCase,
+            updateToDoUseCase: updateToDoUseCase,
+            deleteToDoUseCase: deleteToDoUseCase,
+            removeToDoUseCase: removeToDoUseCase,
+            restoreToDoUseCase: restoreToDoUseCase,
+            completeToDoUseCase: completeToDoUseCase,
+            reorderToDosUseCase: reorderToDosUseCase,
+            importAttachmentUseCase: importAttachmentUseCase,
+            createManualSnippetUseCase: createManualSnippetUseCase,
             removeAttachmentUseCase: removeAttachmentUseCase,
             prepareAttachmentPreviewUseCase: prepareAttachmentPreviewUseCase,
             openAttachmentUseCase: openAttachmentUseCase,
             copySnippetUseCase: copySnippetUseCase,
-            fileService: fileService,
+            attachmentsRepository: attachmentsRepository,
             syntaxHighlightService: syntaxHighlightService
         )
     }
@@ -39,6 +57,14 @@ extension AppEnvironment {
             listLabelsUseCase: listLabelsUseCase,
             createLabelUseCase: createLabelUseCase,
             updateNoteUseCase: updateNoteUseCase,
+            createToDoUseCase: createToDoUseCase,
+            updateToDoUseCase: updateToDoUseCase,
+            deleteToDoUseCase: deleteToDoUseCase,
+            removeToDoUseCase: removeToDoUseCase,
+            restoreToDoUseCase: restoreToDoUseCase,
+            completeToDoUseCase: completeToDoUseCase,
+            reorderToDosUseCase: reorderToDosUseCase,
+            listToDosForNoteUseCase: listToDosForNoteUseCase,
             createManualSnippetUseCase: createManualSnippetUseCase,
             updateManualSnippetUseCase: updateManualSnippetUseCase,
             removeSnippetUseCase: removeSnippetUseCase,
@@ -47,7 +73,6 @@ extension AppEnvironment {
             prepareAttachmentPreviewUseCase: prepareAttachmentPreviewUseCase,
             openAttachmentUseCase: openAttachmentUseCase,
             copySnippetUseCase: copySnippetUseCase,
-            fileService: fileService,
             syntaxHighlightService: syntaxHighlightService,
             onSave: onSave
         )

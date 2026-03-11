@@ -9,11 +9,13 @@ extension AppEnvironment {
         let clipboardService = SystemClipboardService()
         let quickLookService = DefaultQuickLookService(fileService: fileService)
         let syntaxHighlightService = HighlightrSyntaxHighlightService()
+        let toDoNotificationScheduler = LocalToDoNotificationScheduler()
         let databaseManager = DatabaseManager(fileService: fileService)
 
         let notesDataSource = NotesLocalDataSource(databaseManager: databaseManager)
         let labelsDataSource = LabelsLocalDataSource(databaseManager: databaseManager)
         let attachmentsDataSource = AttachmentsLocalDataSource(databaseManager: databaseManager)
+        let toDoDataSource = ToDoLocalDataSource(databaseManager: databaseManager)
         let searchDataSource = SearchLocalDataSource(databaseManager: databaseManager)
         let syncDataSource = SyncLocalDataSource(databaseManager: databaseManager)
 
@@ -24,6 +26,7 @@ extension AppEnvironment {
             fileService: fileService,
             dateService: dateService
         )
+        let toDoRepository = LocalToDoRepository(dataSource: toDoDataSource)
         let searchIndexRepository = LocalSearchIndexRepository(dataSource: searchDataSource)
         let searchPolicy = SearchPolicy()
         let searchRepository = LocalSearchRepository(
@@ -57,20 +60,31 @@ extension AppEnvironment {
             labelsRepository: labelsRepository,
             dateService: dateService
         )
+        let renameLabelUseCase = RenameLabelUseCase(
+            labelsRepository: labelsRepository,
+            dateService: dateService
+        )
+        let deleteLabelUseCase = DeleteLabelUseCase(
+            labelsRepository: labelsRepository,
+            dateService: dateService
+        )
         let loadSidebarDataUseCase = LoadSidebarDataUseCase(
             notesRepository: notesRepository,
             labelsRepository: labelsRepository,
-            attachmentsRepository: attachmentsRepository
+            attachmentsRepository: attachmentsRepository,
+            toDoRepository: toDoRepository
         )
         let getNoteSnapshotUseCase = GetNoteSnapshotUseCase(
             notesRepository: notesRepository,
             labelsRepository: labelsRepository,
-            attachmentsRepository: attachmentsRepository
+            attachmentsRepository: attachmentsRepository,
+            toDoRepository: toDoRepository
         )
         let listNoteSnapshotsUseCase = ListNoteSnapshotsUseCase(
             notesRepository: notesRepository,
             labelsRepository: labelsRepository,
-            attachmentsRepository: attachmentsRepository
+            attachmentsRepository: attachmentsRepository,
+            toDoRepository: toDoRepository
         )
         let loadNoteDraftUseCase = LoadNoteDraftUseCase(getNoteSnapshotUseCase: getNoteSnapshotUseCase)
         let indexNoteForSearchUseCase = IndexNoteForSearchUseCase(
@@ -112,6 +126,10 @@ extension AppEnvironment {
         )
         let openAttachmentUseCase = OpenAttachmentUseCase(quickLookService: quickLookService)
         let copySnippetUseCase = CopySnippetUseCase(clipboardService: clipboardService)
+        let refreshToDoNotificationsUseCase = RefreshToDoNotificationsUseCase(
+            toDoRepository: toDoRepository,
+            notificationScheduler: toDoNotificationScheduler
+        )
 
         let createNoteUseCase = CreateNoteUseCase(
             notesRepository: notesRepository,
@@ -124,23 +142,28 @@ extension AppEnvironment {
             labelsRepository: labelsRepository,
             markdownService: markdownService,
             dateService: dateService,
-            indexNoteForSearchUseCase: indexNoteForSearchUseCase
+            createSnippetUseCase: createSnippetUseCase,
+            indexNoteForSearchUseCase: indexNoteForSearchUseCase,
+            refreshToDoNotificationsUseCase: refreshToDoNotificationsUseCase
         )
         let deleteNoteUseCase = DeleteNoteUseCase(
             notesRepository: notesRepository,
             searchIndexRepository: searchIndexRepository,
-            dateService: dateService
+            dateService: dateService,
+            refreshToDoNotificationsUseCase: refreshToDoNotificationsUseCase
         )
         let emptyTrashUseCase = EmptyTrashUseCase(
             notesRepository: notesRepository,
             databaseManager: databaseManager,
             fileService: fileService,
-            searchIndexRepository: searchIndexRepository
+            searchIndexRepository: searchIndexRepository,
+            refreshToDoNotificationsUseCase: refreshToDoNotificationsUseCase
         )
         let restoreNoteUseCase = RestoreNoteUseCase(
             notesRepository: notesRepository,
             dateService: dateService,
-            indexNoteForSearchUseCase: indexNoteForSearchUseCase
+            indexNoteForSearchUseCase: indexNoteForSearchUseCase,
+            refreshToDoNotificationsUseCase: refreshToDoNotificationsUseCase
         )
         let searchNotesUseCase = SearchNotesUseCase(searchRepository: searchRepository, searchPolicy: searchPolicy)
         let togglePinUseCase = TogglePinUseCase(
@@ -156,6 +179,51 @@ extension AppEnvironment {
         let assignLabelsUseCase = AssignLabelsUseCase(
             labelsRepository: labelsRepository,
             indexNoteForSearchUseCase: indexNoteForSearchUseCase
+        )
+        let createToDoUseCase = CreateToDoUseCase(
+            toDoRepository: toDoRepository,
+            dateService: dateService,
+            refreshToDoNotificationsUseCase: refreshToDoNotificationsUseCase
+        )
+        let updateToDoUseCase = UpdateToDoUseCase(
+            toDoRepository: toDoRepository,
+            dateService: dateService,
+            refreshToDoNotificationsUseCase: refreshToDoNotificationsUseCase
+        )
+        let deleteToDoUseCase = DeleteToDoUseCase(
+            toDoRepository: toDoRepository,
+            dateService: dateService,
+            refreshToDoNotificationsUseCase: refreshToDoNotificationsUseCase
+        )
+        let removeToDoUseCase = RemoveToDoUseCase(
+            toDoRepository: toDoRepository,
+            refreshToDoNotificationsUseCase: refreshToDoNotificationsUseCase
+        )
+        let restoreToDoUseCase = RestoreToDoUseCase(
+            toDoRepository: toDoRepository,
+            dateService: dateService,
+            refreshToDoNotificationsUseCase: refreshToDoNotificationsUseCase
+        )
+        let completeToDoUseCase = CompleteToDoUseCase(
+            toDoRepository: toDoRepository,
+            dateService: dateService,
+            refreshToDoNotificationsUseCase: refreshToDoNotificationsUseCase
+        )
+        let snoozeToDoUseCase = SnoozeToDoUseCase(
+            toDoRepository: toDoRepository,
+            dateService: dateService,
+            calendar: .current,
+            refreshToDoNotificationsUseCase: refreshToDoNotificationsUseCase
+        )
+        let reorderToDosUseCase = ReorderToDosUseCase(
+            toDoRepository: toDoRepository,
+            dateService: dateService
+        )
+        let listToDosForNoteUseCase = ListToDosForNoteUseCase(toDoRepository: toDoRepository)
+        let listAllToDosUseCase = ListAllToDosUseCase(
+            toDoRepository: toDoRepository,
+            calendar: .current,
+            dateService: dateService
         )
         let quickCaptureUseCase = QuickCaptureUseCase(
             createNoteUseCase: createNoteUseCase,
@@ -173,7 +241,8 @@ extension AppEnvironment {
         )
         let bootstrapApplicationUseCase = BootstrapApplicationUseCase(
             databaseManager: databaseManager,
-            seedSampleDataUseCase: seedSampleDataUseCase
+            seedSampleDataUseCase: seedSampleDataUseCase,
+            refreshToDoNotificationsUseCase: refreshToDoNotificationsUseCase
         )
 
         return AppEnvironment(
@@ -183,10 +252,12 @@ extension AppEnvironment {
             clipboardService: clipboardService,
             syntaxHighlightService: syntaxHighlightService,
             quickLookService: quickLookService,
+            toDoNotificationScheduler: toDoNotificationScheduler,
             databaseManager: databaseManager,
             notesRepository: notesRepository,
             labelsRepository: labelsRepository,
             attachmentsRepository: attachmentsRepository,
+            toDoRepository: toDoRepository,
             searchRepository: searchRepository,
             searchIndexRepository: searchIndexRepository,
             syncQueue: syncQueue,
@@ -198,6 +269,8 @@ extension AppEnvironment {
             snippetDetectionPolicy: snippetDetectionPolicy,
             listLabelsUseCase: listLabelsUseCase,
             createLabelUseCase: createLabelUseCase,
+            renameLabelUseCase: renameLabelUseCase,
+            deleteLabelUseCase: deleteLabelUseCase,
             loadSidebarDataUseCase: loadSidebarDataUseCase,
             getNoteSnapshotUseCase: getNoteSnapshotUseCase,
             listNoteSnapshotsUseCase: listNoteSnapshotsUseCase,
@@ -212,6 +285,17 @@ extension AppEnvironment {
             togglePinUseCase: togglePinUseCase,
             toggleFavoriteUseCase: toggleFavoriteUseCase,
             assignLabelsUseCase: assignLabelsUseCase,
+            createToDoUseCase: createToDoUseCase,
+            updateToDoUseCase: updateToDoUseCase,
+            deleteToDoUseCase: deleteToDoUseCase,
+            removeToDoUseCase: removeToDoUseCase,
+            restoreToDoUseCase: restoreToDoUseCase,
+            completeToDoUseCase: completeToDoUseCase,
+            snoozeToDoUseCase: snoozeToDoUseCase,
+            reorderToDosUseCase: reorderToDosUseCase,
+            listToDosForNoteUseCase: listToDosForNoteUseCase,
+            listAllToDosUseCase: listAllToDosUseCase,
+            refreshToDoNotificationsUseCase: refreshToDoNotificationsUseCase,
             importAttachmentUseCase: importAttachmentUseCase,
             createSnippetUseCase: createSnippetUseCase,
             createManualSnippetUseCase: createManualSnippetUseCase,
@@ -229,6 +313,42 @@ extension AppEnvironment {
 
     func bootstrapSampleDataIfNeeded() async {
         await bootstrapApplicationUseCase.execute()
+    }
+
+    @MainActor
+    func configureToDoNotificationRouting(
+        onOpenToDo: @escaping @MainActor (NoteID, ToDoID) -> Void,
+        onSnoozeToDo: @escaping @MainActor (ToDoID, ToDoNotificationSnoozePreset) async -> Void,
+        onCompleteToDo: @escaping @MainActor (ToDoID) async -> Void
+    ) {
+        toDoNotificationScheduler.configure(
+            onOpenToDo: onOpenToDo,
+            onSnoozeToDo: onSnoozeToDo,
+            onCompleteToDo: onCompleteToDo
+        )
+    }
+
+    func refreshToDoNotifications(promptIfNeeded: Bool = false) async {
+        await refreshToDoNotificationsUseCase.execute(promptIfNeeded: promptIfNeeded)
+    }
+
+    func completeToDoFromNotification(toDoID: ToDoID) async {
+        do {
+            try await completeToDoUseCase.execute(toDoID: toDoID, isCompleted: true)
+        } catch {
+            print("Notification completion failed: \(error)")
+        }
+    }
+
+    func snoozeToDoFromNotification(
+        toDoID: ToDoID,
+        preset: ToDoNotificationSnoozePreset
+    ) async {
+        do {
+            try await snoozeToDoUseCase.execute(toDoID: toDoID, preset: preset)
+        } catch {
+            print("Notification snooze failed: \(error)")
+        }
     }
 
     func performSyncIfNeeded() async {

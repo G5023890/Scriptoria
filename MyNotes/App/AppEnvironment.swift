@@ -7,11 +7,13 @@ final class AppEnvironment {
     let clipboardService: any ClipboardService
     let syntaxHighlightService: any SyntaxHighlightService
     let quickLookService: any QuickLookService
+    let toDoNotificationScheduler: any ToDoNotificationScheduling
     let databaseManager: DatabaseManager
 
     let notesRepository: any NotesRepository
     let labelsRepository: any LabelsRepository
     let attachmentsRepository: any AttachmentsRepository
+    let toDoRepository: any ToDoRepository
     let searchRepository: any SearchRepository
     let searchIndexRepository: any SearchIndexRepository
     let syncQueue: any SyncQueue
@@ -25,6 +27,8 @@ final class AppEnvironment {
 
     let listLabelsUseCase: ListLabelsUseCase
     let createLabelUseCase: CreateLabelUseCase
+    let renameLabelUseCase: RenameLabelUseCase
+    let deleteLabelUseCase: DeleteLabelUseCase
     let loadSidebarDataUseCase: LoadSidebarDataUseCase
     let getNoteSnapshotUseCase: GetNoteSnapshotUseCase
     let listNoteSnapshotsUseCase: ListNoteSnapshotsUseCase
@@ -39,6 +43,17 @@ final class AppEnvironment {
     let togglePinUseCase: TogglePinUseCase
     let toggleFavoriteUseCase: ToggleFavoriteUseCase
     let assignLabelsUseCase: AssignLabelsUseCase
+    let createToDoUseCase: CreateToDoUseCase
+    let updateToDoUseCase: UpdateToDoUseCase
+    let deleteToDoUseCase: DeleteToDoUseCase
+    let removeToDoUseCase: RemoveToDoUseCase
+    let restoreToDoUseCase: RestoreToDoUseCase
+    let completeToDoUseCase: CompleteToDoUseCase
+    let snoozeToDoUseCase: SnoozeToDoUseCase
+    let reorderToDosUseCase: ReorderToDosUseCase
+    let listToDosForNoteUseCase: ListToDosForNoteUseCase
+    let listAllToDosUseCase: ListAllToDosUseCase
+    let refreshToDoNotificationsUseCase: RefreshToDoNotificationsUseCase
     let importAttachmentUseCase: ImportAttachmentUseCase
     let createSnippetUseCase: CreateSnippetUseCase
     let createManualSnippetUseCase: CreateManualSnippetUseCase
@@ -59,10 +74,12 @@ final class AppEnvironment {
         clipboardService: any ClipboardService,
         syntaxHighlightService: any SyntaxHighlightService,
         quickLookService: any QuickLookService,
+        toDoNotificationScheduler: any ToDoNotificationScheduling,
         databaseManager: DatabaseManager,
         notesRepository: any NotesRepository,
         labelsRepository: any LabelsRepository,
         attachmentsRepository: any AttachmentsRepository,
+        toDoRepository: any ToDoRepository,
         searchRepository: any SearchRepository,
         searchIndexRepository: any SearchIndexRepository,
         syncQueue: any SyncQueue,
@@ -74,6 +91,8 @@ final class AppEnvironment {
         snippetDetectionPolicy: SnippetDetectionPolicy,
         listLabelsUseCase: ListLabelsUseCase,
         createLabelUseCase: CreateLabelUseCase,
+        renameLabelUseCase: RenameLabelUseCase,
+        deleteLabelUseCase: DeleteLabelUseCase,
         loadSidebarDataUseCase: LoadSidebarDataUseCase,
         getNoteSnapshotUseCase: GetNoteSnapshotUseCase,
         listNoteSnapshotsUseCase: ListNoteSnapshotsUseCase,
@@ -88,6 +107,17 @@ final class AppEnvironment {
         togglePinUseCase: TogglePinUseCase,
         toggleFavoriteUseCase: ToggleFavoriteUseCase,
         assignLabelsUseCase: AssignLabelsUseCase,
+        createToDoUseCase: CreateToDoUseCase,
+        updateToDoUseCase: UpdateToDoUseCase,
+        deleteToDoUseCase: DeleteToDoUseCase,
+        removeToDoUseCase: RemoveToDoUseCase,
+        restoreToDoUseCase: RestoreToDoUseCase,
+        completeToDoUseCase: CompleteToDoUseCase,
+        snoozeToDoUseCase: SnoozeToDoUseCase,
+        reorderToDosUseCase: ReorderToDosUseCase,
+        listToDosForNoteUseCase: ListToDosForNoteUseCase,
+        listAllToDosUseCase: ListAllToDosUseCase,
+        refreshToDoNotificationsUseCase: RefreshToDoNotificationsUseCase,
         importAttachmentUseCase: ImportAttachmentUseCase,
         createSnippetUseCase: CreateSnippetUseCase,
         createManualSnippetUseCase: CreateManualSnippetUseCase,
@@ -107,10 +137,12 @@ final class AppEnvironment {
         self.clipboardService = clipboardService
         self.syntaxHighlightService = syntaxHighlightService
         self.quickLookService = quickLookService
+        self.toDoNotificationScheduler = toDoNotificationScheduler
         self.databaseManager = databaseManager
         self.notesRepository = notesRepository
         self.labelsRepository = labelsRepository
         self.attachmentsRepository = attachmentsRepository
+        self.toDoRepository = toDoRepository
         self.searchRepository = searchRepository
         self.searchIndexRepository = searchIndexRepository
         self.syncQueue = syncQueue
@@ -122,6 +154,8 @@ final class AppEnvironment {
         self.snippetDetectionPolicy = snippetDetectionPolicy
         self.listLabelsUseCase = listLabelsUseCase
         self.createLabelUseCase = createLabelUseCase
+        self.renameLabelUseCase = renameLabelUseCase
+        self.deleteLabelUseCase = deleteLabelUseCase
         self.loadSidebarDataUseCase = loadSidebarDataUseCase
         self.getNoteSnapshotUseCase = getNoteSnapshotUseCase
         self.listNoteSnapshotsUseCase = listNoteSnapshotsUseCase
@@ -136,6 +170,17 @@ final class AppEnvironment {
         self.togglePinUseCase = togglePinUseCase
         self.toggleFavoriteUseCase = toggleFavoriteUseCase
         self.assignLabelsUseCase = assignLabelsUseCase
+        self.createToDoUseCase = createToDoUseCase
+        self.updateToDoUseCase = updateToDoUseCase
+        self.deleteToDoUseCase = deleteToDoUseCase
+        self.removeToDoUseCase = removeToDoUseCase
+        self.restoreToDoUseCase = restoreToDoUseCase
+        self.completeToDoUseCase = completeToDoUseCase
+        self.snoozeToDoUseCase = snoozeToDoUseCase
+        self.reorderToDosUseCase = reorderToDosUseCase
+        self.listToDosForNoteUseCase = listToDosForNoteUseCase
+        self.listAllToDosUseCase = listAllToDosUseCase
+        self.refreshToDoNotificationsUseCase = refreshToDoNotificationsUseCase
         self.importAttachmentUseCase = importAttachmentUseCase
         self.createSnippetUseCase = createSnippetUseCase
         self.createManualSnippetUseCase = createManualSnippetUseCase

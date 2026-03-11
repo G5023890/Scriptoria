@@ -14,6 +14,7 @@ enum FTSSchema {
         updated_at UNINDEXED,
         is_pinned UNINDEXED,
         is_favorite UNINDEXED,
+        has_tasks UNINDEXED,
         has_attachments UNINDEXED,
         languages_text UNINDEXED,
         tokenize = 'unicode61 remove_diacritics 2'

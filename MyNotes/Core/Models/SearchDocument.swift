@@ -12,6 +12,7 @@ struct SearchDocument: Identifiable, Hashable, Sendable {
     let updatedAt: Date
     let isPinned: Bool
     let isFavorite: Bool
+    let hasTasks: Bool
     let hasAttachments: Bool
     let languagesText: String
 }

@@ -79,8 +79,10 @@ struct AttachmentsLocalDataSource {
         }
     }
 
-    func snippets(for noteID: NoteID) throws -> [NoteSnippet] {
-        try databaseManager.read { db in
+    func snippets(for noteID: NoteID, includeCode: Bool = true) throws -> [NoteSnippet] {
+        let codeColumn = includeCode ? "code" : "'' AS code"
+
+        return try databaseManager.read { db in
             try db.query(
                 statement: """
                 SELECT
@@ -89,7 +91,7 @@ struct AttachmentsLocalDataSource {
                     language,
                     title,
                     description,
-                    code,
+                    \(codeColumn),
                     start_offset,
                     end_offset,
                     source_type,

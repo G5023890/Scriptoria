@@ -4,15 +4,10 @@ import SwiftUI
 @MainActor
 @Observable
 final class NoteEditorViewModel {
-    struct ManualSnippetDraft {
-        var snippetID: String?
-        var title = ""
-        var description = ""
-        var language = SnippetSyntaxLanguage.auto
-        var code = ""
-    }
-
     var draft: NoteDraft?
+    var toDoItems: [NoteToDoItem] = []
+    var deletedToDoItems: [NoteToDoItem] = []
+    var activeToDoDraft: ToDoDraft?
     var attachmentItems: [AttachmentItem] = []
     var snippetItems: [SnippetItem] = []
     var availableLabels: [Label] = []
@@ -33,6 +28,14 @@ final class NoteEditorViewModel {
     private let listLabelsUseCase: ListLabelsUseCase
     private let createLabelUseCase: CreateLabelUseCase
     private let updateNoteUseCase: UpdateNoteUseCase
+    private let createToDoUseCase: CreateToDoUseCase
+    private let updateToDoUseCase: UpdateToDoUseCase
+    private let deleteToDoUseCase: DeleteToDoUseCase
+    private let removeToDoUseCase: RemoveToDoUseCase
+    private let restoreToDoUseCase: RestoreToDoUseCase
+    private let completeToDoUseCase: CompleteToDoUseCase
+    private let reorderToDosUseCase: ReorderToDosUseCase
+    private let listToDosForNoteUseCase: ListToDosForNoteUseCase
     private let createManualSnippetUseCase: CreateManualSnippetUseCase
     private let updateManualSnippetUseCase: UpdateManualSnippetUseCase
     private let removeSnippetUseCase: RemoveSnippetUseCase
@@ -41,7 +44,6 @@ final class NoteEditorViewModel {
     private let prepareAttachmentPreviewUseCase: PrepareAttachmentPreviewUseCase
     private let openAttachmentUseCase: OpenAttachmentUseCase
     private let copySnippetUseCase: CopySnippetUseCase
-    private let fileService: any FileService
     let syntaxHighlightService: any SyntaxHighlightService
     private let onSave: @MainActor () async -> Void
     private var autosaveTask: Task<Void, Never>?
@@ -52,6 +54,14 @@ final class NoteEditorViewModel {
         listLabelsUseCase: ListLabelsUseCase,
         createLabelUseCase: CreateLabelUseCase,
         updateNoteUseCase: UpdateNoteUseCase,
+        createToDoUseCase: CreateToDoUseCase,
+        updateToDoUseCase: UpdateToDoUseCase,
+        deleteToDoUseCase: DeleteToDoUseCase,
+        removeToDoUseCase: RemoveToDoUseCase,
+        restoreToDoUseCase: RestoreToDoUseCase,
+        completeToDoUseCase: CompleteToDoUseCase,
+        reorderToDosUseCase: ReorderToDosUseCase,
+        listToDosForNoteUseCase: ListToDosForNoteUseCase,
         createManualSnippetUseCase: CreateManualSnippetUseCase,
         updateManualSnippetUseCase: UpdateManualSnippetUseCase,
         removeSnippetUseCase: RemoveSnippetUseCase,
@@ -60,7 +70,6 @@ final class NoteEditorViewModel {
         prepareAttachmentPreviewUseCase: PrepareAttachmentPreviewUseCase,
         openAttachmentUseCase: OpenAttachmentUseCase,
         copySnippetUseCase: CopySnippetUseCase,
-        fileService: any FileService,
         syntaxHighlightService: any SyntaxHighlightService,
         onSave: @escaping @MainActor () async -> Void
     ) {
@@ -69,6 +78,14 @@ final class NoteEditorViewModel {
         self.listLabelsUseCase = listLabelsUseCase
         self.createLabelUseCase = createLabelUseCase
         self.updateNoteUseCase = updateNoteUseCase
+        self.createToDoUseCase = createToDoUseCase
+        self.updateToDoUseCase = updateToDoUseCase
+        self.deleteToDoUseCase = deleteToDoUseCase
+        self.removeToDoUseCase = removeToDoUseCase
+        self.restoreToDoUseCase = restoreToDoUseCase
+        self.completeToDoUseCase = completeToDoUseCase
+        self.reorderToDosUseCase = reorderToDosUseCase
+        self.listToDosForNoteUseCase = listToDosForNoteUseCase
         self.createManualSnippetUseCase = createManualSnippetUseCase
         self.updateManualSnippetUseCase = updateManualSnippetUseCase
         self.removeSnippetUseCase = removeSnippetUseCase
@@ -77,7 +94,6 @@ final class NoteEditorViewModel {
         self.prepareAttachmentPreviewUseCase = prepareAttachmentPreviewUseCase
         self.openAttachmentUseCase = openAttachmentUseCase
         self.copySnippetUseCase = copySnippetUseCase
-        self.fileService = fileService
         self.syntaxHighlightService = syntaxHighlightService
         self.onSave = onSave
     }
@@ -90,6 +106,8 @@ final class NoteEditorViewModel {
             lastSavedText = "Loaded"
         } catch {
             draft = nil
+            toDoItems = []
+            deletedToDoItems = []
             attachmentItems = []
             snippetItems = []
             availableLabels = []
@@ -261,6 +279,92 @@ final class NoteEditorViewModel {
         }
     }
 
+    func createToDo(draft taskDraft: ToDoDraft) async {
+        do {
+            guard let todo = try await createToDoUseCase.execute(draft: taskDraft) else { return }
+            try await refreshToDos()
+            lastSavedText = "Added \(todo.title)"
+            await onSave()
+        } catch {
+            errorMessage = "Task creation failed: \(error.localizedDescription)"
+        }
+    }
+
+    func updateToDo(draft taskDraft: ToDoDraft) async {
+        do {
+            guard let todo = try await updateToDoUseCase.execute(draft: taskDraft) else { return }
+            try await refreshToDos()
+            lastSavedText = "Updated \(todo.title)"
+            await onSave()
+        } catch {
+            errorMessage = "Task update failed: \(error.localizedDescription)"
+        }
+    }
+
+    func toggleToDoCompletion(_ todo: ToDo) async {
+        do {
+            try await completeToDoUseCase.execute(toDoID: todo.id, isCompleted: !todo.isCompleted)
+            try await refreshToDos()
+            lastSavedText = todo.isCompleted ? "Marked incomplete" : "Completed \(todo.title)"
+            await onSave()
+        } catch {
+            errorMessage = "Task update failed: \(error.localizedDescription)"
+        }
+    }
+
+    func deleteToDo(_ todo: ToDo) async {
+        do {
+            try await removeToDoUseCase.execute(toDoID: todo.id)
+            try await refreshToDos()
+            lastSavedText = "Removed \(todo.title)"
+            await onSave()
+        } catch {
+            errorMessage = "Task remove failed: \(error.localizedDescription)"
+        }
+    }
+
+    func restoreToDo(_ todo: ToDo) async {
+        do {
+            try await restoreToDoUseCase.execute(toDoID: todo.id)
+            try await refreshToDos()
+            lastSavedText = "Restored \(todo.title)"
+            await onSave()
+        } catch {
+            errorMessage = "Task restore failed: \(error.localizedDescription)"
+        }
+    }
+
+    func removeToDo(_ todo: ToDo) async {
+        do {
+            try await removeToDoUseCase.execute(toDoID: todo.id)
+            try await refreshToDos()
+            lastSavedText = "Removed \(todo.title)"
+            await onSave()
+        } catch {
+            errorMessage = "Task remove failed: \(error.localizedDescription)"
+        }
+    }
+
+    func moveToDo(_ todo: ToDo, direction: NoteTaskMoveDirection) async {
+        guard draft != nil else { return }
+
+        var orderedIDs = toDoItems.map(\.id)
+        guard let index = orderedIDs.firstIndex(of: todo.id) else { return }
+        let destination = direction == .up ? index - 1 : index + 1
+        guard orderedIDs.indices.contains(destination) else { return }
+
+        orderedIDs.swapAt(index, destination)
+
+        do {
+            try await reorderToDosUseCase.execute(noteID: noteID, orderedToDoIDs: orderedIDs)
+            try await refreshToDos()
+            lastSavedText = "Reordered tasks"
+            await onSave()
+        } catch {
+            errorMessage = "Task reorder failed: \(error.localizedDescription)"
+        }
+    }
+
     func importAttachments(from urls: [URL]) async {
         guard !urls.isEmpty, var draft else { return }
 
@@ -330,6 +434,18 @@ final class NoteEditorViewModel {
         errorMessage = nil
     }
 
+    func presentNewToDoSheet() {
+        activeToDoDraft = ToDoDraft(noteID: noteID)
+    }
+
+    func presentEditToDoSheet(_ todo: ToDo) {
+        activeToDoDraft = ToDoDraft(todo: todo)
+    }
+
+    func dismissToDoSheet() {
+        activeToDoDraft = nil
+    }
+
     private func scheduleAutosave() {
         autosaveTask?.cancel()
         autosaveTask = Task { [weak self] in
@@ -341,32 +457,28 @@ final class NoteEditorViewModel {
 
     private func rebuildPresentationState() {
         guard let draft else {
+            toDoItems = []
+            deletedToDoItems = []
             attachmentItems = []
             snippetItems = []
             return
         }
 
+        let todoPresentation = ToDoPresentationBuilder.makeNoteItems(from: draft.todos.sorted(by: ToDoSorting.note))
+        toDoItems = todoPresentation.active
+        deletedToDoItems = todoPresentation.deleted
         attachmentItems = draft.attachments.map { attachment in
-            let previewURL = try? prepareAttachmentPreviewUseCase.execute(for: attachment)
-            let codePreview = attachment.category == .code
-                ? (try? fileService.readTextFile(atRelativePath: attachment.relativePath, maxCharacters: 2_500))
-                : nil
-            let codeLanguage = attachment.category == .code
-                ? SnippetSyntaxLanguage.detectAttachmentLanguage(
-                    fileName: attachment.originalFileName,
-                    mimeType: attachment.mimeType
-                )
-                : nil
-
-            return AttachmentPresentationBuilder.make(
-                attachment: attachment,
-                previewURL: previewURL ?? nil,
-                codePreview: codePreview,
-                codeLanguage: codeLanguage
-            )
+            AttachmentPresentationBuilder.make(attachment: attachment, previewURL: nil)
         }
         snippetItems = draft.snippets.map { snippet in
-            SnippetPresentationBuilder.make(snippet: snippet, syntaxHighlightService: syntaxHighlightService)
+            SnippetPresentationBuilder.make(snippet: snippet)
         }
+    }
+
+    private func refreshToDos() async throws {
+        guard var draft else { return }
+        draft.todos = try await listToDosForNoteUseCase.execute(noteID: noteID)
+        self.draft = draft
+        rebuildPresentationState()
     }
 }
