@@ -33,18 +33,22 @@ struct QuickCaptureView: View {
                                     Button {
                                         viewModel.toggleLabel(label.id)
                                     } label: {
-                                        Text(label.name)
-                                            .font(AppTypography.chip)
-                                            .lineLimit(1)
-                                            .frame(maxWidth: .infinity)
-                                            .padding(.horizontal, 10)
-                                            .padding(.vertical, 8)
-                                            .background(
-                                                viewModel.selectedLabelIDs.contains(label.id)
-                                                    ? Color.accentColor.opacity(0.18)
-                                                    : AppColors.chipBackground,
-                                                in: Capsule()
-                                            )
+                                        HStack(spacing: 6) {
+                                            LabelIconView(label: label)
+                                                .font(.system(size: 11, weight: .semibold))
+                                            Text(label.name)
+                                                .lineLimit(1)
+                                        }
+                                        .font(AppTypography.chip)
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 8)
+                                        .background(
+                                            viewModel.selectedLabelIDs.contains(label.id)
+                                                ? Color.accentColor.opacity(0.18)
+                                                : AppColors.chipBackground,
+                                            in: Capsule()
+                                        )
                                     }
                                     .buttonStyle(.plain)
                                 }

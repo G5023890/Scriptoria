@@ -7,24 +7,26 @@ final class SidebarViewModel {
     var selection: SidebarSelection = .collection(.allNotes)
     var counts: [SmartCollection: Int] = [:]
     var labels: [SidebarLabelSummary] = []
-    var labelBeingRenamed: SidebarLabelSummary?
+    var labelBeingEdited: SidebarLabelSummary?
     var draftLabelName = ""
+    var draftLabelIconName = LabelAppearanceCatalog.defaultIconName
+    var draftLabelColorHex: String?
     var errorMessage: String?
     var labelsMutationID = UUID()
 
     private let loadSidebarDataUseCase: LoadSidebarDataUseCase
-    private let renameLabelUseCase: RenameLabelUseCase
+    private let updateLabelUseCase: UpdateLabelUseCase
     private let deleteLabelUseCase: DeleteLabelUseCase
     private let onEmptyTrashRequested: @MainActor () -> Void
 
     init(
         loadSidebarDataUseCase: LoadSidebarDataUseCase,
-        renameLabelUseCase: RenameLabelUseCase,
+        updateLabelUseCase: UpdateLabelUseCase,
         deleteLabelUseCase: DeleteLabelUseCase,
         onEmptyTrashRequested: @escaping @MainActor () -> Void
     ) {
         self.loadSidebarDataUseCase = loadSidebarDataUseCase
-        self.renameLabelUseCase = renameLabelUseCase
+        self.updateLabelUseCase = updateLabelUseCase
         self.deleteLabelUseCase = deleteLabelUseCase
         self.onEmptyTrashRequested = onEmptyTrashRequested
     }
@@ -56,33 +58,35 @@ final class SidebarViewModel {
         onEmptyTrashRequested()
     }
 
-    func beginRename(for item: SidebarLabelSummary) {
-        guard !item.label.isSystem else { return }
-        labelBeingRenamed = item
+    func beginEditing(for item: SidebarLabelSummary) {
+        labelBeingEdited = item
         draftLabelName = item.label.name
+        draftLabelIconName = item.label.iconName ?? LabelAppearanceCatalog.defaultIconName
+        draftLabelColorHex = LabelAppearanceCatalog.normalizedHex(item.label.color)
     }
 
-    func cancelRename() {
-        labelBeingRenamed = nil
+    func cancelEditing() {
+        labelBeingEdited = nil
         draftLabelName = ""
+        draftLabelIconName = LabelAppearanceCatalog.defaultIconName
+        draftLabelColorHex = nil
     }
 
-    func saveRenamedLabel() async {
-        guard let item = labelBeingRenamed else { return }
+    func saveEditedLabel() async {
+        guard let item = labelBeingEdited else { return }
 
         do {
-            let trimmedName = draftLabelName.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !trimmedName.isEmpty else {
-                errorMessage = "Label name can't be empty."
-                return
-            }
-
-            _ = try await renameLabelUseCase.execute(labelID: item.label.id, newName: trimmedName)
-            cancelRename()
+            _ = try await updateLabelUseCase.execute(
+                labelID: item.label.id,
+                newName: draftLabelName,
+                color: draftLabelColorHex,
+                iconName: draftLabelIconName
+            )
+            cancelEditing()
             await reload()
             labelsMutationID = UUID()
         } catch {
-            errorMessage = "Label rename failed: \(error.localizedDescription)"
+            errorMessage = "Label update failed: \(error.localizedDescription)"
         }
     }
 
@@ -102,5 +106,21 @@ final class SidebarViewModel {
 
     func clearError() {
         errorMessage = nil
+    }
+
+    var draftHasLegacyIcon: Bool {
+        LabelAppearanceCatalog.isLegacyIcon(draftLabelIconName)
+    }
+
+    var draftHasCustomColor: Bool {
+        draftLabelColorHex != nil && !LabelAppearanceCatalog.isPaletteColor(draftLabelColorHex)
+    }
+
+    func selectDraftIcon(_ iconName: String) {
+        draftLabelIconName = iconName
+    }
+
+    func selectDraftColor(_ colorHex: String?) {
+        draftLabelColorHex = LabelAppearanceCatalog.normalizedHex(colorHex)
     }
 }

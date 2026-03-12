@@ -27,7 +27,7 @@ final class AppEnvironment {
 
     let listLabelsUseCase: ListLabelsUseCase
     let createLabelUseCase: CreateLabelUseCase
-    let renameLabelUseCase: RenameLabelUseCase
+    let updateLabelUseCase: UpdateLabelUseCase
     let deleteLabelUseCase: DeleteLabelUseCase
     let loadSidebarDataUseCase: LoadSidebarDataUseCase
     let getNoteSnapshotUseCase: GetNoteSnapshotUseCase
@@ -91,7 +91,7 @@ final class AppEnvironment {
         snippetDetectionPolicy: SnippetDetectionPolicy,
         listLabelsUseCase: ListLabelsUseCase,
         createLabelUseCase: CreateLabelUseCase,
-        renameLabelUseCase: RenameLabelUseCase,
+        updateLabelUseCase: UpdateLabelUseCase,
         deleteLabelUseCase: DeleteLabelUseCase,
         loadSidebarDataUseCase: LoadSidebarDataUseCase,
         getNoteSnapshotUseCase: GetNoteSnapshotUseCase,
@@ -154,7 +154,7 @@ final class AppEnvironment {
         self.snippetDetectionPolicy = snippetDetectionPolicy
         self.listLabelsUseCase = listLabelsUseCase
         self.createLabelUseCase = createLabelUseCase
-        self.renameLabelUseCase = renameLabelUseCase
+        self.updateLabelUseCase = updateLabelUseCase
         self.deleteLabelUseCase = deleteLabelUseCase
         self.loadSidebarDataUseCase = loadSidebarDataUseCase
         self.getNoteSnapshotUseCase = getNoteSnapshotUseCase

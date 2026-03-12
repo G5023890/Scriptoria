@@ -60,7 +60,7 @@ extension AppEnvironment {
             labelsRepository: labelsRepository,
             dateService: dateService
         )
-        let renameLabelUseCase = RenameLabelUseCase(
+        let updateLabelUseCase = UpdateLabelUseCase(
             labelsRepository: labelsRepository,
             dateService: dateService
         )
@@ -269,7 +269,7 @@ extension AppEnvironment {
             snippetDetectionPolicy: snippetDetectionPolicy,
             listLabelsUseCase: listLabelsUseCase,
             createLabelUseCase: createLabelUseCase,
-            renameLabelUseCase: renameLabelUseCase,
+            updateLabelUseCase: updateLabelUseCase,
             deleteLabelUseCase: deleteLabelUseCase,
             loadSidebarDataUseCase: loadSidebarDataUseCase,
             getNoteSnapshotUseCase: getNoteSnapshotUseCase,

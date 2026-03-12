@@ -20,7 +20,7 @@ struct CreateLabelUseCase {
             id: LabelID(),
             name: trimmedName,
             color: nil,
-            iconName: nil,
+            iconName: LabelAppearanceCatalog.defaultIconName,
             isSystem: false,
             createdAt: now,
             updatedAt: now,

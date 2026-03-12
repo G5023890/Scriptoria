@@ -220,6 +220,8 @@ struct NoteDetailHeaderView: View {
                                 HStack(spacing: AppSpacing.small) {
                                     Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                                         .foregroundStyle(isSelected ? Color.accentColor : .secondary)
+                                    LabelIconView(label: label)
+                                        .font(.system(size: 12, weight: .semibold))
                                     Text(label.name)
                                     Spacer()
                                 }

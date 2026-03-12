@@ -7,6 +7,8 @@ cd "$PROJECT_DIR"
 APP_DISPLAY_NAME="${APP_DISPLAY_NAME:-MyNotes}"
 EXECUTABLE_NAME="${EXECUTABLE_NAME:-MyNotes}"
 BUNDLE_ID="${BUNDLE_ID:-com.grigorym.MyNotes}"
+APP_VERSION="${APP_VERSION:-0.9.8}"
+BUILD_NUMBER="${BUILD_NUMBER:-0.9.8}"
 APP_DIR="${APP_DIR:-dist/${APP_DISPLAY_NAME}.app}"
 INSTALL_DIR="${INSTALL_DIR:-/Applications/${APP_DISPLAY_NAME}.app}"
 LEGACY_INSTALL_DIR="${LEGACY_INSTALL_DIR:-/Applications/SelectedTextOverlay.app}"
@@ -165,9 +167,9 @@ ${ICON_PLIST_BLOCK}
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>CFBundleShortVersionString</key>
-  <string>0.0.2</string>
+  <string>${APP_VERSION}</string>
   <key>CFBundleVersion</key>
-  <string>2</string>
+  <string>${BUILD_NUMBER}</string>
   <key>LSMinimumSystemVersion</key>
   <string>26.0</string>
   <key>NSPrincipalClass</key>

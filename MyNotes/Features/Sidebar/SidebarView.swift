@@ -4,17 +4,6 @@ import SwiftUI
 struct SidebarView: View {
     @Bindable var viewModel: SidebarViewModel
 
-    private var renameAlertPresented: Binding<Bool> {
-        Binding(
-            get: { viewModel.labelBeingRenamed != nil },
-            set: { isPresented in
-                if !isPresented {
-                    viewModel.cancelRename()
-                }
-            }
-        )
-    }
-
     private var errorAlertPresented: Binding<Bool> {
         Binding(
             get: { viewModel.errorMessage?.isEmpty == false },
@@ -51,18 +40,17 @@ struct SidebarView: View {
             Section("Labels") {
                 ForEach(viewModel.labels) { item in
                     HStack(spacing: AppSpacing.small) {
-                        Image(systemName: item.label.iconName ?? "tag")
-                            .foregroundStyle(.secondary)
+                        LabelIconView(label: item.label)
+                            .font(.system(size: 13, weight: .semibold))
                         Text(item.label.name)
                         Spacer()
                         InfoBadge(text: "\(item.noteCount)")
                     }
                     .tag(SidebarSelection.label(item.label.id))
                     .contextMenu {
-                        Button("Rename") {
-                            viewModel.beginRename(for: item)
+                        Button("Edit") {
+                            viewModel.beginEditing(for: item)
                         }
-                        .disabled(item.label.isSystem)
 
                         Button("Delete", role: .destructive) {
                             Task {
@@ -76,8 +64,8 @@ struct SidebarView: View {
         }
         .listStyle(.sidebar)
         .navigationTitle("MyNotes")
-        .sheet(item: $viewModel.labelBeingRenamed) { _ in
-            renameLabelSheet
+        .sheet(item: $viewModel.labelBeingEdited) { item in
+            editLabelSheet(for: item)
         }
         .alert("Label Error", isPresented: errorAlertPresented) {
             Button("OK", role: .cancel) {
@@ -89,28 +77,177 @@ struct SidebarView: View {
     }
 
     @ViewBuilder
-    private var renameLabelSheet: some View {
+    private func editLabelSheet(for item: SidebarLabelSummary) -> some View {
         VStack(alignment: .leading, spacing: AppSpacing.medium) {
-            Text("Rename Label")
+            Text("Edit Label")
                 .font(.headline)
 
-            TextField("Label Name", text: $viewModel.draftLabelName)
-                .textFieldStyle(.roundedBorder)
+            ScrollView {
+                VStack(alignment: .leading, spacing: AppSpacing.medium) {
+                    VStack(alignment: .leading, spacing: AppSpacing.small) {
+                        Text("Name")
+                            .font(AppTypography.caption)
+                            .foregroundStyle(.secondary)
+
+                        TextField("Label Name", text: $viewModel.draftLabelName)
+                            .textFieldStyle(.roundedBorder)
+                            .disabled(item.label.isSystem)
+                    }
+
+                    previewSection
+                    iconPickerSection
+                    colorPickerSection
+                }
+            }
 
             HStack {
                 Spacer()
                 Button("Cancel") {
-                    viewModel.cancelRename()
+                    viewModel.cancelEditing()
                 }
                 Button("Save") {
                     Task {
-                        await viewModel.saveRenamedLabel()
+                        await viewModel.saveEditedLabel()
                     }
                 }
                 .keyboardShortcut(.defaultAction)
             }
         }
         .padding(AppSpacing.large)
-        .frame(minWidth: 360)
+        .frame(minWidth: 460, minHeight: 620)
+    }
+
+    private var previewSection: some View {
+        VStack(alignment: .leading, spacing: AppSpacing.small) {
+            Text("Preview")
+                .font(AppTypography.caption)
+                .foregroundStyle(.secondary)
+
+            HStack(spacing: AppSpacing.small) {
+                LabelIconView(iconName: viewModel.draftLabelIconName, colorHex: viewModel.draftLabelColorHex)
+                    .font(.system(size: 16, weight: .semibold))
+
+                Text(viewModel.draftLabelName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Label" : viewModel.draftLabelName)
+                    .font(AppTypography.bodySemibold)
+
+                if viewModel.draftHasLegacyIcon {
+                    Text("Legacy icon")
+                        .font(AppTypography.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                if viewModel.draftHasCustomColor {
+                    Text("Custom color")
+                        .font(AppTypography.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer()
+            }
+            .padding(AppSpacing.medium)
+            .background(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(AppColors.chipBackground)
+            )
+        }
+    }
+
+    private var iconPickerSection: some View {
+        VStack(alignment: .leading, spacing: AppSpacing.small) {
+            Text("Icon")
+                .font(AppTypography.caption)
+                .foregroundStyle(.secondary)
+
+            LazyVGrid(
+                columns: Array(repeating: GridItem(.flexible(), spacing: AppSpacing.small), count: 5),
+                alignment: .leading,
+                spacing: AppSpacing.small
+            ) {
+                ForEach(LabelAppearanceCatalog.allowedIconNames, id: \.self) { iconName in
+                    Button {
+                        viewModel.selectDraftIcon(iconName)
+                    } label: {
+                        LabelIconView(iconName: iconName, colorHex: viewModel.draftLabelColorHex)
+                            .font(.system(size: 16, weight: .semibold))
+                            .frame(maxWidth: .infinity, minHeight: 38)
+                            .background(iconButtonBackground(for: iconName))
+                    }
+                    .buttonStyle(.plain)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .strokeBorder(iconName == viewModel.draftLabelIconName ? Color.accentColor : Color.clear, lineWidth: 1.5)
+                    )
+                }
+            }
+        }
+    }
+
+    private var colorPickerSection: some View {
+        VStack(alignment: .leading, spacing: AppSpacing.small) {
+            Text("Icon Color")
+                .font(AppTypography.caption)
+                .foregroundStyle(.secondary)
+
+            LazyVGrid(
+                columns: Array(repeating: GridItem(.flexible(), spacing: AppSpacing.small), count: 3),
+                alignment: .leading,
+                spacing: AppSpacing.small
+            ) {
+                ForEach(LabelAppearanceCatalog.colorOptions) { option in
+                    Button {
+                        viewModel.selectDraftColor(option.hex)
+                    } label: {
+                        HStack(spacing: AppSpacing.small) {
+                            colorSwatch(for: option)
+                            Text(option.name)
+                                .font(AppTypography.caption)
+                                .foregroundStyle(.primary)
+                            Spacer(minLength: 0)
+                        }
+                        .padding(.horizontal, 10)
+                        .frame(maxWidth: .infinity, minHeight: 36)
+                        .background(colorButtonBackground(for: option))
+                    }
+                    .buttonStyle(.plain)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .strokeBorder(
+                                LabelAppearanceCatalog.normalizedHex(option.hex) == viewModel.draftLabelColorHex
+                                    ? Color.accentColor
+                                    : Color.clear,
+                                lineWidth: 1.5
+                            )
+                    )
+                }
+            }
+        }
+    }
+
+    private func iconButtonBackground(for iconName: String) -> some View {
+        RoundedRectangle(cornerRadius: 10, style: .continuous)
+            .fill(iconName == viewModel.draftLabelIconName ? Color.accentColor.opacity(0.14) : AppColors.chipBackground)
+    }
+
+    private func colorButtonBackground(for option: LabelColorOption) -> some View {
+        RoundedRectangle(cornerRadius: 10, style: .continuous)
+            .fill(
+                LabelAppearanceCatalog.normalizedHex(option.hex) == viewModel.draftLabelColorHex
+                    ? Color.accentColor.opacity(0.14)
+                    : AppColors.chipBackground
+            )
+    }
+
+    @ViewBuilder
+    private func colorSwatch(for option: LabelColorOption) -> some View {
+        if let hex = option.hex, let color = Color(labelHex: hex) {
+            Circle()
+                .fill(color)
+                .frame(width: 12, height: 12)
+        } else {
+            Circle()
+                .strokeBorder(Color.secondary.opacity(0.5), lineWidth: 1)
+                .frame(width: 12, height: 12)
+                .background(Circle().fill(Color.clear))
+        }
     }
 }

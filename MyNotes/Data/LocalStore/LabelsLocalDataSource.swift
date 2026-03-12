@@ -91,21 +91,26 @@ struct LabelsLocalDataSource {
         }
     }
 
-    func rename(labelID: LabelID, to newName: String, updatedAt: Date) throws {
+    func update(_ label: Label) throws {
         try databaseManager.write { db in
             try db.execute(
                 statement: """
                 UPDATE labels
                 SET name = ?,
+                    color = ?,
+                    icon_name = ?,
                     updated_at = ?,
-                    version = version + 1
+                    version = ?
                 WHERE id = ?
                   AND is_deleted = 0;
                 """,
                 bindings: [
-                    .text(newName),
-                    .text(DatabaseDateCodec.encode(updatedAt)),
-                    .text(labelID.rawValue)
+                    .text(label.name),
+                    label.color.map(SQLiteValue.text) ?? .null,
+                    label.iconName.map(SQLiteValue.text) ?? .null,
+                    .text(DatabaseDateCodec.encode(label.updatedAt)),
+                    .integer(Int64(label.version)),
+                    .text(label.id.rawValue)
                 ]
             )
         }

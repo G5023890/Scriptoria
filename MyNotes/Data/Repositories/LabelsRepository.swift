@@ -6,7 +6,7 @@ protocol LabelsRepository {
     func labels(for noteID: NoteID) async throws -> [Label]
     func noteIDs(for labelID: LabelID) async throws -> [NoteID]
     func create(label: Label) async throws
-    func rename(labelID: LabelID, to newName: String, updatedAt: Date) async throws
+    func update(label: Label) async throws
     func delete(labelID: LabelID, deletedAt: Date) async throws
     func assign(labelIDs: [LabelID], to noteID: NoteID) async throws
     func remove(labelID: LabelID, from noteID: NoteID) async throws
@@ -35,8 +35,8 @@ struct LocalLabelsRepository: LabelsRepository {
         try dataSource.create(label)
     }
 
-    func rename(labelID: LabelID, to newName: String, updatedAt: Date) async throws {
-        try dataSource.rename(labelID: labelID, to: newName, updatedAt: updatedAt)
+    func update(label: Label) async throws {
+        try dataSource.update(label)
     }
 
     func delete(labelID: LabelID, deletedAt: Date) async throws {
@@ -78,10 +78,10 @@ struct SyncAwareLabelsRepository: LabelsRepository {
         try await enqueue(.label, entityID: label.id.rawValue, operation: .create, payloadVersion: label.version)
     }
 
-    func rename(labelID: LabelID, to newName: String, updatedAt: Date) async throws {
-        try await base.rename(labelID: labelID, to: newName, updatedAt: updatedAt)
-        guard let label = try await base.label(id: labelID) else { return }
-        try await enqueue(.label, entityID: labelID.rawValue, operation: .update, payloadVersion: label.version)
+    func update(label: Label) async throws {
+        try await base.update(label: label)
+        guard let updatedLabel = try await base.label(id: label.id) else { return }
+        try await enqueue(.label, entityID: label.id.rawValue, operation: .update, payloadVersion: updatedLabel.version)
     }
 
     func delete(labelID: LabelID, deletedAt: Date) async throws {

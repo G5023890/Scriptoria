@@ -5,7 +5,7 @@ extension AppEnvironment {
     func makeSidebarViewModel(onEmptyTrashRequested: @escaping @MainActor () -> Void) -> SidebarViewModel {
         SidebarViewModel(
             loadSidebarDataUseCase: loadSidebarDataUseCase,
-            renameLabelUseCase: renameLabelUseCase,
+            updateLabelUseCase: updateLabelUseCase,
             deleteLabelUseCase: deleteLabelUseCase,
             onEmptyTrashRequested: onEmptyTrashRequested
         )
