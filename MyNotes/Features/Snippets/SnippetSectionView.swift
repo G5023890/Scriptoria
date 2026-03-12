@@ -26,6 +26,8 @@ struct SnippetSectionView: View {
             } else {
                 VStack(alignment: .leading, spacing: AppSpacing.xSmall) {
                     ForEach(snippets) { item in
+                        let allowsMutation = item.snippet.sourceType == .manual
+
                         SnippetRowView(
                             item: item,
                             showsInlineCode: showsInlineCode,
@@ -37,12 +39,12 @@ struct SnippetSectionView: View {
                                 }
                             },
                             onCopy: { onCopy(item.snippet) },
-                            onEdit: onEdit.map { action in
+                            onEdit: allowsMutation ? onEdit.map { action in
                                 { action(item.snippet) }
-                            },
-                            onRemove: onRemove.map { action in
+                            } : nil,
+                            onRemove: allowsMutation ? onRemove.map { action in
                                 { action(item.snippet) }
-                            }
+                            } : nil
                         )
                     }
                 }

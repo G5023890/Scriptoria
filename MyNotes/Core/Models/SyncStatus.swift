@@ -15,7 +15,7 @@ enum SyncStatus: Sendable, Equatable {
         case .syncing:
             "Syncing"
         case .success(let date):
-            "Synced \(date.formatted(date: .abbreviated, time: .shortened))"
+            "Synced \(date.fixedDateTimeString())"
         case .failed(let message):
             "Failed: \(message)"
         case .offlinePending(let pendingCount):

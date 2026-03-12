@@ -100,7 +100,7 @@ enum SnippetPresentationBuilder {
     static func make(snippet: NoteSnippet) -> SnippetItem {
         let selectedLanguage = selectedLanguage(for: snippet)
         let displayLanguage = SnippetSyntaxLanguage.displayName(for: selectedLanguage)
-        var detailParts: [String] = [displayLanguage]
+        var detailParts: [String] = [snippet.sourceType == .automatic ? "Auto" : "Manual", displayLanguage]
 
         if let snippetDescription = snippet.snippetDescription, !snippetDescription.isEmpty {
             detailParts.append(snippetDescription)

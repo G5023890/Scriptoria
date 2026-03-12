@@ -147,8 +147,7 @@ struct AttachmentsLocalDataSource {
                 bindings: [.text(noteID.rawValue)],
                 map: Self.mapSnippet
             )
-            let existingAutomaticSnippets = existingSnippets.filter { $0.sourceType == .automatic }
-            let existingActiveIDs = Set(existingAutomaticSnippets.map(\.id))
+            let existingActiveIDs = Set(existingSnippets.map(\.id))
             let retainedIDs = Set(activeSnippetIDs)
 
             if activeSnippetIDs.isEmpty {
@@ -186,7 +185,6 @@ struct AttachmentsLocalDataSource {
                         version = version + 1
                     WHERE note_id = ?
                       AND is_deleted = 0
-                      AND source_type = 'automatic'
                       AND id NOT IN (\(placeholders));
                     """,
                     bindings: bindings
@@ -197,7 +195,7 @@ struct AttachmentsLocalDataSource {
                 try upsertSnippet(snippet, using: db)
             }
 
-            let deletedSnippets = existingAutomaticSnippets
+            let deletedSnippets = existingSnippets
                 .filter { !retainedIDs.contains($0.id) }
                 .map { snippet in
                     NoteSnippet(
@@ -220,7 +218,7 @@ struct AttachmentsLocalDataSource {
 
             let upsertedSnippets = snippets.map { snippet -> NoteSnippet in
                 if existingActiveIDs.contains(snippet.id),
-                   let existingSnippet = existingAutomaticSnippets.first(where: { $0.id == snippet.id }) {
+                   let existingSnippet = existingSnippets.first(where: { $0.id == snippet.id }) {
                     return NoteSnippet(
                         id: snippet.id,
                         noteID: snippet.noteID,

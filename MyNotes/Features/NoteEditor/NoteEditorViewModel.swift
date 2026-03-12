@@ -246,7 +246,12 @@ final class NoteEditorViewModel {
                 ) else {
                     return
                 }
-                nextDraft.snippets.append(snippet)
+
+                if let index = nextDraft.snippets.firstIndex(where: { $0.id == snippet.id }) {
+                    nextDraft.snippets[index] = snippet
+                } else {
+                    nextDraft.snippets.append(snippet)
+                }
             }
 
             nextDraft.snippets.sort { $0.updatedAt > $1.updatedAt }

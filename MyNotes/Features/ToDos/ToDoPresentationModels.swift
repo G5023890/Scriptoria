@@ -65,8 +65,6 @@ enum ToDoPresentationBuilder {
 
     static func dueText(for todo: ToDo) -> String? {
         guard let dueDate = todo.dueDate else { return nil }
-        return todo.hasTimeComponent
-            ? dueDate.formatted(date: .abbreviated, time: .shortened)
-            : dueDate.formatted(date: .abbreviated, time: .omitted)
+        return dueDate.fixedDateString()
     }
 }
