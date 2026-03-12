@@ -444,11 +444,31 @@ final class NoteDetailViewModel {
         let todoPresentation = ToDoPresentationBuilder.makeNoteItems(from: sortedTodos)
         toDoItems = todoPresentation.active
         deletedToDoItems = todoPresentation.deleted
-        attachmentItems = snapshot.attachments.map { attachment in
+        attachmentItems = snapshot.attachments.sorted(by: Self.attachmentSort).map { attachment in
             AttachmentPresentationBuilder.make(attachment: attachment, previewURL: nil)
         }
-        snippetItems = snapshot.snippets.map { snippet in
+        snippetItems = snapshot.snippets.sorted(by: Self.snippetSort).map { snippet in
             SnippetPresentationBuilder.make(snippet: snippet)
         }
+    }
+
+    private static func attachmentSort(_ lhs: Attachment, _ rhs: Attachment) -> Bool {
+        if lhs.isArchived != rhs.isArchived {
+            return !lhs.isArchived && rhs.isArchived
+        }
+        if lhs.createdAt != rhs.createdAt {
+            return lhs.createdAt > rhs.createdAt
+        }
+        return lhs.id.rawValue < rhs.id.rawValue
+    }
+
+    private static func snippetSort(_ lhs: NoteSnippet, _ rhs: NoteSnippet) -> Bool {
+        if lhs.isArchived != rhs.isArchived {
+            return !lhs.isArchived && rhs.isArchived
+        }
+        if lhs.updatedAt != rhs.updatedAt {
+            return lhs.updatedAt > rhs.updatedAt
+        }
+        return lhs.id < rhs.id
     }
 }

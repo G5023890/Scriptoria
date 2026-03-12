@@ -58,7 +58,9 @@ final class AppEnvironment {
     let createSnippetUseCase: CreateSnippetUseCase
     let createManualSnippetUseCase: CreateManualSnippetUseCase
     let updateManualSnippetUseCase: UpdateManualSnippetUseCase
+    let archiveSnippetUseCase: ArchiveSnippetUseCase
     let removeSnippetUseCase: RemoveSnippetUseCase
+    let archiveAttachmentUseCase: ArchiveAttachmentUseCase
     let removeAttachmentUseCase: RemoveAttachmentUseCase
     let prepareAttachmentPreviewUseCase: PrepareAttachmentPreviewUseCase
     let openAttachmentUseCase: OpenAttachmentUseCase
@@ -122,7 +124,9 @@ final class AppEnvironment {
         createSnippetUseCase: CreateSnippetUseCase,
         createManualSnippetUseCase: CreateManualSnippetUseCase,
         updateManualSnippetUseCase: UpdateManualSnippetUseCase,
+        archiveSnippetUseCase: ArchiveSnippetUseCase,
         removeSnippetUseCase: RemoveSnippetUseCase,
+        archiveAttachmentUseCase: ArchiveAttachmentUseCase,
         removeAttachmentUseCase: RemoveAttachmentUseCase,
         prepareAttachmentPreviewUseCase: PrepareAttachmentPreviewUseCase,
         openAttachmentUseCase: OpenAttachmentUseCase,
@@ -185,7 +189,9 @@ final class AppEnvironment {
         self.createSnippetUseCase = createSnippetUseCase
         self.createManualSnippetUseCase = createManualSnippetUseCase
         self.updateManualSnippetUseCase = updateManualSnippetUseCase
+        self.archiveSnippetUseCase = archiveSnippetUseCase
         self.removeSnippetUseCase = removeSnippetUseCase
+        self.archiveAttachmentUseCase = archiveAttachmentUseCase
         self.removeAttachmentUseCase = removeAttachmentUseCase
         self.prepareAttachmentPreviewUseCase = prepareAttachmentPreviewUseCase
         self.openAttachmentUseCase = openAttachmentUseCase

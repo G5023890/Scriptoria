@@ -10,6 +10,7 @@ struct CompleteToDoUseCase {
         try await toDoRepository.setCompleted(
             isCompleted,
             for: toDoID,
+            isArchived: isCompleted,
             completedAt: isCompleted ? now : nil,
             updatedAt: now
         )

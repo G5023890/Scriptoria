@@ -50,6 +50,7 @@ struct SnippetDetectionPolicy {
                 sourceType: .automatic,
                 createdAt: createdAt,
                 updatedAt: createdAt,
+                isArchived: false,
                 isDeleted: false,
                 deletedAt: nil,
                 version: 1

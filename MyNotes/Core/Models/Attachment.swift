@@ -16,6 +16,7 @@ struct Attachment: Identifiable, Codable, Hashable, Sendable {
     var pageCount: Int?
     let createdAt: Date
     var updatedAt: Date
+    var isArchived: Bool
     var isDeleted: Bool
     var deletedAt: Date?
     var version: Int

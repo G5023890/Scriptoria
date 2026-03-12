@@ -45,6 +45,7 @@ struct CreateSnippetUseCase {
                 sourceType: detected.sourceType,
                 createdAt: existing.createdAt,
                 updatedAt: now,
+                isArchived: existing.isArchived,
                 isDeleted: false,
                 deletedAt: nil,
                 version: existing.version + 1

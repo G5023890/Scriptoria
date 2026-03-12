@@ -45,7 +45,8 @@ final class NotesListViewModel {
                     note: item.note,
                     labels: item.labels,
                     attachmentCount: item.attachmentCount,
-                    snippetCount: item.snippetCount
+                    snippetCount: item.snippetCount,
+                    openToDoCount: item.openToDoCount
                 )
             }
             sortRows()

@@ -38,8 +38,10 @@ final class NoteEditorViewModel {
     private let listToDosForNoteUseCase: ListToDosForNoteUseCase
     private let createManualSnippetUseCase: CreateManualSnippetUseCase
     private let updateManualSnippetUseCase: UpdateManualSnippetUseCase
+    private let archiveSnippetUseCase: ArchiveSnippetUseCase
     private let removeSnippetUseCase: RemoveSnippetUseCase
     private let importAttachmentUseCase: ImportAttachmentUseCase
+    private let archiveAttachmentUseCase: ArchiveAttachmentUseCase
     private let removeAttachmentUseCase: RemoveAttachmentUseCase
     private let prepareAttachmentPreviewUseCase: PrepareAttachmentPreviewUseCase
     private let openAttachmentUseCase: OpenAttachmentUseCase
@@ -64,8 +66,10 @@ final class NoteEditorViewModel {
         listToDosForNoteUseCase: ListToDosForNoteUseCase,
         createManualSnippetUseCase: CreateManualSnippetUseCase,
         updateManualSnippetUseCase: UpdateManualSnippetUseCase,
+        archiveSnippetUseCase: ArchiveSnippetUseCase,
         removeSnippetUseCase: RemoveSnippetUseCase,
         importAttachmentUseCase: ImportAttachmentUseCase,
+        archiveAttachmentUseCase: ArchiveAttachmentUseCase,
         removeAttachmentUseCase: RemoveAttachmentUseCase,
         prepareAttachmentPreviewUseCase: PrepareAttachmentPreviewUseCase,
         openAttachmentUseCase: OpenAttachmentUseCase,
@@ -88,8 +92,10 @@ final class NoteEditorViewModel {
         self.listToDosForNoteUseCase = listToDosForNoteUseCase
         self.createManualSnippetUseCase = createManualSnippetUseCase
         self.updateManualSnippetUseCase = updateManualSnippetUseCase
+        self.archiveSnippetUseCase = archiveSnippetUseCase
         self.removeSnippetUseCase = removeSnippetUseCase
         self.importAttachmentUseCase = importAttachmentUseCase
+        self.archiveAttachmentUseCase = archiveAttachmentUseCase
         self.removeAttachmentUseCase = removeAttachmentUseCase
         self.prepareAttachmentPreviewUseCase = prepareAttachmentPreviewUseCase
         self.openAttachmentUseCase = openAttachmentUseCase
@@ -254,7 +260,7 @@ final class NoteEditorViewModel {
                 }
             }
 
-            nextDraft.snippets.sort { $0.updatedAt > $1.updatedAt }
+            nextDraft.snippets.sort(by: Self.snippetSort)
             self.draft = nextDraft
             rebuildPresentationState()
             isShowingManualSnippetSheet = false
@@ -281,6 +287,30 @@ final class NoteEditorViewModel {
             await onSave()
         } catch {
             errorMessage = "Snippet remove failed: \(error.localizedDescription)"
+        }
+    }
+
+    func archiveSnippet(_ snippet: NoteSnippet) async {
+        guard var draft else { return }
+
+        do {
+            guard let archivedSnippet = try await archiveSnippetUseCase.execute(snippetID: snippet.id) else {
+                return
+            }
+
+            guard let index = draft.snippets.firstIndex(where: { $0.id == archivedSnippet.id }) else {
+                return
+            }
+
+            draft.snippets[index] = archivedSnippet
+            draft.snippets.sort(by: Self.snippetSort)
+            self.draft = draft
+            rebuildPresentationState()
+            lastSavedText = "Archived snippet"
+            await onSave()
+        } catch {
+            errorMessage = "Snippet archive failed: \(error.localizedDescription)"
+            lastSavedText = "Archive failed"
         }
     }
 
@@ -376,7 +406,7 @@ final class NoteEditorViewModel {
         do {
             let importedAttachments = try await importAttachmentUseCase.execute(sourceURLs: urls, noteID: noteID)
             draft.attachments = (importedAttachments + draft.attachments)
-                .sorted { $0.createdAt > $1.createdAt }
+                .sorted(by: Self.attachmentSort)
             self.draft = draft
             rebuildPresentationState()
             lastSavedText = importedAttachments.count == 1
@@ -386,6 +416,30 @@ final class NoteEditorViewModel {
         } catch {
             errorMessage = "Import failed: \(error.localizedDescription)"
             lastSavedText = "Import failed"
+        }
+    }
+
+    func archiveAttachment(_ attachment: Attachment) async {
+        guard var draft else { return }
+
+        do {
+            guard let archivedAttachment = try await archiveAttachmentUseCase.execute(attachmentID: attachment.id) else {
+                return
+            }
+
+            guard let index = draft.attachments.firstIndex(where: { $0.id == archivedAttachment.id }) else {
+                return
+            }
+
+            draft.attachments[index] = archivedAttachment
+            draft.attachments.sort(by: Self.attachmentSort)
+            self.draft = draft
+            rebuildPresentationState()
+            lastSavedText = "Archived \(attachment.originalFileName)"
+            await onSave()
+        } catch {
+            errorMessage = "Archive failed: \(error.localizedDescription)"
+            lastSavedText = "Archive failed"
         }
     }
 
@@ -472,10 +526,10 @@ final class NoteEditorViewModel {
         let todoPresentation = ToDoPresentationBuilder.makeNoteItems(from: draft.todos.sorted(by: ToDoSorting.note))
         toDoItems = todoPresentation.active
         deletedToDoItems = todoPresentation.deleted
-        attachmentItems = draft.attachments.map { attachment in
+        attachmentItems = draft.attachments.sorted(by: Self.attachmentSort).map { attachment in
             AttachmentPresentationBuilder.make(attachment: attachment, previewURL: nil)
         }
-        snippetItems = draft.snippets.map { snippet in
+        snippetItems = draft.snippets.sorted(by: Self.snippetSort).map { snippet in
             SnippetPresentationBuilder.make(snippet: snippet)
         }
     }
@@ -485,5 +539,25 @@ final class NoteEditorViewModel {
         draft.todos = try await listToDosForNoteUseCase.execute(noteID: noteID)
         self.draft = draft
         rebuildPresentationState()
+    }
+
+    private static func attachmentSort(_ lhs: Attachment, _ rhs: Attachment) -> Bool {
+        if lhs.isArchived != rhs.isArchived {
+            return !lhs.isArchived && rhs.isArchived
+        }
+        if lhs.createdAt != rhs.createdAt {
+            return lhs.createdAt > rhs.createdAt
+        }
+        return lhs.id.rawValue < rhs.id.rawValue
+    }
+
+    private static func snippetSort(_ lhs: NoteSnippet, _ rhs: NoteSnippet) -> Bool {
+        if lhs.isArchived != rhs.isArchived {
+            return !lhs.isArchived && rhs.isArchived
+        }
+        if lhs.updatedAt != rhs.updatedAt {
+            return lhs.updatedAt > rhs.updatedAt
+        }
+        return lhs.id < rhs.id
     }
 }

@@ -10,6 +10,7 @@ struct NoteToDoItem: Identifiable, Sendable {
 
     var id: ToDoID { todo.id }
     var isCompleted: Bool { todo.isCompleted }
+    var isArchived: Bool { todo.isArchived }
     var isDeleted: Bool { todo.isDeleted }
 }
 

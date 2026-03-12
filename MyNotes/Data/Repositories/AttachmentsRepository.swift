@@ -14,6 +14,8 @@ protocol AttachmentsRepository {
     func snippets(for noteID: NoteID, includeCode: Bool) async throws -> [NoteSnippet]
     func add(attachment: Attachment) async throws
     func remove(attachmentID: AttachmentID) async throws
+    func setAttachmentArchived(attachmentID: AttachmentID, isArchived: Bool) async throws -> Attachment?
+    func setSnippetArchived(snippetID: String, isArchived: Bool) async throws -> NoteSnippet?
     func replaceSnippets(_ snippets: [NoteSnippet], for noteID: NoteID) async throws -> SnippetMutationResult
 }
 
@@ -47,6 +49,22 @@ struct LocalAttachmentsRepository: AttachmentsRepository {
             return
         }
         try? fileService.deleteItem(atRelativePath: attachment.relativePath)
+    }
+
+    func setAttachmentArchived(attachmentID: AttachmentID, isArchived: Bool) async throws -> Attachment? {
+        try dataSource.setAttachmentArchived(
+            attachmentID: attachmentID,
+            isArchived: isArchived,
+            updatedAt: dateService.now()
+        )
+    }
+
+    func setSnippetArchived(snippetID: String, isArchived: Bool) async throws -> NoteSnippet? {
+        try dataSource.setSnippetArchived(
+            snippetID: snippetID,
+            isArchived: isArchived,
+            updatedAt: dateService.now()
+        )
     }
 
     func replaceSnippets(_ snippets: [NoteSnippet], for noteID: NoteID) async throws -> SnippetMutationResult {
@@ -84,6 +102,40 @@ struct SyncAwareAttachmentsRepository: AttachmentsRepository {
         try await base.remove(attachmentID: attachmentID)
         let payloadVersion = existingAttachment.map { $0.version + 1 } ?? 1
         try await enqueue(.attachment, entityID: attachmentID.rawValue, operation: .delete, payloadVersion: payloadVersion)
+    }
+
+    func setAttachmentArchived(attachmentID: AttachmentID, isArchived: Bool) async throws -> Attachment? {
+        let existingAttachment = try await base.attachment(id: attachmentID)
+        let updatedAttachment = try await base.setAttachmentArchived(attachmentID: attachmentID, isArchived: isArchived)
+
+        guard existingAttachment?.isArchived != updatedAttachment?.isArchived, let updatedAttachment else {
+            return updatedAttachment
+        }
+
+        try await enqueue(
+            .attachment,
+            entityID: attachmentID.rawValue,
+            operation: .update,
+            payloadVersion: updatedAttachment.version
+        )
+        return updatedAttachment
+    }
+
+    func setSnippetArchived(snippetID: String, isArchived: Bool) async throws -> NoteSnippet? {
+        let existingSnippet = try await base.snippet(id: snippetID)
+        let updatedSnippet = try await base.setSnippetArchived(snippetID: snippetID, isArchived: isArchived)
+
+        guard existingSnippet?.isArchived != updatedSnippet?.isArchived, let updatedSnippet else {
+            return updatedSnippet
+        }
+
+        try await enqueue(
+            .snippet,
+            entityID: snippetID,
+            operation: .update,
+            payloadVersion: updatedSnippet.version
+        )
+        return updatedSnippet
     }
 
     func replaceSnippets(_ snippets: [NoteSnippet], for noteID: NoteID) async throws -> SnippetMutationResult {

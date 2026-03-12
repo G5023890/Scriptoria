@@ -28,6 +28,6 @@ struct UpdateToDoUseCase {
 
     private func shouldPromptForNotification(_ todo: ToDo) -> Bool {
         guard let dueDate = todo.dueDate else { return false }
-        return todo.hasTimeComponent && !todo.isCompleted && !todo.isDeleted && dueDate > dateService.now()
+        return todo.hasTimeComponent && !todo.isCompleted && !todo.isArchived && !todo.isDeleted && dueDate > dateService.now()
     }
 }

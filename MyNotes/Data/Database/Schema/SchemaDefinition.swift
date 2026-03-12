@@ -64,6 +64,31 @@ enum SchemaDefinition {
         page_count INTEGER,
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL,
+        is_archived INTEGER NOT NULL DEFAULT 0,
+        is_deleted INTEGER NOT NULL DEFAULT 0,
+        deleted_at TEXT,
+        version INTEGER NOT NULL DEFAULT 1,
+        FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE
+    );
+    """
+
+    static let attachmentsTableV1 = """
+    CREATE TABLE IF NOT EXISTS attachments (
+        id TEXT PRIMARY KEY,
+        note_id TEXT NOT NULL,
+        file_name TEXT NOT NULL,
+        original_file_name TEXT NOT NULL,
+        mime_type TEXT,
+        category TEXT NOT NULL,
+        relative_path TEXT NOT NULL,
+        file_size INTEGER,
+        checksum TEXT,
+        width INTEGER,
+        height INTEGER,
+        duration REAL,
+        page_count INTEGER,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
         is_deleted INTEGER NOT NULL DEFAULT 0,
         deleted_at TEXT,
         version INTEGER NOT NULL DEFAULT 1,
@@ -84,6 +109,7 @@ enum SchemaDefinition {
         source_type TEXT NOT NULL DEFAULT 'automatic',
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL,
+        is_archived INTEGER NOT NULL DEFAULT 0,
         is_deleted INTEGER NOT NULL DEFAULT 0,
         deleted_at TEXT,
         version INTEGER NOT NULL DEFAULT 1,
@@ -116,6 +142,7 @@ enum SchemaDefinition {
         title TEXT NOT NULL,
         details TEXT,
         is_completed INTEGER NOT NULL DEFAULT 0,
+        is_archived INTEGER NOT NULL DEFAULT 0,
         due_date TEXT,
         has_time_component INTEGER NOT NULL DEFAULT 0,
         snoozed_until TEXT,
@@ -209,7 +236,7 @@ enum SchemaDefinition {
         notesTable,
         labelsTable,
         noteLabelsTable,
-        attachmentsTable,
+        attachmentsTableV1,
         snippetsTableV1
     ]
 

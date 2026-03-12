@@ -113,7 +113,7 @@ struct NoteTasksSectionView: View {
     }
 }
 
-private struct NoteTaskRowView: View {
+struct NoteTaskRowView: View {
     let item: NoteToDoItem
     let isFocused: Bool
     let isExpanded: Bool
@@ -132,6 +132,14 @@ private struct NoteTaskRowView: View {
 
     private var isCollapsed: Bool {
         isExpandable && !isExpanded
+    }
+
+    private var showsArchiveBadge: Bool {
+        item.isArchived && !item.isDeleted
+    }
+
+    private var showsDoneStatus: Bool {
+        item.isCompleted && !item.isDeleted
     }
 
     private var showsActions: Bool {
@@ -180,12 +188,20 @@ private struct NoteTaskRowView: View {
                                 .buttonStyle(.borderless)
                         }
                         if let onDelete {
-                            Button("Remove", role: .destructive, action: onDelete)
-                                .buttonStyle(.borderless)
+                            iconButton(
+                                systemImage: AppIcons.delete,
+                                accessibilityLabel: "Remove",
+                                action: onDelete,
+                                role: .destructive
+                            )
                         }
                         if let onRemove {
-                            Button("Remove", role: .destructive, action: onRemove)
-                                .buttonStyle(.borderless)
+                            iconButton(
+                                systemImage: AppIcons.delete,
+                                accessibilityLabel: "Remove",
+                                action: onRemove,
+                                role: .destructive
+                            )
                         }
                     }
                     .font(AppTypography.caption)
@@ -205,7 +221,7 @@ private struct NoteTaskRowView: View {
                     .strokeBorder(Color.accentColor.opacity(0.45))
             }
         }
-        .opacity(item.isDeleted ? 0.78 : 1)
+        .opacity(rowOpacity)
     }
 
     @ViewBuilder
@@ -224,10 +240,13 @@ private struct NoteTaskRowView: View {
                     .font(AppTypography.bodySemibold)
                     .strikethrough(item.isCompleted)
                     .foregroundStyle(item.isDeleted ? .secondary : .primary)
-                if item.isCompleted {
+                if showsDoneStatus {
                     Text("Done")
                         .font(AppTypography.caption.weight(.semibold))
                         .foregroundStyle(.green)
+                }
+                if showsArchiveBadge {
+                    InfoBadge(text: "Архив")
                 }
             }
             if !item.details.isEmpty {
@@ -245,35 +264,56 @@ private struct NoteTaskRowView: View {
     }
 
     private var collapsedText: some View {
-        collapsedSummary
-            .lineLimit(2)
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(alignment: .firstTextBaseline, spacing: AppSpacing.xSmall) {
+                Text(item.title)
+                    .font(AppTypography.bodySemibold)
+                    .strikethrough(item.isCompleted)
+                    .foregroundStyle(item.isDeleted ? .secondary : .primary)
+                    .lineLimit(1)
+
+                if showsDoneStatus {
+                    Text("Done")
+                        .font(AppTypography.caption.weight(.semibold))
+                        .foregroundStyle(.green)
+                }
+
+                if showsArchiveBadge {
+                    InfoBadge(text: "Архив")
+                }
+            }
+
+            if !collapsedMetadata.isEmpty {
+                Text(collapsedMetadata)
+                    .font(AppTypography.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
+        }
     }
 
-    private var collapsedSummary: Text {
-        var summary = Text(item.title)
-            .font(AppTypography.bodySemibold)
-            .strikethrough(item.isCompleted)
-            .foregroundStyle(item.isDeleted ? .secondary : .primary)
-
-        if item.isCompleted {
-            summary = summary + Text(" Done")
-                .font(AppTypography.caption.weight(.semibold))
-                .foregroundStyle(.green)
-        }
+    private var collapsedMetadata: String {
+        var components: [String] = []
 
         if !item.details.isEmpty {
-            summary = summary + Text(" • \(item.details)")
-                .font(AppTypography.caption)
-                .foregroundStyle(.secondary)
+            components.append(item.details)
         }
 
         if let dueText = item.dueText {
-            summary = summary + Text(" • \(dueText)")
-                .font(AppTypography.caption)
-                .foregroundStyle(.secondary)
+            components.append(dueText)
         }
 
-        return summary
+        return components.joined(separator: " • ")
+    }
+
+    private var rowOpacity: Double {
+        if item.isDeleted {
+            return 0.78
+        }
+        if showsArchiveBadge {
+            return 0.86
+        }
+        return 1
     }
 
     private func categoryChip(systemImage: String) -> some View {
@@ -290,9 +330,10 @@ private struct NoteTaskRowView: View {
     private func iconButton(
         systemImage: String,
         accessibilityLabel: String,
-        action: @escaping () -> Void
+        action: @escaping () -> Void,
+        role: ButtonRole? = nil
     ) -> some View {
-        Button(action: action) {
+        Button(role: role, action: action) {
             Image(systemName: systemImage)
                 .frame(width: 18, height: 18)
         }

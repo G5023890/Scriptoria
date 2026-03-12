@@ -102,12 +102,19 @@ struct NoteDetailView: View {
                                         proxy.scrollTo(toDoID, anchor: .center)
                                     }
                                 },
+                                onArchiveRevealRequest: {
+                                    withAnimation(.easeInOut(duration: 0.2)) {
+                                        proxy.scrollTo(noteArchiveBottomAnchorID, anchor: .bottom)
+                                    }
+                                },
                                 syntaxHighlightService: viewModel.syntaxHighlightService,
                                 onPreviewAttachment: viewModel.previewAttachment,
                                 onOpenAttachment: viewModel.openAttachment,
+                                onArchiveAttachment: nil,
                                 onRemoveAttachment: { _ in },
                                 onCopySnippet: viewModel.copySnippet,
                                 onPreviewSnippet: viewModel.previewSnippet,
+                                onArchiveSnippet: nil,
                                 onEditSnippet: nil,
                                 onRemoveSnippet: nil
                             )

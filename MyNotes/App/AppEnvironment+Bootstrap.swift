@@ -107,6 +107,10 @@ extension AppEnvironment {
             indexNoteForSearchUseCase: indexNoteForSearchUseCase,
             dateService: dateService
         )
+        let archiveSnippetUseCase = ArchiveSnippetUseCase(
+            attachmentsRepository: attachmentsRepository,
+            indexNoteForSearchUseCase: indexNoteForSearchUseCase
+        )
         let removeSnippetUseCase = RemoveSnippetUseCase(
             attachmentsRepository: attachmentsRepository,
             indexNoteForSearchUseCase: indexNoteForSearchUseCase
@@ -118,6 +122,10 @@ extension AppEnvironment {
             indexNoteForSearchUseCase: indexNoteForSearchUseCase
         )
         let removeAttachmentUseCase = RemoveAttachmentUseCase(
+            attachmentsRepository: attachmentsRepository,
+            indexNoteForSearchUseCase: indexNoteForSearchUseCase
+        )
+        let archiveAttachmentUseCase = ArchiveAttachmentUseCase(
             attachmentsRepository: attachmentsRepository,
             indexNoteForSearchUseCase: indexNoteForSearchUseCase
         )
@@ -300,7 +308,9 @@ extension AppEnvironment {
             createSnippetUseCase: createSnippetUseCase,
             createManualSnippetUseCase: createManualSnippetUseCase,
             updateManualSnippetUseCase: updateManualSnippetUseCase,
+            archiveSnippetUseCase: archiveSnippetUseCase,
             removeSnippetUseCase: removeSnippetUseCase,
+            archiveAttachmentUseCase: archiveAttachmentUseCase,
             removeAttachmentUseCase: removeAttachmentUseCase,
             prepareAttachmentPreviewUseCase: prepareAttachmentPreviewUseCase,
             openAttachmentUseCase: openAttachmentUseCase,

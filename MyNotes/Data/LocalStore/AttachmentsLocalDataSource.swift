@@ -27,6 +27,7 @@ struct AttachmentsLocalDataSource {
                     page_count,
                     created_at,
                     updated_at,
+                    is_archived,
                     is_deleted,
                     deleted_at,
                     version
@@ -79,6 +80,43 @@ struct AttachmentsLocalDataSource {
         }
     }
 
+    func setAttachmentArchived(
+        attachmentID: AttachmentID,
+        isArchived: Bool,
+        updatedAt: Date
+    ) throws -> Attachment? {
+        try databaseManager.transaction { db in
+            guard var attachment = try attachment(id: attachmentID, using: db) else {
+                return nil
+            }
+
+            guard attachment.isArchived != isArchived else {
+                return attachment
+            }
+
+            let timestamp = DatabaseDateCodec.encode(updatedAt)
+            try db.execute(
+                statement: """
+                UPDATE attachments
+                SET is_archived = ?,
+                    updated_at = ?,
+                    version = version + 1
+                WHERE id = ?;
+                """,
+                bindings: [
+                    .integer(isArchived ? 1 : 0),
+                    .text(timestamp),
+                    .text(attachmentID.rawValue)
+                ]
+            )
+
+            attachment.isArchived = isArchived
+            attachment.updatedAt = updatedAt
+            attachment.version += 1
+            return attachment
+        }
+    }
+
     func snippets(for noteID: NoteID, includeCode: Bool = true) throws -> [NoteSnippet] {
         let codeColumn = includeCode ? "code" : "'' AS code"
 
@@ -97,6 +135,7 @@ struct AttachmentsLocalDataSource {
                     source_type,
                     created_at,
                     updated_at,
+                    is_archived,
                     is_deleted,
                     deleted_at,
                     version
@@ -114,6 +153,43 @@ struct AttachmentsLocalDataSource {
     func snippet(id: String) throws -> NoteSnippet? {
         try databaseManager.read { db in
             try snippet(id: id, using: db)
+        }
+    }
+
+    func setSnippetArchived(
+        snippetID: String,
+        isArchived: Bool,
+        updatedAt: Date
+    ) throws -> NoteSnippet? {
+        try databaseManager.transaction { db in
+            guard var snippet = try snippet(id: snippetID, using: db) else {
+                return nil
+            }
+
+            guard snippet.isArchived != isArchived else {
+                return snippet
+            }
+
+            let timestamp = DatabaseDateCodec.encode(updatedAt)
+            try db.execute(
+                statement: """
+                UPDATE snippets
+                SET is_archived = ?,
+                    updated_at = ?,
+                    version = version + 1
+                WHERE id = ?;
+                """,
+                bindings: [
+                    .integer(isArchived ? 1 : 0),
+                    .text(timestamp),
+                    .text(snippetID)
+                ]
+            )
+
+            snippet.isArchived = isArchived
+            snippet.updatedAt = updatedAt
+            snippet.version += 1
+            return snippet
         }
     }
 
@@ -137,6 +213,7 @@ struct AttachmentsLocalDataSource {
                     source_type,
                     created_at,
                     updated_at,
+                    is_archived,
                     is_deleted,
                     deleted_at,
                     version
@@ -210,6 +287,7 @@ struct AttachmentsLocalDataSource {
                         sourceType: snippet.sourceType,
                         createdAt: snippet.createdAt,
                         updatedAt: deletedAt,
+                        isArchived: snippet.isArchived,
                         isDeleted: true,
                         deletedAt: deletedAt,
                         version: snippet.version + 1
@@ -231,6 +309,7 @@ struct AttachmentsLocalDataSource {
                         sourceType: snippet.sourceType,
                         createdAt: existingSnippet.createdAt,
                         updatedAt: snippet.updatedAt,
+                        isArchived: snippet.isArchived,
                         isDeleted: false,
                         deletedAt: nil,
                         version: max(existingSnippet.version, snippet.version)
@@ -262,6 +341,7 @@ struct AttachmentsLocalDataSource {
                 page_count,
                 created_at,
                 updated_at,
+                is_archived,
                 is_deleted,
                 deleted_at,
                 version
@@ -288,6 +368,7 @@ struct AttachmentsLocalDataSource {
                 source_type,
                 created_at,
                 updated_at,
+                is_archived,
                 is_deleted,
                 deleted_at,
                 version
@@ -318,10 +399,11 @@ struct AttachmentsLocalDataSource {
                 page_count,
                 created_at,
                 updated_at,
+                is_archived,
                 is_deleted,
                 deleted_at,
                 version
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
                 note_id = excluded.note_id,
                 file_name = excluded.file_name,
@@ -337,6 +419,7 @@ struct AttachmentsLocalDataSource {
                 page_count = excluded.page_count,
                 created_at = excluded.created_at,
                 updated_at = excluded.updated_at,
+                is_archived = excluded.is_archived,
                 is_deleted = excluded.is_deleted,
                 deleted_at = excluded.deleted_at,
                 version = excluded.version;
@@ -357,6 +440,7 @@ struct AttachmentsLocalDataSource {
                 attachment.pageCount.map { .integer(Int64($0)) } ?? .null,
                 .text(DatabaseDateCodec.encode(attachment.createdAt)),
                 .text(DatabaseDateCodec.encode(attachment.updatedAt)),
+                .integer(attachment.isArchived ? 1 : 0),
                 .integer(attachment.isDeleted ? 1 : 0),
                 attachment.deletedAt.map { .text(DatabaseDateCodec.encode($0)) } ?? .null,
                 .integer(Int64(attachment.version))
@@ -379,10 +463,11 @@ struct AttachmentsLocalDataSource {
                 source_type,
                 created_at,
                 updated_at,
+                is_archived,
                 is_deleted,
                 deleted_at,
                 version
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
                 note_id = excluded.note_id,
                 language = excluded.language,
@@ -394,6 +479,7 @@ struct AttachmentsLocalDataSource {
                 source_type = excluded.source_type,
                 created_at = excluded.created_at,
                 updated_at = excluded.updated_at,
+                is_archived = excluded.is_archived,
                 is_deleted = excluded.is_deleted,
                 deleted_at = excluded.deleted_at,
                 version = excluded.version;
@@ -410,6 +496,7 @@ struct AttachmentsLocalDataSource {
                 .text(snippet.sourceType.rawValue),
                 .text(DatabaseDateCodec.encode(snippet.createdAt)),
                 .text(DatabaseDateCodec.encode(snippet.updatedAt)),
+                .integer(snippet.isArchived ? 1 : 0),
                 .integer(snippet.isDeleted ? 1 : 0),
                 snippet.deletedAt.map { .text(DatabaseDateCodec.encode($0)) } ?? .null,
                 .integer(Int64(snippet.version))
@@ -436,6 +523,7 @@ struct AttachmentsLocalDataSource {
             pageCount: try row.int("page_count"),
             createdAt: try DatabaseDateCodec.decode(try row.requiredString("created_at")),
             updatedAt: try DatabaseDateCodec.decode(try row.requiredString("updated_at")),
+            isArchived: try row.bool("is_archived"),
             isDeleted: try row.bool("is_deleted"),
             deletedAt: try deletedAtValue.map { try DatabaseDateCodec.decode($0) },
             version: try row.requiredInt("version")
@@ -457,6 +545,7 @@ struct AttachmentsLocalDataSource {
             sourceType: NoteSnippetSourceType(rawValue: try row.requiredString("source_type")) ?? .automatic,
             createdAt: try DatabaseDateCodec.decode(try row.requiredString("created_at")),
             updatedAt: try DatabaseDateCodec.decode(try row.requiredString("updated_at")),
+            isArchived: try row.bool("is_archived"),
             isDeleted: try row.bool("is_deleted"),
             deletedAt: try deletedAtValue.map { try DatabaseDateCodec.decode($0) },
             version: try row.requiredInt("version")

@@ -9,6 +9,7 @@ struct AttachmentSectionView: View {
     let allowsRemoval: Bool
     let onPreview: (Attachment) -> Void
     let onOpen: (Attachment) -> Void
+    let onArchive: ((Attachment) -> Void)?
     let onRemove: ((Attachment) -> Void)?
     let headerAction: (() -> Void)?
 
@@ -30,6 +31,9 @@ struct AttachmentSectionView: View {
                             allowsRemoval: allowsRemoval,
                             onPreview: { onPreview(item.attachment) },
                             onOpen: { onOpen(item.attachment) },
+                            onArchive: onArchive.map { action in
+                                { action(item.attachment) }
+                            },
                             onRemove: onRemove.map { action in
                                 { action(item.attachment) }
                             }
@@ -41,11 +45,12 @@ struct AttachmentSectionView: View {
     }
 }
 
-private struct AttachmentRowView: View {
+struct AttachmentRowView: View {
     let item: AttachmentItem
     let allowsRemoval: Bool
     let onPreview: () -> Void
     let onOpen: () -> Void
+    let onArchive: (() -> Void)?
     let onRemove: (() -> Void)?
 
     var body: some View {
@@ -67,9 +72,14 @@ private struct AttachmentRowView: View {
                 }
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(item.title)
-                        .font(AppTypography.chip.weight(.semibold))
-                        .lineLimit(1)
+                    HStack(spacing: AppSpacing.xSmall) {
+                        Text(item.title)
+                            .font(AppTypography.chip.weight(.semibold))
+                            .lineLimit(1)
+                        if item.isArchived {
+                            InfoBadge(text: "Архив")
+                        }
+                    }
                     Text(item.subtitle)
                         .font(AppTypography.caption)
                         .foregroundStyle(.secondary)
@@ -84,6 +94,7 @@ private struct AttachmentRowView: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 8)
+        .opacity(item.isArchived ? 0.86 : 1)
         .background(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .fill(AppColors.chipBackground)
@@ -96,9 +107,20 @@ private struct AttachmentRowView: View {
                 .buttonStyle(.borderless)
             Button("Open", action: onOpen)
                 .buttonStyle(.borderless)
+            if let onArchive {
+                Button(action: onArchive) {
+                    Image(systemName: AppIcons.archive)
+                }
+                .buttonStyle(.borderless)
+                .help(item.isArchived ? "Archived" : "Archive")
+                .disabled(item.isArchived)
+            }
             if allowsRemoval, let onRemove {
-                Button("Remove", role: .destructive, action: onRemove)
-                    .buttonStyle(.borderless)
+                Button(role: .destructive, action: onRemove) {
+                    Image(systemName: AppIcons.delete)
+                }
+                .buttonStyle(.borderless)
+                .help("Remove")
             }
         }
         .font(AppTypography.caption)

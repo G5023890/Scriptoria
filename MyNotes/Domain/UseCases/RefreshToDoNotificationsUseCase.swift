@@ -9,7 +9,7 @@ struct RefreshToDoNotificationsUseCase {
             let items = try await toDoRepository.listAllActiveForTasksView()
                 .filter { item in
                     let todo = item.todo
-                    return !todo.isCompleted && todo.hasTimeComponent && todo.dueDate != nil
+                    return !todo.isCompleted && !todo.isArchived && todo.hasTimeComponent && todo.dueDate != nil
                 }
                 .compactMap { item -> ScheduledToDoNotification? in
                     guard let dueDate = item.todo.dueDate else { return nil }

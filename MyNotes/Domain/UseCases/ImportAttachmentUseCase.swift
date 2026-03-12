@@ -26,6 +26,7 @@ struct ImportAttachmentUseCase {
             pageCount: imported.pageCount,
             createdAt: now,
             updatedAt: now,
+            isArchived: false,
             isDeleted: false,
             deletedAt: nil,
             version: 1

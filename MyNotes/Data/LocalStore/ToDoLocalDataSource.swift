@@ -80,6 +80,7 @@ struct ToDoLocalDataSource {
     func setCompleted(
         _ isCompleted: Bool,
         for toDoID: ToDoID,
+        isArchived: Bool,
         completedAt: Date?,
         updatedAt: Date
     ) throws {
@@ -88,6 +89,7 @@ struct ToDoLocalDataSource {
                 statement: """
                 UPDATE todos
                 SET is_completed = ?,
+                    is_archived = ?,
                     completed_at = ?,
                     snoozed_until = NULL,
                     updated_at = ?,
@@ -96,6 +98,7 @@ struct ToDoLocalDataSource {
                 """,
                 bindings: [
                     .integer(isCompleted ? 1 : 0),
+                    .integer(isArchived ? 1 : 0),
                     completedAt.map { .text(DatabaseDateCodec.encode($0)) } ?? .null,
                     .text(DatabaseDateCodec.encode(updatedAt)),
                     .text(toDoID.rawValue)
@@ -137,6 +140,7 @@ struct ToDoLocalDataSource {
                 title,
                 details,
                 is_completed,
+                is_archived,
                 due_date,
                 has_time_component,
                 snoozed_until,
@@ -174,6 +178,7 @@ struct ToDoLocalDataSource {
                     t.title,
                     t.details,
                     t.is_completed,
+                    t.is_archived,
                     t.due_date,
                     t.has_time_component,
                     t.snoozed_until,
@@ -206,6 +211,7 @@ struct ToDoLocalDataSource {
                 INNER JOIN notes n ON n.id = t.note_id
                 WHERE t.is_deleted = 0
                   AND t.is_completed = 0
+                  AND t.is_archived = 0
                   AND n.is_deleted = 0
                   AND n.is_archived = 0;
                 """
@@ -235,6 +241,7 @@ struct ToDoLocalDataSource {
                 title,
                 details,
                 is_completed,
+                is_archived,
                 due_date,
                 has_time_component,
                 snoozed_until,
@@ -263,6 +270,7 @@ struct ToDoLocalDataSource {
                 title,
                 details,
                 is_completed,
+                is_archived,
                 due_date,
                 has_time_component,
                 snoozed_until,
@@ -274,12 +282,13 @@ struct ToDoLocalDataSource {
                 is_deleted,
                 deleted_at,
                 version
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
                 note_id = excluded.note_id,
                 title = excluded.title,
                 details = excluded.details,
                 is_completed = excluded.is_completed,
+                is_archived = excluded.is_archived,
                 due_date = excluded.due_date,
                 has_time_component = excluded.has_time_component,
                 snoozed_until = excluded.snoozed_until,
@@ -298,6 +307,7 @@ struct ToDoLocalDataSource {
                 .text(todo.title),
                 todo.details.nilIfEmpty.map(SQLiteValue.text) ?? .null,
                 .integer(todo.isCompleted ? 1 : 0),
+                .integer(todo.isArchived ? 1 : 0),
                 todo.dueDate.map { .text(DatabaseDateCodec.encode($0)) } ?? .null,
                 .integer(todo.hasTimeComponent ? 1 : 0),
                 todo.snoozedUntil.map { .text(DatabaseDateCodec.encode($0)) } ?? .null,
@@ -325,6 +335,7 @@ struct ToDoLocalDataSource {
             title: try row.requiredString("title"),
             details: try row.string("details") ?? "",
             isCompleted: try row.bool("is_completed"),
+            isArchived: try row.bool("is_archived"),
             dueDate: try dueDateValue.map(DatabaseDateCodec.decode),
             hasTimeComponent: try row.bool("has_time_component"),
             snoozedUntil: try snoozedUntilValue.map(DatabaseDateCodec.decode),

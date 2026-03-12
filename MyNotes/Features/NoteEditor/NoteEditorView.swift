@@ -57,9 +57,19 @@ struct NoteEditorPane: View {
                                     proxy.scrollTo(toDoID, anchor: .center)
                                 }
                             },
+                            onArchiveRevealRequest: {
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    proxy.scrollTo(noteArchiveBottomAnchorID, anchor: .bottom)
+                                }
+                            },
                             syntaxHighlightService: viewModel.syntaxHighlightService,
                             onPreviewAttachment: viewModel.previewAttachment,
                             onOpenAttachment: viewModel.openAttachment,
+                            onArchiveAttachment: { attachment in
+                                Task {
+                                    await viewModel.archiveAttachment(attachment)
+                                }
+                            },
                             onRemoveAttachment: { attachment in
                                 Task {
                                     await viewModel.removeAttachment(attachment)
@@ -67,6 +77,11 @@ struct NoteEditorPane: View {
                             },
                             onCopySnippet: viewModel.copySnippet,
                             onPreviewSnippet: nil,
+                            onArchiveSnippet: { snippet in
+                                Task {
+                                    await viewModel.archiveSnippet(snippet)
+                                }
+                            },
                             onEditSnippet: viewModel.presentEditSnippetSheet,
                             onRemoveSnippet: { snippet in
                                 Task {

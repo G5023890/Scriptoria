@@ -126,6 +126,14 @@ private struct NoteListRowView: View {
                     .font(AppTypography.caption)
                     .foregroundStyle(.secondary)
                 }
+                if row.hasOpenToDos {
+                    HStack(spacing: 4) {
+                        Image(systemName: AppIcons.tasks)
+                        Text("\(row.openToDoCount)")
+                    }
+                    .font(AppTypography.caption)
+                    .foregroundStyle(.secondary)
+                }
                 Spacer()
                 Text(row.updatedDisplayText)
                     .font(AppTypography.caption)

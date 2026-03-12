@@ -18,6 +18,7 @@ extension SampleDataFactory {
             pageCount: 12,
             createdAt: now,
             updatedAt: now,
+            isArchived: false,
             isDeleted: false,
             deletedAt: nil,
             version: 1
@@ -42,6 +43,7 @@ extension SampleDataFactory {
             sourceType: .automatic,
             createdAt: now,
             updatedAt: now,
+            isArchived: false,
             isDeleted: false,
             deletedAt: nil,
             version: 1

@@ -5,7 +5,7 @@
 `Scriptoria` is built for people who collect ideas all day, move between writing and execution, and want one calm place for everything: notes, labels, tasks, code, files, and search.
 
 Current app bundle: `MyNotes`  
-Current release: `0.9.8`  
+Current release: `0.9.9`  
 Repository: [G5023890/Scriptoria](https://github.com/G5023890/Scriptoria)
 
 ## Hero
@@ -44,6 +44,7 @@ Most tools force you to choose one mode of thinking.
 - Create notes instantly from the toolbar or with `Cmd+N`
 - Edit title and body
 - Switch between `Read`, `Edit`, and `Split` modes
+- Keep archived note items grouped in a dedicated bottom `Архив` section
 - Pin important notes
 - Mark favorites
 - Move notes to Trash, restore them, or empty Trash
@@ -64,6 +65,7 @@ Most tools force you to choose one mode of thinking.
 - Edit task text, details, and due dates
 - Support due dates with or without time
 - Mark tasks complete and reopen them
+- Keep completed tasks marked as `Done` while also grouping archived ones inside note detail
 - Reorder tasks inside a note
 - Soft-delete, restore, or permanently remove tasks
 - Review all tasks in global sections: `Overdue`, `Today`, `Upcoming`, `No Date`, `Completed`
@@ -80,6 +82,7 @@ Most tools force you to choose one mode of thinking.
 
 - Import files directly into notes
 - Work with images, PDFs, code files, video, audio, and generic files
+- Archive attachments out of the active note section without deleting them
 - Preview attachments with Quick Look
 - Open attachments in the system
 - See inline thumbnails for local image attachments
@@ -88,7 +91,7 @@ Most tools force you to choose one mode of thinking.
 
 - Detect snippets from note content
 - Create manual snippets
-- Edit and remove manual snippets
+- Edit, archive, and remove manual snippets
 - Preview snippets in a dedicated sheet
 - Copy code to clipboard
 - Highlight syntax with `Highlightr`
@@ -147,13 +150,14 @@ The sidebar currently includes:
 
 Each collection shows a live count so the workspace stays scannable as it grows.
 
-## Release 0.9.8
+## Release 0.9.9
 
-- Full label appearance editing from the sidebar
-- SF Symbols support for label icons
-- Fixed icon color palette for labels
-- Consistent label rendering across sidebar, chips, picker, and Quick Capture
-- Release build and install flow updated for version `0.9.8`
+- New bottom `Архив` section inside note detail for archived tasks, snippets, and attachments
+- Archive rows are merged into one mixed list and hidden from active note sections
+- Completed tasks keep their `Done` status and also participate in archive grouping
+- Snippets and attachments now support direct archive actions from note detail
+- Archive section opens collapsed by default and scrolls into view when expanded
+- Release build and install flow updated for version `0.9.9`
 
 ## Roadmap
 
@@ -171,7 +175,7 @@ Already present in the codebase:
 - conflict-resolution scaffolding
 - sync status reporting
 
-Current status: CloudKit transport is scaffolded but still disabled by default, so `0.9.8` behaves as a local-first app.
+Current status: CloudKit transport is scaffolded but still disabled by default, so `0.9.9` behaves as a local-first app.
 
 ## Technology
 

@@ -6,6 +6,7 @@ struct ToDo: Identifiable, Codable, Hashable, Sendable {
     var title: String
     var details: String
     var isCompleted: Bool
+    var isArchived: Bool
     var dueDate: Date?
     var hasTimeComponent: Bool
     var snoozedUntil: Date?
@@ -87,6 +88,10 @@ enum ToDoSorting {
                 return lhs.updatedAt > rhs.updatedAt
             }
             return lhs.sortOrder < rhs.sortOrder
+        }
+
+        if lhs.isArchived != rhs.isArchived {
+            return !lhs.isArchived && rhs.isArchived
         }
 
         if lhs.isCompleted != rhs.isCompleted {

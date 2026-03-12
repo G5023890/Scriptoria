@@ -5,6 +5,7 @@ struct NoteListItem: Sendable {
     let labels: [Label]
     let attachmentCount: Int
     let snippetCount: Int
+    let openToDoCount: Int
 }
 
 struct ListNoteSnapshotsUseCase {
@@ -29,13 +30,18 @@ struct ListNoteSnapshotsUseCase {
                 let labels = try await labelsRepository.labels(for: note.id)
                 let attachmentCount = try await attachmentsRepository.attachments(for: note.id).count
                 let snippetCount = try await attachmentsRepository.snippets(for: note.id, includeCode: false).count
+                let openToDoCount = try await toDoRepository
+                    .listForNote(noteID: note.id, includeDeleted: true)
+                    .filter { !$0.isCompleted && !$0.isArchived && !$0.isDeleted }
+                    .count
 
                 items.append(
                     NoteListItem(
                         note: note,
                         labels: labels,
                         attachmentCount: attachmentCount,
-                        snippetCount: snippetCount
+                        snippetCount: snippetCount,
+                        openToDoCount: openToDoCount
                     )
                 )
             } catch {

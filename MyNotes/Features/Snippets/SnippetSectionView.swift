@@ -8,6 +8,7 @@ struct SnippetSectionView: View {
     let showsInlineCode: Bool
     let onCopy: (NoteSnippet) -> Void
     let onPreviewSnippet: ((NoteSnippet) -> Void)?
+    let onArchive: ((NoteSnippet) -> Void)?
     let onEdit: ((NoteSnippet) -> Void)?
     let onRemove: ((NoteSnippet) -> Void)?
 
@@ -39,6 +40,9 @@ struct SnippetSectionView: View {
                                 }
                             },
                             onCopy: { onCopy(item.snippet) },
+                            onArchive: onArchive.map { action in
+                                { action(item.snippet) }
+                            },
                             onEdit: allowsMutation ? onEdit.map { action in
                                 { action(item.snippet) }
                             } : nil,
@@ -62,11 +66,12 @@ struct SnippetSectionView: View {
     }
 }
 
-private struct SnippetRowView: View {
+struct SnippetRowView: View {
     let item: SnippetItem
     let showsInlineCode: Bool
     let onPreview: () -> Void
     let onCopy: () -> Void
+    let onArchive: (() -> Void)?
     let onEdit: (() -> Void)?
     let onRemove: (() -> Void)?
 
@@ -76,9 +81,14 @@ private struct SnippetRowView: View {
                 categoryChip(systemImage: "chevron.left.forwardslash.chevron.right")
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(item.title)
-                        .font(AppTypography.chip.weight(.semibold))
-                        .lineLimit(1)
+                    HStack(spacing: AppSpacing.xSmall) {
+                        Text(item.title)
+                            .font(AppTypography.chip.weight(.semibold))
+                            .lineLimit(1)
+                        if item.isArchived {
+                            InfoBadge(text: "Архив")
+                        }
+                    }
                     Text(item.subtitle)
                         .font(AppTypography.caption)
                         .foregroundStyle(.secondary)
@@ -99,9 +109,21 @@ private struct SnippetRowView: View {
                     Button("Copy", action: onCopy)
                         .buttonStyle(.borderless)
 
+                    if let onArchive {
+                        Button(action: onArchive) {
+                            Image(systemName: AppIcons.archive)
+                        }
+                        .buttonStyle(.borderless)
+                        .help(item.isArchived ? "Archived" : "Archive")
+                        .disabled(item.isArchived)
+                    }
+
                     if let onRemove {
-                        Button("Remove", role: .destructive, action: onRemove)
-                            .buttonStyle(.borderless)
+                        Button(role: .destructive, action: onRemove) {
+                            Image(systemName: AppIcons.delete)
+                        }
+                        .buttonStyle(.borderless)
+                        .help("Remove")
                     }
                 }
                 .font(AppTypography.caption)
@@ -121,6 +143,7 @@ private struct SnippetRowView: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 8)
+        .opacity(item.isArchived ? 0.86 : 1)
         .background(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .fill(AppColors.chipBackground)
@@ -139,7 +162,7 @@ private struct SnippetRowView: View {
     }
 }
 
-private struct SnippetInlinePreviewSheet: View {
+struct SnippetInlinePreviewSheet: View {
     let item: SnippetItem
     let syntaxHighlightService: any SyntaxHighlightService
     let onCopy: () -> Void

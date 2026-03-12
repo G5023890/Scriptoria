@@ -16,6 +16,7 @@ struct CreateToDoUseCase {
             title: title,
             details: draft.details.trimmingCharacters(in: .whitespacesAndNewlines),
             isCompleted: false,
+            isArchived: false,
             dueDate: draft.dueDate,
             hasTimeComponent: draft.dueDate == nil ? false : draft.hasTimeComponent,
             snoozedUntil: nil,
@@ -36,6 +37,6 @@ struct CreateToDoUseCase {
 
     private func shouldPromptForNotification(_ todo: ToDo) -> Bool {
         guard let dueDate = todo.dueDate else { return false }
-        return todo.hasTimeComponent && !todo.isCompleted && !todo.isDeleted && dueDate > dateService.now()
+        return todo.hasTimeComponent && !todo.isCompleted && !todo.isArchived && !todo.isDeleted && dueDate > dateService.now()
     }
 }

@@ -7,6 +7,7 @@ struct AttachmentItem: Identifiable, Equatable {
     let iconName: String
     let previewURL: URL?
     let showsInlinePreview: Bool
+    let isArchived: Bool
 
     var id: AttachmentID { attachment.id }
 }
@@ -28,7 +29,8 @@ enum AttachmentPresentationBuilder {
             subtitle: subtitle(for: attachment),
             iconName: iconName(for: attachment.category),
             previewURL: previewURL,
-            showsInlinePreview: attachment.category == .image && previewURL != nil
+            showsInlinePreview: attachment.category == .image && previewURL != nil,
+            isArchived: attachment.isArchived
         )
     }
 
@@ -91,6 +93,7 @@ struct SnippetItem: Identifiable, Equatable {
     let code: String
     let selectedLanguage: String
     let displayLanguage: String
+    let isArchived: Bool
 
     var id: String { snippet.id }
 }
@@ -116,7 +119,8 @@ enum SnippetPresentationBuilder {
             subtitle: detailParts.joined(separator: " • "),
             code: snippet.code,
             selectedLanguage: selectedLanguage,
-            displayLanguage: displayLanguage
+            displayLanguage: displayLanguage,
+            isArchived: snippet.isArchived
         )
     }
 

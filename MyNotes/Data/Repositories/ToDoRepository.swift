@@ -7,7 +7,7 @@ protocol ToDoRepository {
     func softDelete(toDoID: ToDoID, deletedAt: Date) async throws
     func remove(toDoID: ToDoID) async throws
     func restore(toDoID: ToDoID, restoredAt: Date) async throws
-    func setCompleted(_ isCompleted: Bool, for toDoID: ToDoID, completedAt: Date?, updatedAt: Date) async throws
+    func setCompleted(_ isCompleted: Bool, for toDoID: ToDoID, isArchived: Bool, completedAt: Date?, updatedAt: Date) async throws
     func reorder(noteID: NoteID, orderedToDoIDs: [ToDoID], updatedAt: Date) async throws
     func listForNote(noteID: NoteID, includeDeleted: Bool) async throws -> [ToDo]
     func listAllActiveForTasksView() async throws -> [ToDoTaskListItem]
@@ -42,8 +42,14 @@ struct LocalToDoRepository: ToDoRepository {
         try dataSource.restore(toDoID: toDoID, restoredAt: restoredAt)
     }
 
-    func setCompleted(_ isCompleted: Bool, for toDoID: ToDoID, completedAt: Date?, updatedAt: Date) async throws {
-        try dataSource.setCompleted(isCompleted, for: toDoID, completedAt: completedAt, updatedAt: updatedAt)
+    func setCompleted(_ isCompleted: Bool, for toDoID: ToDoID, isArchived: Bool, completedAt: Date?, updatedAt: Date) async throws {
+        try dataSource.setCompleted(
+            isCompleted,
+            for: toDoID,
+            isArchived: isArchived,
+            completedAt: completedAt,
+            updatedAt: updatedAt
+        )
     }
 
     func reorder(noteID: NoteID, orderedToDoIDs: [ToDoID], updatedAt: Date) async throws {

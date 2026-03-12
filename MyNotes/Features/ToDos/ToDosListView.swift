@@ -59,6 +59,14 @@ private struct ToDoListRowView: View {
                     .font(AppTypography.bodySemibold)
                     .strikethrough(row.todo.isCompleted)
                     .lineLimit(1)
+                if row.todo.isCompleted {
+                    Text("Done")
+                        .font(AppTypography.caption.weight(.semibold))
+                        .foregroundStyle(.green)
+                }
+                if row.todo.isArchived {
+                    InfoBadge(text: "Архив")
+                }
                 Spacer()
                 if let dueText = row.dueText {
                     Text(dueText)
@@ -73,5 +81,6 @@ private struct ToDoListRowView: View {
                 .lineLimit(1)
         }
         .padding(.vertical, 4)
+        .opacity(row.todo.isArchived ? 0.86 : 1)
     }
 }

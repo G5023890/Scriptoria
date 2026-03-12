@@ -17,6 +17,7 @@ struct NoteSnippet: Identifiable, Codable, Hashable, Sendable {
     var sourceType: NoteSnippetSourceType
     let createdAt: Date
     var updatedAt: Date
+    var isArchived: Bool
     var isDeleted: Bool
     var deletedAt: Date?
     var version: Int

@@ -82,6 +82,7 @@ struct SyncMapper {
         record["pageCount"] = attachment.pageCount.map(NSNumber.init(value:)) as CKRecordValue?
         record["createdAt"] = attachment.createdAt as NSDate
         record["updatedAt"] = attachment.updatedAt as NSDate
+        record["isArchived"] = NSNumber(value: attachment.isArchived)
         record["isDeleted"] = NSNumber(value: attachment.isDeleted)
         record["deletedAt"] = attachment.deletedAt as NSDate?
         record["version"] = NSNumber(value: attachment.version)
@@ -101,6 +102,7 @@ struct SyncMapper {
         record["sourceType"] = snippet.sourceType.rawValue as CKRecordValue
         record["createdAt"] = snippet.createdAt as NSDate
         record["updatedAt"] = snippet.updatedAt as NSDate
+        record["isArchived"] = NSNumber(value: snippet.isArchived)
         record["isDeleted"] = NSNumber(value: snippet.isDeleted)
         record["deletedAt"] = snippet.deletedAt as NSDate?
         record["version"] = NSNumber(value: snippet.version)
@@ -219,6 +221,7 @@ struct SyncMapper {
                 pageCount: (record["pageCount"] as? NSNumber)?.intValue,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                isArchived: (record["isArchived"] as? NSNumber)?.boolValue ?? false,
                 isDeleted: (record["isDeleted"] as? NSNumber)?.boolValue ?? false,
                 deletedAt: record["deletedAt"] as? Date,
                 version: versionNumber.intValue
@@ -252,6 +255,7 @@ struct SyncMapper {
                 sourceType: NoteSnippetSourceType(rawValue: (record["sourceType"] as? String) ?? NoteSnippetSourceType.automatic.rawValue) ?? .automatic,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                isArchived: (record["isArchived"] as? NSNumber)?.boolValue ?? false,
                 isDeleted: (record["isDeleted"] as? NSNumber)?.boolValue ?? false,
                 deletedAt: record["deletedAt"] as? Date,
                 version: versionNumber.intValue

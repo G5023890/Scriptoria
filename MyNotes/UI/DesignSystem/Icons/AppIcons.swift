@@ -3,6 +3,7 @@ import Foundation
 enum AppIcons {
     static let pin = "pin"
     static let favorite = "star"
+    static let archive = "archivebox"
     static let attachment = "paperclip.circle"
     static let code = "curlybraces"
     static let tasks = "checklist.checked"

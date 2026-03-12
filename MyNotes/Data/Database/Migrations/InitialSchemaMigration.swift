@@ -12,7 +12,9 @@ enum DatabaseMigrations {
         SnippetMetadataMigration.migration,
         ToDoSchemaMigration.migration,
         ToDoNotificationStateMigration.migration,
-        SearchTasksMigration.migration
+        SearchTasksMigration.migration,
+        ArtifactArchiveMigration.migration,
+        ToDoArchiveMigration.migration
     ]
 }
 
@@ -132,6 +134,25 @@ enum SearchTasksMigration {
             """,
             "DROP TABLE notes_fts;",
             "ALTER TABLE notes_fts_new RENAME TO notes_fts;"
+        ]
+    )
+}
+
+enum ArtifactArchiveMigration {
+    static let migration = DatabaseMigration(
+        version: 7,
+        statements: [
+            "ALTER TABLE attachments ADD COLUMN is_archived INTEGER NOT NULL DEFAULT 0;",
+            "ALTER TABLE snippets ADD COLUMN is_archived INTEGER NOT NULL DEFAULT 0;"
+        ]
+    )
+}
+
+enum ToDoArchiveMigration {
+    static let migration = DatabaseMigration(
+        version: 8,
+        statements: [
+            "ALTER TABLE todos ADD COLUMN is_archived INTEGER NOT NULL DEFAULT 0;"
         ]
     )
 }

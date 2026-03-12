@@ -44,6 +44,7 @@ struct CreateManualSnippetUseCase {
             sourceType: .manual,
             createdAt: now,
             updatedAt: now,
+            isArchived: false,
             isDeleted: false,
             deletedAt: nil,
             version: 1
