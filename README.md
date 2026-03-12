@@ -1,114 +1,95 @@
 # Scriptoria
 
-`Scriptoria` is a native macOS notes app focused on fast knowledge capture, structured note management, code snippets, files, and task tracking inside one workspace.
+`Scriptoria` is a native macOS knowledge workspace for notes, labels, tasks, code snippets, attachments, and fast capture.
+
+It is built for people who collect ideas all day long and do not want to split their work between a notes app, a snippets manager, a task list, and a scratchpad.
 
 Current app bundle: `MyNotes`  
 Current release: `0.9.8`
 
-## Overview
+GitHub: [G5023890/Scriptoria](https://github.com/G5023890/Scriptoria)
 
-The app is built as a three-column macOS experience with:
+## Why Scriptoria
 
-- a sidebar for smart collections and labels
-- a central list for notes or global tasks
-- a detail area with read, edit, and split modes
+Most note apps are good at one thing and awkward at the rest. `Scriptoria` is designed to keep the whole flow in one native macOS workspace:
 
-`Scriptoria` is designed for mixed-content notes: plain text, markdown-like content, snippets, attachments, labels, favorites, pins, and tasks all live together in one note model.
+- capture ideas quickly
+- turn notes into actionable tasks
+- keep files and code snippets next to the note they belong to
+- organize everything with visual labels
+- find anything later with structured search
 
-## Main Functionality
+The result is a workspace that feels closer to a personal knowledge cockpit than a plain text editor.
 
-### Notes
+## What You Can Do
 
-- Create notes instantly from the main window toolbar or `Cmd+N`
+### Write and organize notes
+
+- Create notes instantly from the main window or with `Cmd+N`
 - Edit note title and body
 - Switch between `Read`, `Edit`, and `Split` modes
-- Render note content in reading mode
-- Keep autosaved drafts in the editor flow
-- Delete notes to Trash and restore them later
-- Empty Trash from the sidebar or command menu
 - Pin important notes
 - Mark notes as favorites
+- Move notes to Trash, restore them, or empty Trash when you are done
 
-### Labels
+### Use labels as visual structure
 
-- Create labels directly while assigning labels to a note
-- Assign and remove labels from notes
+- Create labels directly while working with a note
+- Assign multiple labels to the same note
 - Browse notes by label from the sidebar
-- Edit label name from the sidebar
-- Customize label icon with SF Symbols
-- Customize label icon color using a fixed palette
-- Display label styling consistently in sidebar rows, chips, pickers, and Quick Capture
-- Keep legacy label icons visible even if they are outside the current picker whitelist
+- Edit label names from the sidebar
+- Customize label icons with SF Symbols
+- Customize label icon colors with a fixed palette
+- See the same label styling in the sidebar, chips, pickers, and Quick Capture
 
-### Tasks
+### Turn notes into task hubs
 
 - Add tasks inside a note
-- Edit task title, details, and due date
-- Support due dates with or without time component
-- Mark tasks complete and reopen them
-- Reorder tasks inside a note
-- Soft-delete tasks and restore or permanently remove them later
-- Show tasks inline inside the note detail screen
-- Show a global Tasks collection grouped as:
+- Edit task text, details, and due dates
+- Support due dates with or without time
+- Mark tasks as completed or reopen them
+- Reorder tasks inside the note
+- Soft-delete tasks, restore them, or remove them permanently
+- Review all tasks globally in dedicated sections:
   - Overdue
   - Today
   - Upcoming
   - No Date
   - Completed
 
-### Task Notifications
+### Get reminders that stay connected to the note
 
-- Schedule local reminders for tasks with due dates
-- Support notification actions:
-  - Complete
-  - Snooze 1 Hour
-  - Tomorrow Morning
-- Rebuild notification schedule on app bootstrap
-- Reveal the related note and task when opening from a notification
+- Schedule local notifications for tasks with due dates
+- Use notification actions to:
+  - complete a task
+  - snooze for one hour
+  - snooze until tomorrow morning
+- Jump from a notification back into the exact note and task
 
-### Attachments
+### Keep files and media attached to context
 
-- Import attachments into a note
-- Support attachment categories:
-  - image
-  - pdf
-  - code
-  - video
-  - audio
-  - generic file
-- Show inline thumbnails for local image attachments
+- Import files directly into a note
+- Work with images, PDFs, code files, video, audio, and generic files
 - Preview attachments with Quick Look
 - Open attachments in the system
-- Remove attachments from a note
-- Browse notes through the `Attachments` smart collection
+- See inline thumbnails for local image attachments
+- Browse notes through dedicated `Attachments` views
 
-### Code Snippets
+### Save and preview code snippets
 
-- Detect and extract snippets from note content
+- Detect snippets from note content
 - Create manual snippets
 - Edit and remove manual snippets
 - Preview snippets in a dedicated sheet
-- Copy snippet code to clipboard
+- Copy code to clipboard in one click
 - Highlight syntax with `Highlightr`
-- Switch preview syntax language manually
-- Browse notes through the `Snippets` smart collection
+- Switch preview language manually when needed
 
-### Search
+### Search like a power user
 
-- Search by free text across:
-  - title
-  - note content
-  - labels
-  - snippets
-  - attachment names
-- Use debounced search updates
-- Filter with quick filters in the UI:
-  - pinned
-  - favorite
-  - tasks
-  - attachments
-  - code
-- Use query syntax in the search field, including:
+- Search across note titles, content, labels, snippets, and attachment names
+- Use quick filters for pinned, favorite, tasks, attachments, and code
+- Search with structured tokens such as:
   - `is:pinned`
   - `is:favorite`
   - `has:tasks`
@@ -132,16 +113,24 @@ The app is built as a three-column macOS experience with:
   - `in:labels`
   - `in:code`
   - `in:attachments`
-- Support quoted phrases in search queries
+- Use quoted phrases for more precise results
 
-### Quick Capture
+### Capture without breaking flow
 
 - Open a dedicated Quick Capture window
-- Create a new note without leaving the current workflow
-- Set title and body
-- Assign labels during capture
-- Mark the note as pinned or favorite immediately
+- Create a note from anywhere in your workflow
+- Add title, body, labels, pin state, and favorite state immediately
 - Save and jump straight into the created note
+
+## Product Experience
+
+`Scriptoria` is built as a native three-column macOS app:
+
+- sidebar for smart collections and labels
+- main list for notes or global tasks
+- detail area for reading, editing, and split view
+
+The app is local-first, fast to navigate, and designed to feel at home on modern macOS rather than like a ported web interface.
 
 ## Smart Collections
 
@@ -156,30 +145,23 @@ The sidebar currently includes:
 - `Snippets`
 - `Trash`
 
-Each collection shows a live count in the sidebar.
+Each collection shows a live count, so the workspace stays scannable even when the dataset grows.
 
-## Data And Sync
+## Release 0.9.8 Highlights
 
-- Local storage is backed by SQLite
-- Search uses a local indexed document model
-- Labels, notes, attachments, snippets, and task changes are versioned
-- A sync queue and CloudKit mapping layer are already present in the codebase
-- Sync status is tracked in app state
+- Full label appearance editing from the sidebar
+- SF Symbols support for label icons
+- Fixed icon color palette for labels
+- Consistent label rendering across sidebar, chips, picker, and Quick Capture
+- Release build and install flow updated for version `0.9.8`
 
-### Current Sync Status
+## Current Sync Status
 
-CloudKit transport is scaffolded but not yet enabled by default. The app currently boots with sync configuration disabled, so local-first behavior is the active mode in release `0.9.8`.
+The app already includes a sync queue, CloudKit record mapping, conflict-resolution scaffolding, and sync status reporting.
 
-## User Experience Details
+At the moment, CloudKit transport is still scaffolded and disabled by default, so release `0.9.8` behaves as a local-first app.
 
-- Native macOS windowing with a main workspace window and a dedicated Quick Capture window
-- Keyboard shortcut for new notes: `Cmd+N`
-- Command menu action for emptying trash: `Shift+Cmd+Delete`
-- Context menus in the sidebar for label editing and deletion
-- Inline badges and chips for metadata visibility
-- Focus-and-reveal flows from tasks and notifications back into their notes
-
-## Technology Stack
+## Technology
 
 - Swift
 - SwiftUI
@@ -188,25 +170,25 @@ CloudKit transport is scaffolded but not yet enabled by default. The app current
 - CloudKit scaffolding
 - UserNotifications
 - Quick Look
-- `Highlightr` for syntax highlighting
+- `Highlightr`
 
 ## Project Structure
 
 - `MyNotes/App` — app bootstrap, routing, scenes, coordinator
-- `MyNotes/Features` — UI by product area
+- `MyNotes/Features` — user-facing features by domain
 - `MyNotes/Domain` — use cases and policies
-- `MyNotes/Data` — repositories, local storage, database, sync queue, sync mapping
-- `MyNotes/Core` — models, types, services, utilities
-- `MyNotes/UI` — design system primitives and shared UI pieces
-- `scripts/build_and_install_app.sh` — production build, signing, packaging, and install flow
+- `MyNotes/Data` — repositories, database, local storage, sync queue, and sync mapping
+- `MyNotes/Core` — models, services, types, and utilities
+- `MyNotes/UI` — design system primitives and shared components
+- `scripts/build_and_install_app.sh` — release build, signing, bundling, and install flow
 
-## Build And Install
+## Build and Install
 
 Requirements:
 
 - macOS 26 beta or newer
 - Xcode toolchain with Swift Package Manager support
-- Optional Apple Development signing identity for stable signed installs
+- optional Apple Development signing identity for stable signed installs
 
 Debug build:
 
@@ -229,15 +211,3 @@ The install script:
 - applies the app icon from `assets/AppIcon.icns`
 - signs with an Apple Development identity when available
 - installs the app into `/Applications/MyNotes.app`
-
-## Release 0.9.8 Highlights
-
-- Full label appearance editing from the sidebar
-- SF Symbols support for label icons
-- Fixed color palette for label icon styling
-- Consistent label rendering in sidebar, chips, label picker, and Quick Capture
-- Release build/version flow updated to `0.9.8`
-
-## Repository
-
-GitHub: [G5023890/Scriptoria](https://github.com/G5023890/Scriptoria)
