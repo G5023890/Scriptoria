@@ -1,126 +1,140 @@
 # Scriptoria
 
-`Scriptoria` is a native macOS knowledge workspace for notes, labels, tasks, code snippets, attachments, and fast capture.
+**A native macOS workspace for notes, tasks, snippets, attachments, and fast capture.**
 
-It is built for people who collect ideas all day long and do not want to split their work between a notes app, a snippets manager, a task list, and a scratchpad.
+`Scriptoria` is built for people who collect ideas all day, move between writing and execution, and want one calm place for everything: notes, labels, tasks, code, files, and search.
 
 Current app bundle: `MyNotes`  
-Current release: `0.9.8`
+Current release: `0.9.8`  
+Repository: [G5023890/Scriptoria](https://github.com/G5023890/Scriptoria)
 
-GitHub: [G5023890/Scriptoria](https://github.com/G5023890/Scriptoria)
+## Hero
 
-## Why Scriptoria
+Most tools force you to choose one mode of thinking.
 
-Most note apps are good at one thing and awkward at the rest. `Scriptoria` is designed to keep the whole flow in one native macOS workspace:
+- notes app for writing
+- task app for planning
+- snippets app for code
+- file browser for assets
+- search tool for finding things again
 
-- capture ideas quickly
-- turn notes into actionable tasks
-- keep files and code snippets next to the note they belong to
-- organize everything with visual labels
-- find anything later with structured search
+`Scriptoria` combines those workflows into one native macOS workspace. You can capture an idea, turn part of it into a task, attach files, save code snippets, label it visually, and still find it later with structured search.
 
-The result is a workspace that feels closer to a personal knowledge cockpit than a plain text editor.
+## Why It Feels Different
+
+- Native macOS app, not a wrapped web UI
+- Three-column workspace optimized for scanning and editing
+- Local-first behavior for fast interaction
+- Notes, labels, tasks, snippets, and files stay connected
+- Quick Capture lets you save ideas without breaking flow
+- Search is built for both casual recall and power-user filtering
+
+## Who It's For
+
+- Developers who keep research notes, snippets, todos, and files together
+- Founders and operators who need one working inbox for ideas and execution
+- Writers and researchers who want labels, search, and structured note history
+- Power users who prefer native macOS apps over browser-heavy workflows
+- Anyone building a personal knowledge base that needs to stay actionable
 
 ## What You Can Do
 
-### Write and organize notes
+### Notes
 
-- Create notes instantly from the main window or with `Cmd+N`
-- Edit note title and body
+- Create notes instantly from the toolbar or with `Cmd+N`
+- Edit title and body
 - Switch between `Read`, `Edit`, and `Split` modes
 - Pin important notes
-- Mark notes as favorites
-- Move notes to Trash, restore them, or empty Trash when you are done
+- Mark favorites
+- Move notes to Trash, restore them, or empty Trash
 
-### Use labels as visual structure
+### Labels
 
-- Create labels directly while working with a note
+- Create labels while working with a note
 - Assign multiple labels to the same note
 - Browse notes by label from the sidebar
 - Edit label names from the sidebar
 - Customize label icons with SF Symbols
 - Customize label icon colors with a fixed palette
-- See the same label styling in the sidebar, chips, pickers, and Quick Capture
+- See the same label styling in sidebar rows, chips, pickers, and Quick Capture
 
-### Turn notes into task hubs
+### Tasks
 
-- Add tasks inside a note
+- Add tasks inside notes
 - Edit task text, details, and due dates
 - Support due dates with or without time
-- Mark tasks as completed or reopen them
-- Reorder tasks inside the note
-- Soft-delete tasks, restore them, or remove them permanently
-- Review all tasks globally in dedicated sections:
-  - Overdue
-  - Today
-  - Upcoming
-  - No Date
-  - Completed
+- Mark tasks complete and reopen them
+- Reorder tasks inside a note
+- Soft-delete, restore, or permanently remove tasks
+- Review all tasks in global sections: `Overdue`, `Today`, `Upcoming`, `No Date`, `Completed`
 
-### Get reminders that stay connected to the note
+### Notifications
 
-- Schedule local notifications for tasks with due dates
-- Use notification actions to:
-  - complete a task
-  - snooze for one hour
-  - snooze until tomorrow morning
+- Schedule local reminders for tasks with due dates
+- Complete tasks directly from a notification
+- Snooze for one hour
+- Snooze until tomorrow morning
 - Jump from a notification back into the exact note and task
 
-### Keep files and media attached to context
+### Attachments
 
-- Import files directly into a note
+- Import files directly into notes
 - Work with images, PDFs, code files, video, audio, and generic files
 - Preview attachments with Quick Look
 - Open attachments in the system
 - See inline thumbnails for local image attachments
-- Browse notes through dedicated `Attachments` views
 
-### Save and preview code snippets
+### Code Snippets
 
 - Detect snippets from note content
 - Create manual snippets
 - Edit and remove manual snippets
 - Preview snippets in a dedicated sheet
-- Copy code to clipboard in one click
+- Copy code to clipboard
 - Highlight syntax with `Highlightr`
 - Switch preview language manually when needed
 
-### Search like a power user
+### Search
 
-- Search across note titles, content, labels, snippets, and attachment names
-- Use quick filters for pinned, favorite, tasks, attachments, and code
-- Search with structured tokens such as:
-  - `is:pinned`
-  - `is:favorite`
-  - `has:tasks`
-  - `has:attachments`
-  - `has:snippets`
-  - `label:<name>`
-  - `type:note`
-  - `type:code`
-  - `type:image`
-  - `type:mixed`
-  - `type:file`
-  - `updated:today`
-  - `updated:week`
-  - `language:<name>`
-  - `kind:note`
-  - `kind:label`
-  - `kind:snippet`
-  - `kind:attachment`
-  - `in:title`
-  - `in:content`
-  - `in:labels`
-  - `in:code`
-  - `in:attachments`
+- Search across titles, note content, labels, snippets, and attachment names
+- Use quick filters for pinned, favorites, tasks, attachments, and code
+- Use structured tokens such as `is:pinned`, `has:tasks`, `label:<name>`, `type:code`, `updated:today`, `language:<name>`, `kind:snippet`, `in:attachments`
 - Use quoted phrases for more precise results
 
-### Capture without breaking flow
+### Quick Capture
 
 - Open a dedicated Quick Capture window
 - Create a note from anywhere in your workflow
 - Add title, body, labels, pin state, and favorite state immediately
 - Save and jump straight into the created note
+
+## Screenshots
+
+This section is ready for GitHub screenshots. Add images under `docs/screenshots/` and replace the placeholder lines below.
+
+### Main Workspace
+
+Placeholder path: `docs/screenshots/main-workspace.png`
+
+Suggested caption: `Three-column workspace with smart collections, labels, note list, and detail view.`
+
+### Label Editing
+
+Placeholder path: `docs/screenshots/label-editing.png`
+
+Suggested caption: `Sidebar label editor with name, SF Symbol icon, color palette, and live preview.`
+
+### Quick Capture
+
+Placeholder path: `docs/screenshots/quick-capture.png`
+
+Suggested caption: `Fast note capture window with labels, pin, and favorite controls.`
+
+### Tasks And Snippets
+
+Placeholder path: `docs/screenshots/tasks-and-snippets.png`
+
+Suggested caption: `Actionable note metadata with tasks, attachments, and code snippets in one place.`
 
 ## Product Experience
 
@@ -129,10 +143,6 @@ The result is a workspace that feels closer to a personal knowledge cockpit than
 - sidebar for smart collections and labels
 - main list for notes or global tasks
 - detail area for reading, editing, and split view
-
-The app is local-first, fast to navigate, and designed to feel at home on modern macOS rather than like a ported web interface.
-
-## Smart Collections
 
 The sidebar currently includes:
 
@@ -145,9 +155,9 @@ The sidebar currently includes:
 - `Snippets`
 - `Trash`
 
-Each collection shows a live count, so the workspace stays scannable even when the dataset grows.
+Each collection shows a live count so the workspace stays scannable as it grows.
 
-## Release 0.9.8 Highlights
+## Release 0.9.8
 
 - Full label appearance editing from the sidebar
 - SF Symbols support for label icons
@@ -155,11 +165,23 @@ Each collection shows a live count, so the workspace stays scannable even when t
 - Consistent label rendering across sidebar, chips, picker, and Quick Capture
 - Release build and install flow updated for version `0.9.8`
 
-## Current Sync Status
+## Roadmap
 
-The app already includes a sync queue, CloudKit record mapping, conflict-resolution scaffolding, and sync status reporting.
+Near-term priorities:
 
-At the moment, CloudKit transport is still scaffolded and disabled by default, so release `0.9.8` behaves as a local-first app.
+- Enable real CloudKit transport on top of the existing sync scaffolding
+- Improve README visuals with real screenshots and usage examples
+- Expand release polish across label editing and detail workflows
+- Continue refining the native macOS visual language and interactions
+
+Already present in the codebase:
+
+- sync queue
+- CloudKit record mapping
+- conflict-resolution scaffolding
+- sync status reporting
+
+Current status: CloudKit transport is scaffolded but still disabled by default, so `0.9.8` behaves as a local-first app.
 
 ## Technology
 
@@ -182,7 +204,7 @@ At the moment, CloudKit transport is still scaffolded and disabled by default, s
 - `MyNotes/UI` — design system primitives and shared components
 - `scripts/build_and_install_app.sh` — release build, signing, bundling, and install flow
 
-## Build and Install
+## Build And Install
 
 Requirements:
 
