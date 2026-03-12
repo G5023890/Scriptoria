@@ -110,31 +110,21 @@ Most tools force you to choose one mode of thinking.
 
 ## Screenshots
 
-This section is ready for GitHub screenshots. Add images under `docs/screenshots/` and replace the placeholder lines below.
+Real screenshots from the current app build.
 
 ### Main Workspace
 
-Placeholder path: `docs/screenshots/main-workspace.png`
+![Main Workspace](docs/screenshots/main-workspace.png)
 
-Suggested caption: `Three-column workspace with smart collections, labels, note list, and detail view.`
-
-### Label Editing
-
-Placeholder path: `docs/screenshots/label-editing.png`
-
-Suggested caption: `Sidebar label editor with name, SF Symbol icon, color palette, and live preview.`
+Three-column workspace with smart collections, labels, note list, and detail view.
 
 ### Quick Capture
 
-Placeholder path: `docs/screenshots/quick-capture.png`
+![Quick Capture](docs/screenshots/quick-capture.png)
 
-Suggested caption: `Fast note capture window with labels, pin, and favorite controls.`
+Fast note capture window with labels, pin, and favorite controls.
 
-### Tasks And Snippets
-
-Placeholder path: `docs/screenshots/tasks-and-snippets.png`
-
-Suggested caption: `Actionable note metadata with tasks, attachments, and code snippets in one place.`
+More screenshots for label editing and task-focused flows will be added in the next pass.
 
 ## Product Experience
 
