@@ -4,6 +4,7 @@ struct SeedSampleDataUseCase {
     let notesRepository: any NotesRepository
     let labelsRepository: any LabelsRepository
     let attachmentsRepository: any AttachmentsRepository
+    let fileService: any FileService
     let assignLabelsUseCase: AssignLabelsUseCase
     let markdownService: any MarkdownService
     let dateService: any DateService
@@ -25,6 +26,9 @@ struct SeedSampleDataUseCase {
                 labelIDs: sampleData.labelAssignments[note.id] ?? []
             )
         }
+
+        try copyBundledSampleFilesIfNeeded(for: sampleData.attachments)
+
         for attachment in sampleData.attachments {
             try await attachmentsRepository.add(attachment: attachment)
         }
@@ -32,6 +36,17 @@ struct SeedSampleDataUseCase {
             let snippets = sampleData.snippets.filter { $0.noteID == note.id }
             _ = try await attachmentsRepository.replaceSnippets(snippets, for: note.id)
             try await indexNoteForSearchUseCase.execute(noteID: note.id)
+        }
+    }
+
+    private func copyBundledSampleFilesIfNeeded(for attachments: [Attachment]) throws {
+        for attachment in attachments where attachment.relativePath == SampleDataFactory.sampleAttachmentRelativePath {
+            try fileService.copyBundledResourceIfNeeded(
+                named: SampleDataFactory.sampleAttachmentResourceName,
+                withExtension: SampleDataFactory.sampleAttachmentResourceExtension,
+                subdirectory: SampleDataFactory.sampleAttachmentResourceSubdirectory,
+                toRelativePath: attachment.relativePath
+            )
         }
     }
 }

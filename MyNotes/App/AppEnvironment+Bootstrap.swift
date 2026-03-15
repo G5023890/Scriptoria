@@ -242,6 +242,7 @@ extension AppEnvironment {
             notesRepository: notesRepository,
             labelsRepository: labelsRepository,
             attachmentsRepository: attachmentsRepository,
+            fileService: fileService,
             assignLabelsUseCase: assignLabelsUseCase,
             markdownService: markdownService,
             dateService: dateService,

@@ -35,8 +35,6 @@ pick_icon_source() {
     "$PROJECT_DIR/Assets/AppIcon.icns"
     "$PROJECT_DIR/Resources/AppIcon.icns"
     "$PROJECT_DIR/dist/AppIcon.icns"
-    "/Applications/${APP_DISPLAY_NAME}.app/Contents/Resources/AppIcon.icns"
-    "$LEGACY_INSTALL_DIR/Contents/Resources/AppIcon.icns"
   )
 
   local candidate

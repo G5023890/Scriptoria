@@ -25,6 +25,12 @@ protocol FileService {
     func databaseURL() throws -> URL
     func thumbnailsDirectory() throws -> URL
     func attachmentsDirectory(for noteID: NoteID) throws -> URL
+    func copyBundledResourceIfNeeded(
+        named resourceName: String,
+        withExtension resourceExtension: String,
+        subdirectory: String?,
+        toRelativePath relativePath: String
+    ) throws
     func importAttachment(from sourceURL: URL, noteID: NoteID, attachmentID: AttachmentID) throws -> ImportedAttachmentFile
     func absoluteURL(for relativePath: String) throws -> URL
     func readTextFile(atRelativePath relativePath: String, maxCharacters: Int) throws -> String?
@@ -76,6 +82,32 @@ struct LocalFileService: FileService {
             .appendingPathComponent("note_\(noteID.rawValue)", isDirectory: true)
         try fileManager.createDirectory(at: directory, withIntermediateDirectories: true, attributes: nil)
         return directory
+    }
+
+    func copyBundledResourceIfNeeded(
+        named resourceName: String,
+        withExtension resourceExtension: String,
+        subdirectory: String? = nil,
+        toRelativePath relativePath: String
+    ) throws {
+        try ensureBaseDirectories()
+
+        let destinationURL = try absoluteURL(for: relativePath)
+        if fileManager.fileExists(atPath: destinationURL.path) {
+            return
+        }
+
+        guard let sourceURL = Bundle.module.url(
+            forResource: resourceName,
+            withExtension: resourceExtension,
+            subdirectory: subdirectory
+        ) else {
+            throw CocoaError(.fileNoSuchFile)
+        }
+
+        let parentDirectory = destinationURL.deletingLastPathComponent()
+        try fileManager.createDirectory(at: parentDirectory, withIntermediateDirectories: true, attributes: nil)
+        try fileManager.copyItem(at: sourceURL, to: destinationURL)
     }
 
     func importAttachment(from sourceURL: URL, noteID: NoteID, attachmentID: AttachmentID) throws -> ImportedAttachmentFile {

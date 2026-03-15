@@ -1,6 +1,11 @@
 import Foundation
 
 extension SampleDataFactory {
+    static let sampleAttachmentResourceName = "DataModel-v1"
+    static let sampleAttachmentResourceExtension = "pdf"
+    static let sampleAttachmentResourceSubdirectory = "SampleData"
+    static let sampleAttachmentRelativePath = "attachments/note_note-attachments/attachment_attachment-design-doc.pdf"
+
     static func makeAttachment(now: Date) -> Attachment {
         Attachment(
             id: AttachmentID(rawValue: "attachment-design-doc"),
@@ -9,7 +14,7 @@ extension SampleDataFactory {
             originalFileName: "DataModel-v1.pdf",
             mimeType: "application/pdf",
             category: .pdf,
-            relativePath: "attachments/note_note-attachments/attachment_attachment-design-doc.pdf",
+            relativePath: sampleAttachmentRelativePath,
             fileSize: 234_512,
             checksum: "demo-checksum",
             width: nil,
