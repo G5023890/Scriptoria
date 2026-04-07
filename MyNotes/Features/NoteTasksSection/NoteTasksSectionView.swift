@@ -7,6 +7,7 @@ enum NoteTaskMoveDirection: Equatable {
 
 struct NoteTasksSectionView: View {
     @State private var expandedCompletedIDs: Set<ToDoID> = []
+    @State private var activePreviewItem: NoteToDoItem?
 
     let items: [NoteToDoItem]
     let deletedItems: [NoteToDoItem]
@@ -31,6 +32,9 @@ struct NoteTasksSectionView: View {
                         isExpanded: expandedCompletedIDs.contains(item.id),
                         allowsMutation: allowsMutation,
                         allowsCompletionToggle: allowsCompletionToggle,
+                        onPreview: {
+                            activePreviewItem = item
+                        },
                         onToggleComplete: asyncAction {
                             await onToggleComplete(item.todo)
                         },
@@ -57,15 +61,18 @@ struct NoteTasksSectionView: View {
                         .foregroundStyle(.secondary)
 
                     ForEach(deletedItems) { item in
-                        NoteTaskRowView(
-                            item: item,
-                            isFocused: focusedToDoID == item.id,
-                            isExpanded: false,
-                            allowsMutation: allowsMutation,
-                            allowsCompletionToggle: false,
-                            onToggleComplete: {},
-                            onToggleExpansion: nil,
-                            onEdit: allowsMutation ? {
+                    NoteTaskRowView(
+                        item: item,
+                        isFocused: focusedToDoID == item.id,
+                        isExpanded: false,
+                        allowsMutation: allowsMutation,
+                        allowsCompletionToggle: false,
+                        onPreview: {
+                            activePreviewItem = item
+                        },
+                        onToggleComplete: {},
+                        onToggleExpansion: nil,
+                        onEdit: allowsMutation ? {
                                 onEditRequested(item.todo)
                             } : nil,
                             onDelete: nil,
@@ -86,6 +93,9 @@ struct NoteTasksSectionView: View {
         }
         .onChange(of: focusedToDoID) { _, _ in
             requestFocusIfNeeded()
+        }
+        .sheet(item: $activePreviewItem) { item in
+            NoteTaskPreviewSheet(item: item)
         }
     }
 
@@ -119,6 +129,7 @@ struct NoteTaskRowView: View {
     let isExpanded: Bool
     let allowsMutation: Bool
     let allowsCompletionToggle: Bool
+    let onPreview: () -> Void
     let onToggleComplete: () -> Void
     let onToggleExpansion: (() -> Void)?
     let onEdit: (() -> Void)?
@@ -209,6 +220,8 @@ struct NoteTaskRowView: View {
                 }
             }
         }
+        .contentShape(Rectangle())
+        .onTapGesture(perform: onPreview)
         .padding(.horizontal, 10)
         .padding(.vertical, 8)
         .background(
@@ -339,6 +352,67 @@ struct NoteTaskRowView: View {
         }
         .buttonStyle(.borderless)
         .accessibilityLabel(accessibilityLabel)
+    }
+}
+
+struct NoteTaskPreviewSheet: View {
+    let item: NoteToDoItem
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: AppSpacing.medium) {
+            HStack(alignment: .top, spacing: AppSpacing.small) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(item.title)
+                        .font(AppTypography.section)
+                        .foregroundStyle(item.isDeleted ? .secondary : .primary)
+                        .strikethrough(item.isCompleted)
+
+                    HStack(spacing: AppSpacing.xSmall) {
+                        if item.isCompleted {
+                            Text("Done")
+                                .font(AppTypography.caption.weight(.semibold))
+                                .foregroundStyle(.green)
+                        }
+                        if item.isArchived {
+                            InfoBadge(text: "Архив")
+                        }
+                        if let dueText = item.dueText {
+                            Text(dueText)
+                                .font(AppTypography.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+
+                Spacer()
+
+                Button("Done") {
+                    dismiss()
+                }
+            }
+
+            ScrollView {
+                if item.details.isEmpty {
+                    ContentUnavailableView(
+                        "No Description",
+                        systemImage: "text.alignleft",
+                        description: Text("This task does not have additional details.")
+                    )
+                    .frame(maxWidth: .infinity)
+                    .padding(AppSpacing.medium)
+                } else {
+                    Text(item.details)
+                        .font(AppTypography.caption)
+                        .foregroundStyle(.primary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(AppSpacing.medium)
+                }
+            }
+            .modifier(PanelSurfaceModifier())
+        }
+        .padding(AppSpacing.large)
+        .frame(minWidth: 520, minHeight: 360)
     }
 }
 

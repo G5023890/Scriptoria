@@ -178,6 +178,7 @@ private enum ArchivedNoteItem: Identifiable {
 private struct ArchivedNoteSectionView: View {
     @State private var isExpanded = false
     @State private var expandedTaskIDs: Set<ToDoID> = []
+    @State private var activePreviewTaskItem: NoteToDoItem?
     @State private var activePreviewSnippetItem: SnippetItem?
 
     let items: [ArchivedNoteItem]
@@ -246,6 +247,9 @@ private struct ArchivedNoteSectionView: View {
                 }
             )
         }
+        .sheet(item: $activePreviewTaskItem) { item in
+            NoteTaskPreviewSheet(item: item)
+        }
     }
 
     @ViewBuilder
@@ -258,6 +262,9 @@ private struct ArchivedNoteSectionView: View {
                 isExpanded: expandedTaskIDs.contains(toDoItem.id),
                 allowsMutation: allowsTaskMutation,
                 allowsCompletionToggle: allowsTaskCompletionToggle,
+                onPreview: {
+                    activePreviewTaskItem = toDoItem
+                },
                 onToggleComplete: asyncAction {
                     await onToggleToDoCompletion(toDoItem.todo)
                 },

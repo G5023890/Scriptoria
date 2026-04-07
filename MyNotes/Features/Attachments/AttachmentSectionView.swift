@@ -101,6 +101,8 @@ struct AttachmentRowView: View {
             }
 
         }
+        .contentShape(Rectangle())
+        .onTapGesture(perform: onPreview)
         .padding(.horizontal, 10)
         .padding(.vertical, 8)
         .opacity(item.isArchived ? 0.86 : 1)
@@ -112,8 +114,6 @@ struct AttachmentRowView: View {
 
     private var actionStrip: some View {
         HStack(spacing: AppSpacing.small) {
-            Button("Preview", action: onPreview)
-                .buttonStyle(.borderless)
             Button("Open", action: onOpen)
                 .buttonStyle(.borderless)
             if let onEdit {
