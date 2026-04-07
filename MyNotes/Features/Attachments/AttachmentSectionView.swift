@@ -61,8 +61,6 @@ struct AttachmentRowView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(alignment: .center, spacing: AppSpacing.small) {
-                categoryChip(systemImage: "paperclip")
-
                 if item.showsInlinePreview, let previewURL = item.previewURL {
                     LocalImageThumbnailView(url: previewURL)
                 } else {

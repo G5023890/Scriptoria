@@ -125,7 +125,7 @@ struct NoteMetadataSectionsView: View {
                     onRestoreToDo: onRestoreToDo,
                     onPreviewAttachment: onPreviewAttachment,
                     onOpenAttachment: onOpenAttachment,
-                    onEditAttachment: onEditAttachment,
+                    onEditAttachment: nil,
                     onRemoveAttachment: onRemoveAttachment,
                     onCopySnippet: onCopySnippet,
                     onPreviewSnippet: onPreviewSnippet,

@@ -110,7 +110,7 @@ struct NoteDetailView: View {
                                 syntaxHighlightService: viewModel.syntaxHighlightService,
                                 onPreviewAttachment: viewModel.previewAttachment,
                                 onOpenAttachment: viewModel.openAttachment,
-                                onEditAttachment: viewModel.presentEditAttachmentSheet,
+                                onEditAttachment: nil,
                                 onArchiveAttachment: nil,
                                 onRemoveAttachment: { _ in },
                                 onCopySnippet: viewModel.copySnippet,

@@ -5,7 +5,7 @@
 `Scriptoria` is built for people who collect ideas all day, move between writing and execution, and want one calm place for everything: notes, labels, tasks, code, files, and search.
 
 Current app bundle: `MyNotes`  
-Current release: `0.9.9`  
+Current release: `0.9.10`  
 Repository: [G5023890/Scriptoria](https://github.com/G5023890/Scriptoria)
 
 ## Hero
@@ -150,14 +150,14 @@ The sidebar currently includes:
 
 Each collection shows a live count so the workspace stays scannable as it grows.
 
-## Release 0.9.9
+## Release 0.9.10
 
 - New bottom `Архив` section inside note detail for archived tasks, snippets, and attachments
 - Archive rows are merged into one mixed list and hidden from active note sections
 - Completed tasks keep their `Done` status and also participate in archive grouping
 - Snippets and attachments now support direct archive actions from note detail
 - Archive section opens collapsed by default and scrolls into view when expanded
-- Release build and install flow updated for version `0.9.9`
+- Release build and install flow updated for version `0.9.10`
 
 ## Roadmap
 
@@ -175,7 +175,7 @@ Already present in the codebase:
 - conflict-resolution scaffolding
 - sync status reporting
 
-Current status: CloudKit transport is scaffolded but still disabled by default, so `0.9.9` behaves as a local-first app.
+Current status: CloudKit transport is scaffolded but still disabled by default, so `0.9.10` behaves as a local-first app.
 
 ## Technology
 
