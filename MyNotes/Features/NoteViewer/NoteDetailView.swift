@@ -110,6 +110,7 @@ struct NoteDetailView: View {
                                 syntaxHighlightService: viewModel.syntaxHighlightService,
                                 onPreviewAttachment: viewModel.previewAttachment,
                                 onOpenAttachment: viewModel.openAttachment,
+                                onEditAttachment: viewModel.presentEditAttachmentSheet,
                                 onArchiveAttachment: nil,
                                 onRemoveAttachment: { _ in },
                                 onCopySnippet: viewModel.copySnippet,
@@ -246,6 +247,14 @@ struct NoteDetailView: View {
             }
         )
 
+        let attachmentEditBinding = Binding<AttachmentEditDraft?>(
+            get: { editorViewModel?.activeAttachmentEditDraft ?? viewModel.activeAttachmentEditDraft },
+            set: { _ in
+                editorViewModel?.dismissAttachmentSheet()
+                viewModel.dismissAttachmentSheet()
+            }
+        )
+
         let snippetPreviewBinding = Binding<NoteSnippet?>(
             get: { viewModel.activeSnippetPreview },
             set: { _ in
@@ -346,7 +355,40 @@ struct NoteDetailView: View {
             .padding(AppSpacing.large)
         }
 
-        let shellWithSnippetPreview = shellWithAttachmentPreview.sheet(item: snippetPreviewBinding) { snippet in
+        let shellWithAttachmentEdit = shellWithAttachmentPreview.sheet(item: attachmentEditBinding) { draft in
+            AttachmentEditSheet(
+                draft: Binding(
+                    get: { attachmentEditBinding.wrappedValue ?? draft },
+                    set: { nextDraft in
+                        if effectiveMode == .read {
+                            viewModel.activeAttachmentEditDraft = nextDraft
+                        } else {
+                            editorViewModel?.activeAttachmentEditDraft = nextDraft
+                        }
+                    }
+                ),
+                isSaving: effectiveMode == .read
+                    ? viewModel.isSavingAttachment
+                    : (editorViewModel?.isSavingAttachment ?? false),
+                onCancel: {
+                    editorViewModel?.dismissAttachmentSheet()
+                    viewModel.dismissAttachmentSheet()
+                },
+                onSave: {
+                    Task {
+                        let currentDraft = attachmentEditBinding.wrappedValue ?? draft
+                        if effectiveMode == .read {
+                            await viewModel.updateAttachment(draft: currentDraft)
+                            await onNoteChanged(snapshot.note.id)
+                        } else if let editorViewModel {
+                            await editorViewModel.updateAttachment(draft: currentDraft)
+                        }
+                    }
+                }
+            )
+        }
+
+        let shellWithSnippetPreview = shellWithAttachmentEdit.sheet(item: snippetPreviewBinding) { snippet in
             SnippetPreviewSheet(
                 snippet: snippet,
                 syntaxHighlightService: viewModel.syntaxHighlightService,

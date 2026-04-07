@@ -9,6 +9,7 @@ struct AttachmentSectionView: View {
     let allowsRemoval: Bool
     let onPreview: (Attachment) -> Void
     let onOpen: (Attachment) -> Void
+    let onEdit: ((Attachment) -> Void)?
     let onArchive: ((Attachment) -> Void)?
     let onRemove: ((Attachment) -> Void)?
     let headerAction: (() -> Void)?
@@ -31,6 +32,9 @@ struct AttachmentSectionView: View {
                             allowsRemoval: allowsRemoval,
                             onPreview: { onPreview(item.attachment) },
                             onOpen: { onOpen(item.attachment) },
+                            onEdit: onEdit.map { action in
+                                { action(item.attachment) }
+                            },
                             onArchive: onArchive.map { action in
                                 { action(item.attachment) }
                             },
@@ -50,6 +54,7 @@ struct AttachmentRowView: View {
     let allowsRemoval: Bool
     let onPreview: () -> Void
     let onOpen: () -> Void
+    let onEdit: (() -> Void)?
     let onArchive: (() -> Void)?
     let onRemove: (() -> Void)?
 
@@ -84,6 +89,12 @@ struct AttachmentRowView: View {
                         .font(AppTypography.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
+                    if let descriptionText = item.descriptionText, !descriptionText.isEmpty {
+                        Text(descriptionText)
+                            .font(AppTypography.caption)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(2)
+                    }
                 }
 
                 Spacer(minLength: AppSpacing.small)
@@ -107,6 +118,10 @@ struct AttachmentRowView: View {
                 .buttonStyle(.borderless)
             Button("Open", action: onOpen)
                 .buttonStyle(.borderless)
+            if let onEdit {
+                Button("Edit", action: onEdit)
+                    .buttonStyle(.borderless)
+            }
             if let onArchive {
                 Button(action: onArchive) {
                     Image(systemName: AppIcons.archive)

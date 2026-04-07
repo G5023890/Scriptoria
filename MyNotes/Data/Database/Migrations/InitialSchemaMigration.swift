@@ -14,7 +14,8 @@ enum DatabaseMigrations {
         ToDoNotificationStateMigration.migration,
         SearchTasksMigration.migration,
         ArtifactArchiveMigration.migration,
-        ToDoArchiveMigration.migration
+        ToDoArchiveMigration.migration,
+        AttachmentDescriptionMigration.migration
     ]
 }
 
@@ -153,6 +154,15 @@ enum ToDoArchiveMigration {
         version: 8,
         statements: [
             "ALTER TABLE todos ADD COLUMN is_archived INTEGER NOT NULL DEFAULT 0;"
+        ]
+    )
+}
+
+enum AttachmentDescriptionMigration {
+    static let migration = DatabaseMigration(
+        version: 9,
+        statements: [
+            "ALTER TABLE attachments ADD COLUMN description TEXT;"
         ]
     )
 }

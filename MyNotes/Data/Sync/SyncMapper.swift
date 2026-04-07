@@ -73,6 +73,7 @@ struct SyncMapper {
         record["originalFileName"] = attachment.originalFileName as CKRecordValue
         record["mimeType"] = attachment.mimeType as CKRecordValue?
         record["category"] = attachment.category.rawValue as CKRecordValue
+        record["description"] = attachment.description as CKRecordValue?
         record["relativePath"] = attachment.relativePath as CKRecordValue
         record["fileSize"] = attachment.fileSize.map(NSNumber.init(value:)) as CKRecordValue?
         record["checksum"] = attachment.checksum as CKRecordValue?
@@ -212,6 +213,7 @@ struct SyncMapper {
                 originalFileName: originalFileName,
                 mimeType: record["mimeType"] as? String,
                 category: category,
+                description: record["description"] as? String,
                 relativePath: relativePath,
                 fileSize: (record["fileSize"] as? NSNumber)?.int64Value,
                 checksum: record["checksum"] as? String,

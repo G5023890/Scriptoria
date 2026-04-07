@@ -248,6 +248,11 @@ extension AppEnvironment {
             dateService: dateService,
             indexNoteForSearchUseCase: indexNoteForSearchUseCase
         )
+        let updateAttachmentUseCase = UpdateAttachmentUseCase(
+            attachmentsRepository: attachmentsRepository,
+            indexNoteForSearchUseCase: indexNoteForSearchUseCase,
+            dateService: dateService
+        )
         let bootstrapApplicationUseCase = BootstrapApplicationUseCase(
             databaseManager: databaseManager,
             seedSampleDataUseCase: seedSampleDataUseCase,
@@ -306,6 +311,7 @@ extension AppEnvironment {
             listAllToDosUseCase: listAllToDosUseCase,
             refreshToDoNotificationsUseCase: refreshToDoNotificationsUseCase,
             importAttachmentUseCase: importAttachmentUseCase,
+            updateAttachmentUseCase: updateAttachmentUseCase,
             createSnippetUseCase: createSnippetUseCase,
             createManualSnippetUseCase: createManualSnippetUseCase,
             updateManualSnippetUseCase: updateManualSnippetUseCase,

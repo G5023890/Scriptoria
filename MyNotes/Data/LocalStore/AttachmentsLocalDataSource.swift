@@ -18,6 +18,7 @@ struct AttachmentsLocalDataSource {
                     original_file_name,
                     mime_type,
                     category,
+                    description,
                     relative_path,
                     file_size,
                     checksum,
@@ -51,6 +52,17 @@ struct AttachmentsLocalDataSource {
     func add(_ attachment: Attachment) throws {
         try databaseManager.write { db in
             try upsertAttachment(attachment, using: db)
+        }
+    }
+
+    func update(_ attachment: Attachment) throws -> Attachment? {
+        try databaseManager.transaction { db in
+            guard let _ = try self.attachment(id: attachment.id, using: db) else {
+                return nil
+            }
+
+            try upsertAttachment(attachment, using: db)
+            return attachment
         }
     }
 
@@ -332,6 +344,7 @@ struct AttachmentsLocalDataSource {
                 original_file_name,
                 mime_type,
                 category,
+                description,
                 relative_path,
                 file_size,
                 checksum,
@@ -390,6 +403,7 @@ struct AttachmentsLocalDataSource {
                 original_file_name,
                 mime_type,
                 category,
+                description,
                 relative_path,
                 file_size,
                 checksum,
@@ -403,13 +417,14 @@ struct AttachmentsLocalDataSource {
                 is_deleted,
                 deleted_at,
                 version
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
                 note_id = excluded.note_id,
                 file_name = excluded.file_name,
                 original_file_name = excluded.original_file_name,
                 mime_type = excluded.mime_type,
                 category = excluded.category,
+                description = excluded.description,
                 relative_path = excluded.relative_path,
                 file_size = excluded.file_size,
                 checksum = excluded.checksum,
@@ -431,6 +446,7 @@ struct AttachmentsLocalDataSource {
                 .text(attachment.originalFileName),
                 attachment.mimeType.map(SQLiteValue.text) ?? .null,
                 .text(attachment.category.rawValue),
+                attachment.description.map(SQLiteValue.text) ?? .null,
                 .text(attachment.relativePath),
                 attachment.fileSize.map(SQLiteValue.integer) ?? .null,
                 attachment.checksum.map(SQLiteValue.text) ?? .null,
@@ -514,6 +530,7 @@ struct AttachmentsLocalDataSource {
             originalFileName: try row.requiredString("original_file_name"),
             mimeType: try row.string("mime_type"),
             category: AttachmentCategory(rawValue: try row.requiredString("category")) ?? .file,
+            description: try row.string("description"),
             relativePath: try row.requiredString("relative_path"),
             fileSize: try row.int64("file_size"),
             checksum: try row.string("checksum"),

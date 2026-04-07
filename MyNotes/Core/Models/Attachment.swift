@@ -7,6 +7,7 @@ struct Attachment: Identifiable, Codable, Hashable, Sendable {
     var originalFileName: String
     var mimeType: String?
     var category: AttachmentCategory
+    var description: String?
     var relativePath: String
     var fileSize: Int64?
     var checksum: String?

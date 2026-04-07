@@ -21,6 +21,8 @@ final class NoteEditorViewModel {
     var manualSnippetDraft = ManualSnippetDraft()
     var lastSavedText = "Not saved yet"
     var activeAttachmentPreview: AttachmentPreviewState?
+    var activeAttachmentEditDraft: AttachmentEditDraft?
+    var isSavingAttachment = false
     var errorMessage: String?
 
     let noteID: NoteID
@@ -41,6 +43,7 @@ final class NoteEditorViewModel {
     private let archiveSnippetUseCase: ArchiveSnippetUseCase
     private let removeSnippetUseCase: RemoveSnippetUseCase
     private let importAttachmentUseCase: ImportAttachmentUseCase
+    private let updateAttachmentUseCase: UpdateAttachmentUseCase
     private let archiveAttachmentUseCase: ArchiveAttachmentUseCase
     private let removeAttachmentUseCase: RemoveAttachmentUseCase
     private let prepareAttachmentPreviewUseCase: PrepareAttachmentPreviewUseCase
@@ -69,6 +72,7 @@ final class NoteEditorViewModel {
         archiveSnippetUseCase: ArchiveSnippetUseCase,
         removeSnippetUseCase: RemoveSnippetUseCase,
         importAttachmentUseCase: ImportAttachmentUseCase,
+        updateAttachmentUseCase: UpdateAttachmentUseCase,
         archiveAttachmentUseCase: ArchiveAttachmentUseCase,
         removeAttachmentUseCase: RemoveAttachmentUseCase,
         prepareAttachmentPreviewUseCase: PrepareAttachmentPreviewUseCase,
@@ -95,6 +99,7 @@ final class NoteEditorViewModel {
         self.archiveSnippetUseCase = archiveSnippetUseCase
         self.removeSnippetUseCase = removeSnippetUseCase
         self.importAttachmentUseCase = importAttachmentUseCase
+        self.updateAttachmentUseCase = updateAttachmentUseCase
         self.archiveAttachmentUseCase = archiveAttachmentUseCase
         self.removeAttachmentUseCase = removeAttachmentUseCase
         self.prepareAttachmentPreviewUseCase = prepareAttachmentPreviewUseCase
@@ -117,6 +122,7 @@ final class NoteEditorViewModel {
             attachmentItems = []
             snippetItems = []
             availableLabels = []
+            activeAttachmentEditDraft = nil
         }
     }
 
@@ -419,6 +425,44 @@ final class NoteEditorViewModel {
         }
     }
 
+    func presentEditAttachmentSheet(_ attachment: Attachment) {
+        activeAttachmentEditDraft = AttachmentEditDraft(attachment: attachment)
+    }
+
+    func dismissAttachmentSheet() {
+        activeAttachmentEditDraft = nil
+    }
+
+    func updateAttachment(draft: AttachmentEditDraft) async {
+        guard var currentDraft = self.draft else { return }
+        isSavingAttachment = true
+        defer { isSavingAttachment = false }
+
+        do {
+            guard let updatedAttachment = try await updateAttachmentUseCase.execute(
+                attachment: draft.attachment,
+                description: draft.description
+            ) else {
+                errorMessage = "Attachment update failed: attachment not found"
+                return
+            }
+
+            guard let index = currentDraft.attachments.firstIndex(where: { $0.id == updatedAttachment.id }) else {
+                return
+            }
+
+            currentDraft.attachments[index] = updatedAttachment
+            currentDraft.attachments.sort(by: Self.attachmentSort)
+            self.draft = currentDraft
+            rebuildPresentationState()
+            activeAttachmentEditDraft = nil
+            lastSavedText = "Updated attachment"
+            await onSave()
+        } catch {
+            errorMessage = "Attachment update failed: \(error.localizedDescription)"
+        }
+    }
+
     func archiveAttachment(_ attachment: Attachment) async {
         guard var draft else { return }
 
@@ -520,6 +564,7 @@ final class NoteEditorViewModel {
             deletedToDoItems = []
             attachmentItems = []
             snippetItems = []
+            activeAttachmentEditDraft = nil
             return
         }
 

@@ -14,6 +14,7 @@ extension SampleDataFactory {
             originalFileName: "DataModel-v1.pdf",
             mimeType: "application/pdf",
             category: .pdf,
+            description: nil,
             relativePath: sampleAttachmentRelativePath,
             fileSize: 234_512,
             checksum: "demo-checksum",

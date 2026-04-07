@@ -20,6 +20,8 @@ final class NoteDetailViewModel {
     var mode: NoteDetailMode = .read
     var isLoading = false
     var activeAttachmentPreview: AttachmentPreviewState?
+    var activeAttachmentEditDraft: AttachmentEditDraft?
+    var isSavingAttachment = false
     var activeSnippetPreview: NoteSnippet?
     var errorMessage: String?
 
@@ -39,6 +41,7 @@ final class NoteDetailViewModel {
     private let completeToDoUseCase: CompleteToDoUseCase
     private let reorderToDosUseCase: ReorderToDosUseCase
     private let importAttachmentUseCase: ImportAttachmentUseCase
+    private let updateAttachmentUseCase: UpdateAttachmentUseCase
     private let createManualSnippetUseCase: CreateManualSnippetUseCase
     private let removeAttachmentUseCase: RemoveAttachmentUseCase
     private let prepareAttachmentPreviewUseCase: PrepareAttachmentPreviewUseCase
@@ -64,6 +67,7 @@ final class NoteDetailViewModel {
         completeToDoUseCase: CompleteToDoUseCase,
         reorderToDosUseCase: ReorderToDosUseCase,
         importAttachmentUseCase: ImportAttachmentUseCase,
+        updateAttachmentUseCase: UpdateAttachmentUseCase,
         createManualSnippetUseCase: CreateManualSnippetUseCase,
         removeAttachmentUseCase: RemoveAttachmentUseCase,
         prepareAttachmentPreviewUseCase: PrepareAttachmentPreviewUseCase,
@@ -88,6 +92,7 @@ final class NoteDetailViewModel {
         self.completeToDoUseCase = completeToDoUseCase
         self.reorderToDosUseCase = reorderToDosUseCase
         self.importAttachmentUseCase = importAttachmentUseCase
+        self.updateAttachmentUseCase = updateAttachmentUseCase
         self.createManualSnippetUseCase = createManualSnippetUseCase
         self.removeAttachmentUseCase = removeAttachmentUseCase
         self.prepareAttachmentPreviewUseCase = prepareAttachmentPreviewUseCase
@@ -108,6 +113,7 @@ final class NoteDetailViewModel {
             deletedToDoItems = []
             attachmentItems = []
             snippetItems = []
+            activeAttachmentEditDraft = nil
             return
         }
 
@@ -137,6 +143,7 @@ final class NoteDetailViewModel {
             deletedToDoItems = []
             attachmentItems = []
             snippetItems = []
+            activeAttachmentEditDraft = nil
         }
     }
 
@@ -205,6 +212,34 @@ final class NoteDetailViewModel {
             await reloadCurrent()
         } catch {
             errorMessage = "Remove failed: \(error.localizedDescription)"
+        }
+    }
+
+    func presentEditAttachmentSheet(_ attachment: Attachment) {
+        activeAttachmentEditDraft = AttachmentEditDraft(attachment: attachment)
+    }
+
+    func dismissAttachmentSheet() {
+        activeAttachmentEditDraft = nil
+    }
+
+    func updateAttachment(draft: AttachmentEditDraft) async {
+        isSavingAttachment = true
+        defer { isSavingAttachment = false }
+
+        do {
+            guard let _ = try await updateAttachmentUseCase.execute(
+                attachment: draft.attachment,
+                description: draft.description
+            ) else {
+                errorMessage = "Attachment update failed: attachment not found"
+                return
+            }
+
+            activeAttachmentEditDraft = nil
+            await reloadCurrent()
+        } catch {
+            errorMessage = "Attachment update failed: \(error.localizedDescription)"
         }
     }
 
@@ -437,6 +472,7 @@ final class NoteDetailViewModel {
             deletedToDoItems = []
             attachmentItems = []
             snippetItems = []
+            activeAttachmentEditDraft = nil
             return
         }
 

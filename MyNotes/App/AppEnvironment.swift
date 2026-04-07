@@ -55,6 +55,7 @@ final class AppEnvironment {
     let listAllToDosUseCase: ListAllToDosUseCase
     let refreshToDoNotificationsUseCase: RefreshToDoNotificationsUseCase
     let importAttachmentUseCase: ImportAttachmentUseCase
+    let updateAttachmentUseCase: UpdateAttachmentUseCase
     let createSnippetUseCase: CreateSnippetUseCase
     let createManualSnippetUseCase: CreateManualSnippetUseCase
     let updateManualSnippetUseCase: UpdateManualSnippetUseCase
@@ -121,6 +122,7 @@ final class AppEnvironment {
         listAllToDosUseCase: ListAllToDosUseCase,
         refreshToDoNotificationsUseCase: RefreshToDoNotificationsUseCase,
         importAttachmentUseCase: ImportAttachmentUseCase,
+        updateAttachmentUseCase: UpdateAttachmentUseCase,
         createSnippetUseCase: CreateSnippetUseCase,
         createManualSnippetUseCase: CreateManualSnippetUseCase,
         updateManualSnippetUseCase: UpdateManualSnippetUseCase,
@@ -186,6 +188,7 @@ final class AppEnvironment {
         self.listAllToDosUseCase = listAllToDosUseCase
         self.refreshToDoNotificationsUseCase = refreshToDoNotificationsUseCase
         self.importAttachmentUseCase = importAttachmentUseCase
+        self.updateAttachmentUseCase = updateAttachmentUseCase
         self.createSnippetUseCase = createSnippetUseCase
         self.createManualSnippetUseCase = createManualSnippetUseCase
         self.updateManualSnippetUseCase = updateManualSnippetUseCase

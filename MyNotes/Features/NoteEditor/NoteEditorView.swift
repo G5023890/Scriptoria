@@ -65,6 +65,7 @@ struct NoteEditorPane: View {
                             syntaxHighlightService: viewModel.syntaxHighlightService,
                             onPreviewAttachment: viewModel.previewAttachment,
                             onOpenAttachment: viewModel.openAttachment,
+                            onEditAttachment: viewModel.presentEditAttachmentSheet,
                             onArchiveAttachment: { attachment in
                                 Task {
                                     await viewModel.archiveAttachment(attachment)

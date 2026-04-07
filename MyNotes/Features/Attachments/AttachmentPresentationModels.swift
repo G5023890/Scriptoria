@@ -4,6 +4,7 @@ struct AttachmentItem: Identifiable, Equatable {
     let attachment: Attachment
     let title: String
     let subtitle: String
+    let descriptionText: String?
     let iconName: String
     let previewURL: URL?
     let showsInlinePreview: Bool
@@ -27,6 +28,7 @@ enum AttachmentPresentationBuilder {
             attachment: attachment,
             title: attachment.originalFileName,
             subtitle: subtitle(for: attachment),
+            descriptionText: attachment.description,
             iconName: iconName(for: attachment.category),
             previewURL: previewURL,
             showsInlinePreview: attachment.category == .image && previewURL != nil,

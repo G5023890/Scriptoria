@@ -22,6 +22,7 @@ struct NoteMetadataSectionsView: View {
     let syntaxHighlightService: any SyntaxHighlightService
     let onPreviewAttachment: (Attachment) -> Void
     let onOpenAttachment: (Attachment) -> Void
+    let onEditAttachment: ((Attachment) -> Void)?
     let onArchiveAttachment: ((Attachment) -> Void)?
     let onRemoveAttachment: (Attachment) -> Void
     let onCopySnippet: (NoteSnippet) -> Void
@@ -103,6 +104,7 @@ struct NoteMetadataSectionsView: View {
                     allowsRemoval: allowsAttachmentRemoval,
                     onPreview: onPreviewAttachment,
                     onOpen: onOpenAttachment,
+                    onEdit: onEditAttachment,
                     onArchive: onArchiveAttachment,
                     onRemove: allowsAttachmentRemoval ? onRemoveAttachment : nil,
                     headerAction: nil
@@ -123,6 +125,7 @@ struct NoteMetadataSectionsView: View {
                     onRestoreToDo: onRestoreToDo,
                     onPreviewAttachment: onPreviewAttachment,
                     onOpenAttachment: onOpenAttachment,
+                    onEditAttachment: onEditAttachment,
                     onRemoveAttachment: onRemoveAttachment,
                     onCopySnippet: onCopySnippet,
                     onPreviewSnippet: onPreviewSnippet,
@@ -189,6 +192,7 @@ private struct ArchivedNoteSectionView: View {
     let onRestoreToDo: (ToDo) async -> Void
     let onPreviewAttachment: (Attachment) -> Void
     let onOpenAttachment: (Attachment) -> Void
+    let onEditAttachment: ((Attachment) -> Void)?
     let onRemoveAttachment: (Attachment) -> Void
     let onCopySnippet: (NoteSnippet) -> Void
     let onPreviewSnippet: ((NoteSnippet) -> Void)?
@@ -298,6 +302,9 @@ private struct ArchivedNoteSectionView: View {
                 allowsRemoval: allowsAttachmentRemoval,
                 onPreview: { onPreviewAttachment(attachmentItem.attachment) },
                 onOpen: { onOpenAttachment(attachmentItem.attachment) },
+                onEdit: onEditAttachment.map { action in
+                    { action(attachmentItem.attachment) }
+                },
                 onArchive: nil,
                 onRemove: allowsAttachmentRemoval ? { onRemoveAttachment(attachmentItem.attachment) } : nil
             )

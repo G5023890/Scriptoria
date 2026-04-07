@@ -17,6 +17,7 @@ struct ImportAttachmentUseCase {
             originalFileName: imported.originalFileName,
             mimeType: imported.mimeType,
             category: imported.category,
+            description: nil,
             relativePath: imported.relativePath,
             fileSize: imported.fileSize,
             checksum: imported.checksum,

@@ -55,6 +55,7 @@ enum SchemaDefinition {
         original_file_name TEXT NOT NULL,
         mime_type TEXT,
         category TEXT NOT NULL,
+        description TEXT,
         relative_path TEXT NOT NULL,
         file_size INTEGER,
         checksum TEXT,

@@ -26,6 +26,7 @@ struct IndexNoteForSearchUseCase {
                     attachment.fileName,
                     attachment.mimeType,
                     attachment.category.rawValue,
+                    attachment.description,
                     fileExtension.isEmpty ? nil : fileExtension
                 ]
                 .compactMap { $0 }

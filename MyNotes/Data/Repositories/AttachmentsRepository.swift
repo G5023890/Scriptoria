@@ -13,6 +13,7 @@ protocol AttachmentsRepository {
     func snippet(id: String) async throws -> NoteSnippet?
     func snippets(for noteID: NoteID, includeCode: Bool) async throws -> [NoteSnippet]
     func add(attachment: Attachment) async throws
+    func update(attachment: Attachment) async throws -> Attachment?
     func remove(attachmentID: AttachmentID) async throws
     func setAttachmentArchived(attachmentID: AttachmentID, isArchived: Bool) async throws -> Attachment?
     func setSnippetArchived(snippetID: String, isArchived: Bool) async throws -> NoteSnippet?
@@ -42,6 +43,10 @@ struct LocalAttachmentsRepository: AttachmentsRepository {
 
     func add(attachment: Attachment) async throws {
         try dataSource.add(attachment)
+    }
+
+    func update(attachment: Attachment) async throws -> Attachment? {
+        try dataSource.update(attachment)
     }
 
     func remove(attachmentID: AttachmentID) async throws {
@@ -95,6 +100,23 @@ struct SyncAwareAttachmentsRepository: AttachmentsRepository {
     func add(attachment: Attachment) async throws {
         try await base.add(attachment: attachment)
         try await enqueue(.attachment, entityID: attachment.id.rawValue, operation: .create, payloadVersion: attachment.version)
+    }
+
+    func update(attachment: Attachment) async throws -> Attachment? {
+        let existingAttachment = try await base.attachment(id: attachment.id)
+        let updatedAttachment = try await base.update(attachment: attachment)
+
+        guard existingAttachment != updatedAttachment, let updatedAttachment else {
+            return updatedAttachment
+        }
+
+        try await enqueue(
+            .attachment,
+            entityID: attachment.id.rawValue,
+            operation: .update,
+            payloadVersion: updatedAttachment.version
+        )
+        return updatedAttachment
     }
 
     func remove(attachmentID: AttachmentID) async throws {
