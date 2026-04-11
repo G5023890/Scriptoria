@@ -343,6 +343,13 @@ struct NoteDetailView: View {
                     Text(preview.title)
                         .font(AppTypography.section)
                     Spacer()
+                    Button("Copy") {
+                        if effectiveMode == .read {
+                            viewModel.copyAttachmentPreview(preview)
+                        } else {
+                            editorViewModel?.copyAttachmentPreview(preview)
+                        }
+                    }
                     Button("Done") {
                         editorViewModel?.dismissAttachmentPreview()
                         viewModel.dismissAttachmentPreview()

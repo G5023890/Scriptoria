@@ -45,6 +45,7 @@ extension AppEnvironment {
             removeAttachmentUseCase: removeAttachmentUseCase,
             prepareAttachmentPreviewUseCase: prepareAttachmentPreviewUseCase,
             openAttachmentUseCase: openAttachmentUseCase,
+            copyAttachmentUseCase: copyAttachmentUseCase,
             copySnippetUseCase: copySnippetUseCase,
             attachmentsRepository: attachmentsRepository,
             syntaxHighlightService: syntaxHighlightService
@@ -76,6 +77,7 @@ extension AppEnvironment {
             removeAttachmentUseCase: removeAttachmentUseCase,
             prepareAttachmentPreviewUseCase: prepareAttachmentPreviewUseCase,
             openAttachmentUseCase: openAttachmentUseCase,
+            copyAttachmentUseCase: copyAttachmentUseCase,
             copySnippetUseCase: copySnippetUseCase,
             syntaxHighlightService: syntaxHighlightService,
             onSave: onSave

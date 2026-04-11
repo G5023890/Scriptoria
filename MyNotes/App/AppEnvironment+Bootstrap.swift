@@ -133,6 +133,7 @@ extension AppEnvironment {
             quickLookService: quickLookService
         )
         let openAttachmentUseCase = OpenAttachmentUseCase(quickLookService: quickLookService)
+        let copyAttachmentUseCase = CopyAttachmentUseCase(clipboardService: clipboardService)
         let copySnippetUseCase = CopySnippetUseCase(clipboardService: clipboardService)
         let refreshToDoNotificationsUseCase = RefreshToDoNotificationsUseCase(
             toDoRepository: toDoRepository,
@@ -321,6 +322,7 @@ extension AppEnvironment {
             removeAttachmentUseCase: removeAttachmentUseCase,
             prepareAttachmentPreviewUseCase: prepareAttachmentPreviewUseCase,
             openAttachmentUseCase: openAttachmentUseCase,
+            copyAttachmentUseCase: copyAttachmentUseCase,
             copySnippetUseCase: copySnippetUseCase,
             quickCaptureUseCase: quickCaptureUseCase,
             seedSampleDataUseCase: seedSampleDataUseCase,

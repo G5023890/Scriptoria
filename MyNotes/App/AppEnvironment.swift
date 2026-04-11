@@ -65,6 +65,7 @@ final class AppEnvironment {
     let removeAttachmentUseCase: RemoveAttachmentUseCase
     let prepareAttachmentPreviewUseCase: PrepareAttachmentPreviewUseCase
     let openAttachmentUseCase: OpenAttachmentUseCase
+    let copyAttachmentUseCase: CopyAttachmentUseCase
     let copySnippetUseCase: CopySnippetUseCase
     let quickCaptureUseCase: QuickCaptureUseCase
     let seedSampleDataUseCase: SeedSampleDataUseCase
@@ -132,6 +133,7 @@ final class AppEnvironment {
         removeAttachmentUseCase: RemoveAttachmentUseCase,
         prepareAttachmentPreviewUseCase: PrepareAttachmentPreviewUseCase,
         openAttachmentUseCase: OpenAttachmentUseCase,
+        copyAttachmentUseCase: CopyAttachmentUseCase,
         copySnippetUseCase: CopySnippetUseCase,
         quickCaptureUseCase: QuickCaptureUseCase,
         seedSampleDataUseCase: SeedSampleDataUseCase,
@@ -198,6 +200,7 @@ final class AppEnvironment {
         self.removeAttachmentUseCase = removeAttachmentUseCase
         self.prepareAttachmentPreviewUseCase = prepareAttachmentPreviewUseCase
         self.openAttachmentUseCase = openAttachmentUseCase
+        self.copyAttachmentUseCase = copyAttachmentUseCase
         self.copySnippetUseCase = copySnippetUseCase
         self.quickCaptureUseCase = quickCaptureUseCase
         self.seedSampleDataUseCase = seedSampleDataUseCase

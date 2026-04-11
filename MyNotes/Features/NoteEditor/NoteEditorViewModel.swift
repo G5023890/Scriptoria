@@ -48,6 +48,7 @@ final class NoteEditorViewModel {
     private let removeAttachmentUseCase: RemoveAttachmentUseCase
     private let prepareAttachmentPreviewUseCase: PrepareAttachmentPreviewUseCase
     private let openAttachmentUseCase: OpenAttachmentUseCase
+    private let copyAttachmentUseCase: CopyAttachmentUseCase
     private let copySnippetUseCase: CopySnippetUseCase
     let syntaxHighlightService: any SyntaxHighlightService
     private let onSave: @MainActor () async -> Void
@@ -77,6 +78,7 @@ final class NoteEditorViewModel {
         removeAttachmentUseCase: RemoveAttachmentUseCase,
         prepareAttachmentPreviewUseCase: PrepareAttachmentPreviewUseCase,
         openAttachmentUseCase: OpenAttachmentUseCase,
+        copyAttachmentUseCase: CopyAttachmentUseCase,
         copySnippetUseCase: CopySnippetUseCase,
         syntaxHighlightService: any SyntaxHighlightService,
         onSave: @escaping @MainActor () async -> Void
@@ -104,6 +106,7 @@ final class NoteEditorViewModel {
         self.removeAttachmentUseCase = removeAttachmentUseCase
         self.prepareAttachmentPreviewUseCase = prepareAttachmentPreviewUseCase
         self.openAttachmentUseCase = openAttachmentUseCase
+        self.copyAttachmentUseCase = copyAttachmentUseCase
         self.copySnippetUseCase = copySnippetUseCase
         self.syntaxHighlightService = syntaxHighlightService
         self.onSave = onSave
@@ -522,6 +525,11 @@ final class NoteEditorViewModel {
         } catch {
             errorMessage = "Open failed: \(error.localizedDescription)"
         }
+    }
+
+    func copyAttachmentPreview(_ preview: AttachmentPreviewState) {
+        copyAttachmentUseCase.execute(fileURL: preview.url)
+        lastSavedText = "Copied \(preview.title)"
     }
 
     func dismissAttachmentPreview() {

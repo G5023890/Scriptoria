@@ -46,6 +46,7 @@ final class NoteDetailViewModel {
     private let removeAttachmentUseCase: RemoveAttachmentUseCase
     private let prepareAttachmentPreviewUseCase: PrepareAttachmentPreviewUseCase
     private let openAttachmentUseCase: OpenAttachmentUseCase
+    private let copyAttachmentUseCase: CopyAttachmentUseCase
     private let copySnippetUseCase: CopySnippetUseCase
     private let attachmentsRepository: any AttachmentsRepository
     let syntaxHighlightService: any SyntaxHighlightService
@@ -72,6 +73,7 @@ final class NoteDetailViewModel {
         removeAttachmentUseCase: RemoveAttachmentUseCase,
         prepareAttachmentPreviewUseCase: PrepareAttachmentPreviewUseCase,
         openAttachmentUseCase: OpenAttachmentUseCase,
+        copyAttachmentUseCase: CopyAttachmentUseCase,
         copySnippetUseCase: CopySnippetUseCase,
         attachmentsRepository: any AttachmentsRepository,
         syntaxHighlightService: any SyntaxHighlightService
@@ -97,6 +99,7 @@ final class NoteDetailViewModel {
         self.removeAttachmentUseCase = removeAttachmentUseCase
         self.prepareAttachmentPreviewUseCase = prepareAttachmentPreviewUseCase
         self.openAttachmentUseCase = openAttachmentUseCase
+        self.copyAttachmentUseCase = copyAttachmentUseCase
         self.copySnippetUseCase = copySnippetUseCase
         self.attachmentsRepository = attachmentsRepository
         self.syntaxHighlightService = syntaxHighlightService
@@ -204,6 +207,10 @@ final class NoteDetailViewModel {
         } catch {
             errorMessage = "Open failed: \(error.localizedDescription)"
         }
+    }
+
+    func copyAttachmentPreview(_ preview: AttachmentPreviewState) {
+        copyAttachmentUseCase.execute(fileURL: preview.url)
     }
 
     func removeAttachment(_ attachment: Attachment) async {
