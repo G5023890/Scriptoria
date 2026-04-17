@@ -412,7 +412,11 @@ struct NoteTaskPreviewSheet: View {
             .modifier(PanelSurfaceModifier())
         }
         .padding(AppSpacing.large)
+        #if os(macOS)
         .frame(minWidth: 520, minHeight: 360)
+        #else
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        #endif
     }
 }
 
@@ -495,6 +499,10 @@ struct ToDoEditorSheet: View {
             }
         }
         .padding(AppSpacing.large)
+        #if os(macOS)
         .frame(minWidth: 420, minHeight: 420)
+        #else
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        #endif
     }
 }

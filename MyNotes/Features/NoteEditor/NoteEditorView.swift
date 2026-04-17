@@ -14,12 +14,25 @@ struct NoteEditorPane: View {
             case .edit:
                 editor
             case .split:
-                HSplitView {
-                    editor
-                    preview
-                }
+                splitEditor
             }
         }
+    }
+
+    @ViewBuilder
+    private var splitEditor: some View {
+        #if os(macOS)
+        HSplitView {
+            editor
+            preview
+        }
+        #else
+        VStack(spacing: 0) {
+            editor
+            Divider()
+            preview
+        }
+        #endif
     }
 
     private var editor: some View {

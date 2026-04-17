@@ -35,6 +35,10 @@ struct AttachmentEditSheet: View {
             }
         }
         .padding(AppSpacing.large)
+        #if os(macOS)
         .frame(width: 620)
+        #else
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        #endif
     }
 }

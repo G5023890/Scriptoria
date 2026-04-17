@@ -1,6 +1,12 @@
+import SwiftUI
+
+#if os(macOS)
 import AppKit
 import QuickLookUI
-import SwiftUI
+#else
+import UIKit
+import QuickLook
+#endif
 
 struct AttachmentSectionView: View {
     let title: String
@@ -157,6 +163,7 @@ private struct LocalImageThumbnailView: View {
 
     var body: some View {
         Group {
+            #if os(macOS)
             if let image = NSImage(contentsOf: url) {
                 Image(nsImage: image)
                     .resizable()
@@ -165,6 +172,16 @@ private struct LocalImageThumbnailView: View {
                 Image(systemName: "photo")
                     .foregroundStyle(.secondary)
             }
+            #else
+            if let image = UIImage(contentsOfFile: url.path) {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFill()
+            } else {
+                Image(systemName: "photo")
+                    .foregroundStyle(.secondary)
+            }
+            #endif
         }
         .frame(width: 28, height: 28)
         .clipShape(RoundedRectangle(cornerRadius: 8))
@@ -175,6 +192,7 @@ private struct LocalImageThumbnailView: View {
     }
 }
 
+#if os(macOS)
 struct QuickLookPreviewSheet: NSViewRepresentable {
     let url: URL
 
@@ -191,3 +209,39 @@ struct QuickLookPreviewSheet: NSViewRepresentable {
         (nsView as? QLPreviewView)?.previewItem = url as NSURL
     }
 }
+#else
+struct QuickLookPreviewSheet: UIViewControllerRepresentable {
+    let url: URL
+
+    func makeUIViewController(context: Context) -> QLPreviewController {
+        let controller = QLPreviewController()
+        controller.dataSource = context.coordinator
+        return controller
+    }
+
+    func updateUIViewController(_ uiViewController: QLPreviewController, context: Context) {
+        uiViewController.dataSource = context.coordinator
+        uiViewController.reloadData()
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(url: url)
+    }
+
+    final class Coordinator: NSObject, QLPreviewControllerDataSource {
+        let url: URL
+
+        init(url: URL) {
+            self.url = url
+        }
+
+        func numberOfPreviewItems(in controller: QLPreviewController) -> Int {
+            1
+        }
+
+        func previewController(_ controller: QLPreviewController, previewItemAt index: Int) -> QLPreviewItem {
+            url as NSURL
+        }
+    }
+}
+#endif

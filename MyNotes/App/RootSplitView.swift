@@ -39,7 +39,8 @@ struct RootSplitView: View {
                 NotesListView(
                     viewModel: notesListViewModel,
                     searchViewModel: searchViewModel,
-                    coordinator: coordinator
+                    coordinator: coordinator,
+                    isBottomSearchPresented: .constant(false)
                 )
             }
         } detail: {

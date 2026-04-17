@@ -357,7 +357,11 @@ struct NoteDetailView: View {
                 }
 
                 QuickLookPreviewSheet(url: preview.url)
+                    #if os(macOS)
                     .frame(minWidth: 680, minHeight: 520)
+                    #else
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    #endif
             }
             .padding(AppSpacing.large)
         }
@@ -601,7 +605,11 @@ private struct SnippetPreviewSheet: View {
             .modifier(PanelSurfaceModifier())
         }
         .padding(AppSpacing.large)
+        #if os(macOS)
         .frame(minWidth: 680, minHeight: 520)
+        #else
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        #endif
     }
 }
 
@@ -654,6 +662,10 @@ private struct ManualSnippetSheet: View {
             }
         }
         .padding(AppSpacing.large)
+        #if os(macOS)
         .frame(width: 640, height: 520)
+        #else
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        #endif
     }
 }

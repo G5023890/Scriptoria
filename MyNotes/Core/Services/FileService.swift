@@ -97,7 +97,7 @@ struct LocalFileService: FileService {
             return
         }
 
-        guard let sourceURL = Bundle.module.url(
+        guard let sourceURL = resourceBundle.url(
             forResource: resourceName,
             withExtension: resourceExtension,
             subdirectory: subdirectory
@@ -112,6 +112,13 @@ struct LocalFileService: FileService {
 
     func importAttachment(from sourceURL: URL, noteID: NoteID, attachmentID: AttachmentID) throws -> ImportedAttachmentFile {
         try ensureBaseDirectories()
+
+        let scopedAccessStarted = sourceURL.startAccessingSecurityScopedResource()
+        defer {
+            if scopedAccessStarted {
+                sourceURL.stopAccessingSecurityScopedResource()
+            }
+        }
 
         let originalFileName = sourceURL.lastPathComponent
         let resourceValues = try? sourceURL.resourceValues(forKeys: [.contentTypeKey, .fileSizeKey])
@@ -177,6 +184,14 @@ struct LocalFileService: FileService {
         let url = try absoluteURL(for: relativePath)
         guard fileManager.fileExists(atPath: url.path) else { return }
         try fileManager.removeItem(at: url)
+    }
+
+    private var resourceBundle: Bundle {
+        #if SWIFT_PACKAGE
+        .module
+        #else
+        .main
+        #endif
     }
 
     private func typeForSourceURL(_ sourceURL: URL) -> UTType? {

@@ -1,5 +1,6 @@
 import SwiftUI
 
+#if os(macOS)
 @main
 struct MyNotesApp: App {
     @State private var coordinator = AppCoordinator()
@@ -34,3 +35,16 @@ struct MyNotesApp: App {
         }
     }
 }
+#else
+@main
+struct MyNotesApp: App {
+    @State private var coordinator = AppCoordinator()
+    private let environment = AppEnvironment.bootstrap()
+
+    var body: some Scene {
+        WindowGroup {
+            IPhoneRootView(coordinator: coordinator, environment: environment)
+        }
+    }
+}
+#endif

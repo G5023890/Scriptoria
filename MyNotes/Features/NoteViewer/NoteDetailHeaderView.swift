@@ -72,13 +72,13 @@ struct NoteDetailHeaderView: View {
             HStack(spacing: AppSpacing.small) {
                 labelsButton
 
-                labeledToolbarButton(title: "Add Task", systemImage: AppIcons.tasks, action: onAddTask)
+                labeledToolbarButton(title: "Task", systemImage: AppIcons.tasks, action: onAddTask)
                     .disabled(snapshot.note.isDeleted)
 
-                labeledToolbarButton(title: "Add Snippet", systemImage: AppIcons.code, action: onAddSnippet)
+                labeledToolbarButton(title: "Snippet", systemImage: AppIcons.code, action: onAddSnippet)
                     .disabled(snapshot.note.isDeleted)
 
-                labeledToolbarButton(title: "Add Attachment", systemImage: AppIcons.attachment, action: onAddAttachment)
+                labeledToolbarButton(title: "Attachment", systemImage: AppIcons.attachment, action: onAddAttachment)
                     .disabled(snapshot.note.isDeleted)
 
                 if snapshot.note.isDeleted {

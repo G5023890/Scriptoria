@@ -6,12 +6,7 @@ struct ToDosListView: View {
     @Bindable var coordinator: AppCoordinator
 
     var body: some View {
-        let selection = Binding<ToDoID?>(
-            get: { coordinator.selectedToDoID },
-            set: { coordinator.selectedToDoID = $0 }
-        )
-
-        return List(selection: selection) {
+        return List {
             ForEach(viewModel.sections) { section in
                 tasksSection(section)
             }
@@ -36,12 +31,18 @@ struct ToDosListView: View {
     private func tasksSection(_ section: ToDoSectionModel) -> some View {
         Section(section.group.title) {
             ForEach(section.rows) { row in
+                #if os(iOS)
+                NavigationLink(value: TaskDetailRoute(noteID: row.todo.noteID, toDoID: row.id)) {
+                    ToDoListRowView(row: row)
+                }
+                #else
                 ToDoListRowView(row: row)
                     .tag(row.id)
                     .contentShape(Rectangle())
                     .onTapGesture {
                         coordinator.revealToDo(noteID: row.todo.noteID, toDoID: row.id)
                     }
+                #endif
             }
         }
     }

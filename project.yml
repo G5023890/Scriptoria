@@ -1,0 +1,82 @@
+name: MyNotes
+
+options:
+  bundleIdPrefix: com.grigorym
+  deploymentTarget:
+    iOS: "26.0"
+
+packages:
+  Highlightr:
+    path: Vendor/Highlightr
+
+settings:
+  base:
+    SWIFT_VERSION: 5.10
+
+targets:
+  MyNotes:
+    type: application
+    platform: iOS
+    sources:
+      - path: MyNotes
+        excludes:
+          - Resources
+    dependencies:
+      - package: Highlightr
+        product: Highlightr
+    resources:
+      - path: MyNotes/Resources/Assets.xcassets
+      - path: MyNotes/Resources/SampleData
+      - path: MyNotes/Resources/README.md
+    preBuildScripts:
+      - name: Compile App Icon Asset Catalog
+        script: |
+          set -euo pipefail
+
+          case "${PLATFORM_NAME:-}" in
+            iphoneos)
+              ACTOOL_PLATFORM="iphoneos"
+              ;;
+            iphonesimulator)
+              ACTOOL_PLATFORM="iphonesimulator"
+              ;;
+            *)
+              exit 0
+              ;;
+          esac
+
+          ASSET_CATALOG_DIR="$SRCROOT/MyNotes/Resources/Assets.xcassets"
+          OUTPUT_DIR="$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH"
+
+          if [[ -d "$ASSET_CATALOG_DIR" ]]; then
+            /usr/bin/xcrun actool "$ASSET_CATALOG_DIR" \
+              --compile "$OUTPUT_DIR" \
+              --platform "$ACTOOL_PLATFORM" \
+              --minimum-deployment-target "$IPHONEOS_DEPLOYMENT_TARGET" \
+              --target-device iphone \
+              --app-icon AppIcon \
+              --output-partial-info-plist "$TARGET_TEMP_DIR/assetcatalog_generated_info.plist"
+          fi
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.grigorym.MyNotes
+        PRODUCT_NAME: MyNotes
+        DEVELOPMENT_TEAM: 9FP39GTDT5
+        GENERATE_INFOPLIST_FILE: NO
+        INFOPLIST_FILE: MyNotes/Info.plist
+        MARKETING_VERSION: "0.9.11"
+        CURRENT_PROJECT_VERSION: "0.9.11"
+        CODE_SIGN_STYLE: Automatic
+        TARGETED_DEVICE_FAMILY: 1
+        SUPPORTS_MACCATALYST: NO
+        SWIFT_EMIT_LOC_STRINGS: YES
+
+schemes:
+  MyNotes:
+    build:
+      targets:
+        MyNotes: all
+    run:
+      config: Debug
+    test:
+      config: Debug

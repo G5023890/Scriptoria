@@ -7,27 +7,18 @@ struct SearchResultsView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: AppSpacing.medium) {
-            List(viewModel.results, selection: $coordinator.selectedNoteID) { result in
-                VStack(alignment: .leading, spacing: AppSpacing.small) {
-                    HStack(spacing: AppSpacing.small) {
-                        Image(systemName: iconName(for: result.kind))
-                            .foregroundStyle(.secondary)
-                        Text(result.title)
-                            .font(AppTypography.bodySemibold)
-                    }
-                    Text(result.excerpt)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(3)
-                    HStack {
-                        Text(result.matchedField)
-                        Spacer()
-                        Text(result.kind.rawValue.capitalized)
-                    }
-                    .font(AppTypography.caption)
-                    .foregroundStyle(.secondary)
+            #if os(iOS)
+            List(viewModel.results) { result in
+                NavigationLink(value: result.noteID) {
+                    resultRow(result)
                 }
+            }
+            #else
+            List(viewModel.results, selection: $coordinator.selectedNoteID) { result in
+                resultRow(result)
                 .tag(result.noteID)
             }
+            #endif
         }
         .overlay {
             if viewModel.results.isEmpty && !viewModel.isLoading {
@@ -37,6 +28,27 @@ struct SearchResultsView: View {
                     description: Text("No notes matched \"\(viewModel.queryText)\".")
                 )
             }
+        }
+    }
+
+    private func resultRow(_ result: SearchResult) -> some View {
+        VStack(alignment: .leading, spacing: AppSpacing.small) {
+            HStack(spacing: AppSpacing.small) {
+                Image(systemName: iconName(for: result.kind))
+                    .foregroundStyle(.secondary)
+                Text(result.title)
+                    .font(AppTypography.bodySemibold)
+            }
+            Text(result.excerpt)
+                .foregroundStyle(.secondary)
+                .lineLimit(3)
+            HStack {
+                Text(result.matchedField)
+                Spacer()
+                Text(result.kind.rawValue.capitalized)
+            }
+            .font(AppTypography.caption)
+            .foregroundStyle(.secondary)
         }
     }
 

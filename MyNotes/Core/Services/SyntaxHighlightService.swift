@@ -1,7 +1,10 @@
 import Foundation
 import Highlightr
+
 #if os(macOS)
 import AppKit
+#elseif canImport(UIKit)
+import UIKit
 #endif
 
 @MainActor
@@ -32,6 +35,9 @@ final class HighlightrSyntaxHighlightService: SyntaxHighlightService {
         #if os(macOS)
         let font = NSFont.monospacedSystemFont(ofSize: 12, weight: .regular)
         highlightr?.theme.setCodeFont(font)
+        #elseif canImport(UIKit)
+        let font = UIFont.monospacedSystemFont(ofSize: 12, weight: .regular)
+        highlightr?.theme.setCodeFont(font)
         #endif
         self.highlightr = highlightr
     }
@@ -60,6 +66,23 @@ final class HighlightrSyntaxHighlightService: SyntaxHighlightService {
             green: Double(color.greenComponent),
             blue: Double(color.blueComponent),
             alpha: Double(color.alphaComponent)
+        )
+        #elseif canImport(UIKit)
+        guard let color = highlightr?.theme.themeBackgroundColor else {
+            return nil
+        }
+
+        let components = color.cgColor.components ?? [0.95, 0.96, 0.98, 1.0]
+        let red = components.count > 0 ? Double(components[0]) : 0.95
+        let green = components.count > 1 ? Double(components[1]) : 0.96
+        let blue = components.count > 2 ? Double(components[2]) : 0.98
+        let alpha = color.cgColor.alpha
+
+        return ColorComponents(
+            red: red,
+            green: green,
+            blue: blue,
+            alpha: Double(alpha)
         )
         #else
         return nil

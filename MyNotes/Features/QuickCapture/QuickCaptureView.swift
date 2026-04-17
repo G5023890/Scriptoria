@@ -82,7 +82,11 @@ struct QuickCaptureView: View {
             .padding(.top, AppSpacing.small)
         }
         .padding(AppSpacing.large)
+        #if os(macOS)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        #else
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        #endif
         .task {
             await viewModel.load()
         }

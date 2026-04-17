@@ -1,3 +1,4 @@
+#if os(macOS)
 import SwiftUI
 
 struct QuickCaptureWindowScene: View {
@@ -25,3 +26,4 @@ struct QuickCaptureWindowScene: View {
         .frame(minWidth: 560, minHeight: 560)
     }
 }
+#endif

@@ -215,7 +215,11 @@ struct SnippetInlinePreviewSheet: View {
             .modifier(PanelSurfaceModifier())
         }
         .padding(AppSpacing.large)
+        #if os(macOS)
         .frame(minWidth: 680, minHeight: 520)
+        #else
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        #endif
     }
 
     private var previewLanguageTitle: String {

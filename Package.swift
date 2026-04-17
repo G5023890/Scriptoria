@@ -4,7 +4,8 @@ import PackageDescription
 let package = Package(
     name: "MyNotes",
     platforms: [
-        .macOS("26.0")
+        .macOS("26.0"),
+        .iOS("26.0")
     ],
     products: [
         .executable(name: "MyNotes", targets: ["MyNotes"])

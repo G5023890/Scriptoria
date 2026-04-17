@@ -1,3 +1,4 @@
+#if os(macOS)
 import AppKit
 import Observation
 import SwiftUI
@@ -52,3 +53,4 @@ struct MyNotesMenuBarExtra: View {
         .frame(minWidth: 220)
     }
 }
+#endif

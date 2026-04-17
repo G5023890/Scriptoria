@@ -3,6 +3,8 @@ import SwiftUI
 
 struct SidebarView: View {
     @Bindable var viewModel: SidebarViewModel
+    var showsTasks: Bool = true
+    var title: String = "MyNotes"
 
     private var errorAlertPresented: Binding<Bool> {
         Binding(
@@ -16,54 +18,13 @@ struct SidebarView: View {
     }
 
     var body: some View {
-        List(selection: $viewModel.selection) {
-            Section("Browse") {
-                ForEach(SmartCollection.allCases) { collection in
-                    HStack(spacing: AppSpacing.small) {
-                        SwiftUI.Label(collection.title, systemImage: collection.systemImage)
-                        Spacer()
-                        InfoBadge(text: "\(viewModel.noteCount(for: collection))")
-                    }
-                    .tag(SidebarSelection.collection(collection))
-                    .contextMenu {
-                        if collection == .trash {
-                            Button("Empty Trash") {
-                                viewModel.requestEmptyTrash()
-                            }
-                        }
-                    }
-                }
-            }
-
-            Divider()
-
-            Section("Labels") {
-                ForEach(viewModel.labels) { item in
-                    HStack(spacing: AppSpacing.small) {
-                        LabelIconView(label: item.label)
-                            .font(.system(size: 13, weight: .semibold))
-                        Text(item.label.name)
-                        Spacer()
-                        InfoBadge(text: "\(item.noteCount)")
-                    }
-                    .tag(SidebarSelection.label(item.label.id))
-                    .contextMenu {
-                        Button("Edit") {
-                            viewModel.beginEditing(for: item)
-                        }
-
-                        Button("Delete", role: .destructive) {
-                            Task {
-                                await viewModel.deleteLabel(item)
-                            }
-                        }
-                        .disabled(item.label.isSystem)
-                    }
-                }
-            }
-        }
+        sidebarList
+        #if os(macOS)
         .listStyle(.sidebar)
-        .navigationTitle("MyNotes")
+        #else
+        .listStyle(.insetGrouped)
+        #endif
+        .navigationTitle(title)
         .sheet(item: $viewModel.labelBeingEdited) { item in
             editLabelSheet(for: item)
         }
@@ -74,6 +35,113 @@ struct SidebarView: View {
         } message: {
             Text(viewModel.errorMessage ?? "Unknown error")
         }
+    }
+
+    @ViewBuilder
+    private var sidebarList: some View {
+        #if os(iOS)
+        List {
+            browseSection
+            Divider()
+            labelsSection
+        }
+        #else
+        List(selection: $viewModel.selection) {
+            browseSection
+            Divider()
+            labelsSection
+        }
+        #endif
+    }
+
+    private var browseSection: some View {
+        Section("Browse") {
+            ForEach(SmartCollection.allCases.filter { showsTasks || $0 != .tasks }) { collection in
+                collectionRow(for: collection)
+            }
+        }
+    }
+
+    private var labelsSection: some View {
+        Section("Labels") {
+            ForEach(viewModel.labels) { item in
+                labelRow(for: item)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func collectionRow(for collection: SmartCollection) -> some View {
+        sidebarRow(selection: .collection(collection)) {
+            HStack(spacing: AppSpacing.small) {
+                SwiftUI.Label(collection.title, systemImage: collection.systemImage)
+                Spacer()
+                InfoBadge(text: "\(viewModel.noteCount(for: collection))")
+            }
+        } onTap: {
+            viewModel.selection = .collection(collection)
+        } contextMenu: {
+            collectionContextMenu(for: collection)
+        }
+    }
+
+    @ViewBuilder
+    private func collectionContextMenu(for collection: SmartCollection) -> some View {
+        if collection == .trash {
+            Button("Empty Trash") {
+                viewModel.requestEmptyTrash()
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func labelRow(for item: SidebarLabelSummary) -> some View {
+        sidebarRow(selection: .label(item.label.id)) {
+            HStack(spacing: AppSpacing.small) {
+                LabelIconView(label: item.label)
+                    .font(.system(size: 13, weight: .semibold))
+                Text(item.label.name)
+                Spacer()
+                InfoBadge(text: "\(item.noteCount)")
+            }
+        } onTap: {
+            viewModel.selection = .label(item.label.id)
+        } contextMenu: {
+            Button("Edit") {
+                viewModel.beginEditing(for: item)
+            }
+
+            Button("Delete", role: .destructive) {
+                Task {
+                    await viewModel.deleteLabel(item)
+                }
+            }
+            .disabled(item.label.isSystem)
+        }
+    }
+
+    @ViewBuilder
+    private func sidebarRow<Content: View>(
+        selection: SidebarSelection,
+        @ViewBuilder content: () -> Content,
+        onTap: @escaping () -> Void,
+        @ViewBuilder contextMenu: () -> some View
+    ) -> some View {
+        #if os(iOS)
+        Button(action: onTap) {
+            content()
+        }
+        .buttonStyle(.plain)
+        .contextMenu {
+            contextMenu()
+        }
+        #else
+        content()
+            .tag(selection)
+            .contextMenu {
+                contextMenu()
+            }
+        #endif
     }
 
     @ViewBuilder
@@ -114,7 +182,11 @@ struct SidebarView: View {
             }
         }
         .padding(AppSpacing.large)
+        #if os(macOS)
         .frame(minWidth: 460, minHeight: 620)
+        #else
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        #endif
     }
 
     private var previewSection: some View {
