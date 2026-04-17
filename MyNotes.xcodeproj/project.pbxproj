@@ -1113,7 +1113,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 0.9.11;
+				CURRENT_PROJECT_VERSION = 0.9.12;
 				DEVELOPMENT_TEAM = 9FP39GTDT5;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = MyNotes/Info.plist;
@@ -1121,7 +1121,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.9.11;
+				MARKETING_VERSION = 0.9.12;
 				PRODUCT_BUNDLE_IDENTIFIER = com.grigorym.MyNotes;
 				PRODUCT_NAME = MyNotes;
 				SDKROOT = iphoneos;
@@ -1200,7 +1200,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 0.9.11;
+				CURRENT_PROJECT_VERSION = 0.9.12;
 				DEVELOPMENT_TEAM = 9FP39GTDT5;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = MyNotes/Info.plist;
@@ -1208,7 +1208,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.9.11;
+				MARKETING_VERSION = 0.9.12;
 				PRODUCT_BUNDLE_IDENTIFIER = com.grigorym.MyNotes;
 				PRODUCT_NAME = MyNotes;
 				SDKROOT = iphoneos;
