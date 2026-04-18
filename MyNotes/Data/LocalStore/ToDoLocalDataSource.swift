@@ -13,6 +13,36 @@ struct ToDoLocalDataSource {
         }
     }
 
+    func allToDosIncludingDeleted() throws -> [ToDo] {
+        try databaseManager.read { db in
+            try db.query(
+                statement: """
+                SELECT
+                    id,
+                    note_id,
+                    title,
+                    details,
+                    is_completed,
+                    is_archived,
+                    due_date,
+                    has_time_component,
+                    snoozed_until,
+                    priority,
+                    sort_order,
+                    created_at,
+                    updated_at,
+                    completed_at,
+                    is_deleted,
+                    deleted_at,
+                    version
+                FROM todos
+                ORDER BY created_at ASC;
+                """,
+                map: Self.mapToDo
+            )
+        }
+    }
+
     func create(_ todo: ToDo) throws {
         try databaseManager.write { db in
             try upsert(todo, using: db)

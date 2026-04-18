@@ -1,4 +1,8 @@
 import Foundation
+#if os(macOS)
+import Security
+#endif
+import UserNotifications
 
 extension AppEnvironment {
     @MainActor
@@ -9,7 +13,9 @@ extension AppEnvironment {
         let clipboardService = SystemClipboardService()
         let quickLookService = DefaultQuickLookService(fileService: fileService)
         let syntaxHighlightService = HighlightrSyntaxHighlightService()
-        let toDoNotificationScheduler = LocalToDoNotificationScheduler()
+        let toDoNotificationScheduler = LocalToDoNotificationScheduler(
+            center: notificationCenterIfAvailable()
+        )
         let databaseManager = DatabaseManager(fileService: fileService)
 
         let notesDataSource = NotesLocalDataSource(databaseManager: databaseManager)
@@ -26,7 +32,7 @@ extension AppEnvironment {
             fileService: fileService,
             dateService: dateService
         )
-        let toDoRepository = LocalToDoRepository(dataSource: toDoDataSource)
+        let localToDoRepository = LocalToDoRepository(dataSource: toDoDataSource)
         let searchIndexRepository = LocalSearchIndexRepository(dataSource: searchDataSource)
         let searchPolicy = SearchPolicy()
         let searchRepository = LocalSearchRepository(
@@ -38,21 +44,10 @@ extension AppEnvironment {
         let syncStateRepository = LocalSyncStateRepository(dataSource: syncDataSource, dateService: dateService)
         let conflictResolver = ConflictResolver()
         let syncMapper = SyncMapper()
-        let cloudKitSyncEngine = DefaultCloudKitSyncEngine(
-            configuration: .disabled,
-            syncQueue: syncQueue,
-            syncStateRepository: syncStateRepository,
-            syncMapper: syncMapper,
-            conflictResolver: conflictResolver,
-            notesDataSource: notesDataSource,
-            labelsDataSource: labelsDataSource,
-            attachmentsDataSource: attachmentsDataSource,
-            syncStatusStore: syncStatusStore,
-            dateService: dateService
-        )
         let notesRepository = SyncAwareNotesRepository(base: localNotesRepository, syncQueue: syncQueue)
         let labelsRepository = SyncAwareLabelsRepository(base: localLabelsRepository, syncQueue: syncQueue)
         let attachmentsRepository = SyncAwareAttachmentsRepository(base: localAttachmentsRepository, syncQueue: syncQueue)
+        let toDoRepository = SyncAwareToDoRepository(base: localToDoRepository, syncQueue: syncQueue)
         let snippetDetectionPolicy = SnippetDetectionPolicy(markdownService: markdownService)
 
         let listLabelsUseCase = ListLabelsUseCase(labelsRepository: labelsRepository)
@@ -139,6 +134,22 @@ extension AppEnvironment {
             toDoRepository: toDoRepository,
             notificationScheduler: toDoNotificationScheduler
         )
+        let cloudKitSyncEngine = DefaultCloudKitSyncEngine(
+            configuration: cloudKitSyncConfiguration(),
+            syncQueue: syncQueue,
+            syncStateRepository: syncStateRepository,
+            syncMapper: syncMapper,
+            conflictResolver: conflictResolver,
+            notesDataSource: notesDataSource,
+            labelsDataSource: labelsDataSource,
+            attachmentsDataSource: attachmentsDataSource,
+            toDoDataSource: toDoDataSource,
+            fileService: fileService,
+            searchIndexRepository: searchIndexRepository,
+            refreshToDoNotificationsUseCase: refreshToDoNotificationsUseCase,
+            syncStatusStore: syncStatusStore,
+            dateService: dateService
+        )
 
         let createNoteUseCase = CreateNoteUseCase(
             notesRepository: notesRepository,
@@ -206,6 +217,7 @@ extension AppEnvironment {
         )
         let removeToDoUseCase = RemoveToDoUseCase(
             toDoRepository: toDoRepository,
+            dateService: dateService,
             refreshToDoNotificationsUseCase: refreshToDoNotificationsUseCase
         )
         let restoreToDoUseCase = RestoreToDoUseCase(
@@ -254,11 +266,23 @@ extension AppEnvironment {
             indexNoteForSearchUseCase: indexNoteForSearchUseCase,
             dateService: dateService
         )
+        let storageCleanupUseCase = StorageCleanupUseCase(
+            attachmentsDataSource: attachmentsDataSource,
+            fileService: fileService,
+            syncStateRepository: syncStateRepository
+        )
         let bootstrapApplicationUseCase = BootstrapApplicationUseCase(
             databaseManager: databaseManager,
             seedSampleDataUseCase: seedSampleDataUseCase,
-            refreshToDoNotificationsUseCase: refreshToDoNotificationsUseCase
+            refreshToDoNotificationsUseCase: refreshToDoNotificationsUseCase,
+            storageCleanupUseCase: storageCleanupUseCase
         )
+
+        Task {
+            await syncQueue.setAutoSyncHandler {
+                await cloudKitSyncEngine.performSyncIfNeeded()
+            }
+        }
 
         return AppEnvironment(
             dateService: dateService,
@@ -326,6 +350,7 @@ extension AppEnvironment {
             copySnippetUseCase: copySnippetUseCase,
             quickCaptureUseCase: quickCaptureUseCase,
             seedSampleDataUseCase: seedSampleDataUseCase,
+            storageCleanupUseCase: storageCleanupUseCase,
             bootstrapApplicationUseCase: bootstrapApplicationUseCase
         )
     }
@@ -372,9 +397,76 @@ extension AppEnvironment {
 
     func performSyncIfNeeded() async {
         await cloudKitSyncEngine.performSyncIfNeeded()
+        NotificationCenter.default.post(name: .scriptoriaDidApplyRemoteSync, object: nil)
     }
 
     func processPendingSyncQueue() async {
         await cloudKitSyncEngine.processPendingSyncQueue()
     }
+
+    func performStorageCleanup(forceCloudKitCachePurge: Bool = false) async {
+        await storageCleanupUseCase.executeIfNeeded(forceCloudKitCachePurge: forceCloudKitCachePurge)
+    }
+
+    private static func notificationCenterIfAvailable() -> UNUserNotificationCenter? {
+        guard Bundle.main.bundleURL.pathExtension == "app" else {
+            return nil
+        }
+        return .current()
+    }
+
+    private static func cloudKitSyncConfiguration() -> CloudKitSyncConfiguration {
+        let isEnabled = ProcessInfo.processInfo.environment["SCRIPTORIA_ICLOUD_SYNC_DISABLED"] != "1"
+        let containerIdentifier = ProcessInfo.processInfo.environment["SCRIPTORIA_ICLOUD_CONTAINER"] ?? "iCloud.com.grigorym.MyNotes"
+
+        guard isEnabled else {
+            return .disabled
+        }
+
+        guard hasCloudKitRuntimeEntitlements(containerIdentifier: containerIdentifier) else {
+            return .disabled
+        }
+
+        return CloudKitSyncConfiguration(
+            isEnabled: true,
+            containerIdentifier: containerIdentifier,
+            databaseScope: .private
+        )
+    }
+
+    private static func hasCloudKitRuntimeEntitlements(containerIdentifier: String) -> Bool {
+        #if !os(macOS)
+        return true
+        #else
+        guard let task = SecTaskCreateFromSelf(nil) else {
+            return false
+        }
+
+        guard let containers = entitlementValue(
+            "com.apple.developer.icloud-container-identifiers",
+            task: task
+        ) as? [String],
+        containers.contains(containerIdentifier)
+        else {
+            return false
+        }
+
+        guard let services = entitlementValue(
+            "com.apple.developer.icloud-services",
+            task: task
+        ) as? [String],
+        services.contains("CloudKit")
+        else {
+            return false
+        }
+
+        return true
+        #endif
+    }
+
+    #if os(macOS)
+    private static func entitlementValue(_ key: String, task: SecTask) -> AnyObject? {
+        SecTaskCopyValueForEntitlement(task, key as CFString, nil)
+    }
+    #endif
 }

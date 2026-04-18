@@ -49,6 +49,39 @@ struct AttachmentsLocalDataSource {
         }
     }
 
+    func allAttachmentsIncludingDeleted() throws -> [Attachment] {
+        try databaseManager.read { db in
+            try db.query(
+                statement: """
+                SELECT
+                    id,
+                    note_id,
+                    file_name,
+                    original_file_name,
+                    mime_type,
+                    category,
+                    description,
+                    relative_path,
+                    file_size,
+                    checksum,
+                    width,
+                    height,
+                    duration,
+                    page_count,
+                    created_at,
+                    updated_at,
+                    is_archived,
+                    is_deleted,
+                    deleted_at,
+                    version
+                FROM attachments
+                ORDER BY created_at ASC;
+                """,
+                map: Self.mapAttachment
+            )
+        }
+    }
+
     func add(_ attachment: Attachment) throws {
         try databaseManager.write { db in
             try upsertAttachment(attachment, using: db)
@@ -168,6 +201,34 @@ struct AttachmentsLocalDataSource {
         }
     }
 
+    func allSnippetsIncludingDeleted() throws -> [NoteSnippet] {
+        try databaseManager.read { db in
+            try db.query(
+                statement: """
+                SELECT
+                    id,
+                    note_id,
+                    language,
+                    title,
+                    description,
+                    code,
+                    start_offset,
+                    end_offset,
+                    source_type,
+                    created_at,
+                    updated_at,
+                    is_archived,
+                    is_deleted,
+                    deleted_at,
+                    version
+                FROM snippets
+                ORDER BY created_at ASC;
+                """,
+                map: Self.mapSnippet
+            )
+        }
+    }
+
     func setSnippetArchived(
         snippetID: String,
         isArchived: Bool,
@@ -202,6 +263,12 @@ struct AttachmentsLocalDataSource {
             snippet.updatedAt = updatedAt
             snippet.version += 1
             return snippet
+        }
+    }
+
+    func saveSnippet(_ snippet: NoteSnippet) throws {
+        try databaseManager.write { db in
+            try upsertSnippet(snippet, using: db)
         }
     }
 

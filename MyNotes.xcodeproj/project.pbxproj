@@ -8,82 +8,168 @@
 
 /* Begin PBXBuildFile section */
 		006ACC259C2BC3F94D85B78C /* SearchNotesUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73455E7424BCDAAA3FDC5691 /* SearchNotesUseCase.swift */; };
+		020E6D741C45BAB1C148DE3D /* SearchRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C09ECFFBDE2A18B552FE1C06 /* SearchRepository.swift */; };
+		02A20EE576391E820E32ED68 /* NoteDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F508774CD67034C7CB9E1267 /* NoteDetailViewModel.swift */; };
+		0374F487A26B7E793F7E5791 /* SyncStateRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD80532EF17F4A5E7F125D9A /* SyncStateRepository.swift */; };
 		04150849A1BA485D20356900 /* AttachmentID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 202A09B03A5B1FC07B112A44 /* AttachmentID.swift */; };
+		04F4E38889E086539ACCB17B /* DeleteLabelUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7020C4099A736E421167E9F4 /* DeleteLabelUseCase.swift */; };
+		0520D534BDAB53C4E5C712CC /* ManualSnippetDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6475FFE98ACA40971ABBEF /* ManualSnippetDraft.swift */; };
 		055D22373A38691EFC89AC75 /* ToDosListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6311E9536DA12B141DD2A7A /* ToDosListView.swift */; };
+		0608B9EE6A53FB35064AD77E /* SyncQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38CAE56421B17D6408C38D38 /* SyncQueue.swift */; };
+		0636CC0744FE362E914C669F /* Date+Formatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA05A727839690F573A355D /* Date+Formatting.swift */; };
+		0676B8EF4F7A50A3E3FC2D06 /* AppCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2E13D35CB467CC47A34C9A8 /* AppCoordinator.swift */; };
 		06AAC93479998D8745A4658D /* AppTypography.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F921DA436ACFEDE300C943E /* AppTypography.swift */; };
+		070B28D568E2D0A3824A37F3 /* NoteDetailHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9242CF9935867DFA97978167 /* NoteDetailHeaderView.swift */; };
+		08773891FEBB37F7F753907E /* NoteDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6139F408840C5340655BE1A3 /* NoteDetailView.swift */; };
+		08D3F664B79E397711A4919B /* SyncLocalDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC6669A0E35DF79EE64D69D2 /* SyncLocalDataSource.swift */; };
 		0920BDE796B5A551BD42E478 /* UpdateNoteUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7181CDBE8C36EC6A5B4200BD /* UpdateNoteUseCase.swift */; };
+		09A671A35EF45CA6AF364927 /* SampleDataFactory+Labels.swift in Sources */ = {isa = PBXBuildFile; fileRef = C991DA52FEDF2567D12F7344 /* SampleDataFactory+Labels.swift */; };
+		0C053A3EBAABB924A1AFAEA3 /* AttachmentID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 202A09B03A5B1FC07B112A44 /* AttachmentID.swift */; };
 		0C51FAA463C69B8DAECB67D0 /* AppEnvironment+Bootstrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D260C79822832CAFED178A /* AppEnvironment+Bootstrap.swift */; };
+		0D1C51BCADBA0704F1563DCA /* RemoveToDoUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACB20DDB6EC3307FA629F5 /* RemoveToDoUseCase.swift */; };
+		0D218F34A0025FDFC2AB5A2A /* AppSpacing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90D6826CA2ECD695A37FDE21 /* AppSpacing.swift */; };
 		0E5FAB279F914B6A72ED130C /* RootSplitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B33FC63DE87B8B7917FA9C2 /* RootSplitView.swift */; };
+		0ED9C109B9041B4B9266905F /* AppColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31A239E769E52968BC8992A5 /* AppColors.swift */; };
+		0F4B70E8F94838A8AD255B94 /* FileService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7F71DDC0CCC06E672E763FF /* FileService.swift */; };
+		100AD7E33CEE29F05BD43863 /* SeedSampleDataUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 960FF60E9215D0B51F352C61 /* SeedSampleDataUseCase.swift */; };
 		10888CA9B0AA507AEC79386B /* SampleDataFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24B5ECEDC1266994FF62DE88 /* SampleDataFactory.swift */; };
+		124523978DAB2B3DFE284AC2 /* CompleteToDoUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D6F941B3F5ABE67741814D /* CompleteToDoUseCase.swift */; };
 		125F300C6FDAF75197D2F316 /* TogglePinUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0C554C518EE6D9110C30795 /* TogglePinUseCase.swift */; };
+		13DAED801BC089B6A1BB0B47 /* SearchPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = B81E17344C5819FA192CB3C8 /* SearchPolicy.swift */; };
+		15182C95F9C154125E19281E /* UpdateManualSnippetUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9179B07B89EFB4698609B1C8 /* UpdateManualSnippetUseCase.swift */; };
+		152705042A16A4B83D7AACD6 /* ArchiveAttachmentUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 540F5D2FD5BE953AF9DD269B /* ArchiveAttachmentUseCase.swift */; };
+		15C071CEAAB5A35A322B46D7 /* DeleteNoteUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8955F6B81E4AE9807F82D11E /* DeleteNoteUseCase.swift */; };
 		167425D5750F0B35F1F5BA49 /* SnippetSyntaxLanguage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1E46A7EBABF211DB25D46FD /* SnippetSyntaxLanguage.swift */; };
+		169141B4FAE7E41200BF34BC /* RemoveSnippetUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4B6F70EFCB53BCC34850B44 /* RemoveSnippetUseCase.swift */; };
 		1790DB4D92D5BDF5D83869DB /* NoteDetailScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A476AA58A5A1CC4752513D71 /* NoteDetailScreen.swift */; };
+		1DE1070EDCBB2245C5C94957 /* DatabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62C5C5DCDF1F1F886E56E8A0 /* DatabaseManager.swift */; };
+		1EDDF110A0E9B45B53678999 /* EmptyTrashUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4836086395CF9F8FDF505DE8 /* EmptyTrashUseCase.swift */; };
+		20096982C59D06AD4C5E580A /* SearchResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BE530599DD1AA5D54332F12 /* SearchResult.swift */; };
+		2048820971F955A13365603E /* StorageCleanupUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEC6396EC7F622B444B26958 /* StorageCleanupUseCase.swift */; };
 		20F726450371745E0BD27968 /* PanelSurfaceModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8292300A02A22C8B338F9D1 /* PanelSurfaceModifier.swift */; };
 		2105D244E2E263193080CDCA /* AttachmentEditDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = 267CFD460D094AA1C29D6BE6 /* AttachmentEditDraft.swift */; };
+		248C5B8D0955105EEB60FA81 /* RestoreNoteUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E279E59A042CD38DBAF8E14 /* RestoreNoteUseCase.swift */; };
 		251F767B0377F811DC3F7832 /* SidebarSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD56B9B17656E13320766D15 /* SidebarSelection.swift */; };
+		2520D9128252444083531201 /* NoteID.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3DC7E2B82D1182D01983D54 /* NoteID.swift */; };
+		25B8B1ABE05C2259941D0267 /* SnippetSectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B46C8F1932EBF223A8B6D93D /* SnippetSectionView.swift */; };
+		28813B70AAD30E4C65584489 /* SyncPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE242A23CE9ABEADDA077F8E /* SyncPolicy.swift */; };
+		2A044CE74B3D54E848E59F5C /* SyntaxHighlightedCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CD44A300CC211F7C231619D /* SyntaxHighlightedCodeView.swift */; };
 		2AB00A806C05EE0C84E0E3E6 /* ImportAttachmentUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AF65F0BEFCA60423681FD6A /* ImportAttachmentUseCase.swift */; };
+		2BF0A7FA56AAFD3A82B0B0AB /* SearchDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26B5944B7A2109D0DCF84582 /* SearchDocument.swift */; };
 		2E5BF3B41A4B9B70505602F9 /* Color+LabelHex.swift in Sources */ = {isa = PBXBuildFile; fileRef = CABC2D9306C4D22387D21736 /* Color+LabelHex.swift */; };
 		2E84F7BA89E6AB77A93B50BA /* SyncPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE242A23CE9ABEADDA077F8E /* SyncPolicy.swift */; };
+		2F540E5C4D97A6F7CC3C6A5A /* SchemaDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47F354CF7594D6BC76116FBB /* SchemaDefinition.swift */; };
+		2F670CE88A870BD302C64CB3 /* CopyAttachmentUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59CBFD2CF4BFE3644D1146DB /* CopyAttachmentUseCase.swift */; };
 		30B09441FB6ACC02804FDE8C /* NotesRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A9FAC6DAA7ED6A72F7FC450 /* NotesRepository.swift */; };
+		31A189B701F7977333A4092A /* UpdateNoteUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7181CDBE8C36EC6A5B4200BD /* UpdateNoteUseCase.swift */; };
+		32E4250EF5715198F3D3E9B2 /* Color+LabelHex.swift in Sources */ = {isa = PBXBuildFile; fileRef = CABC2D9306C4D22387D21736 /* Color+LabelHex.swift */; };
+		33479F634131989D83B9B97E /* ToDoNotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09083545629AC1085C9AF2FA /* ToDoNotificationService.swift */; };
 		349993004FD99802B395FB3D /* RestoreToDoUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C8ECD491CE6DCADED7D4F0 /* RestoreToDoUseCase.swift */; };
 		34B66D04E02AAC2FAFDE7244 /* NotesListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 052DB6F2342A213E127FCE1C /* NotesListViewModel.swift */; };
 		34E9CAA3CE2CCA6F174C2205 /* AssignLabelsUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2278B001D0535F095D725798 /* AssignLabelsUseCase.swift */; };
+		35EB8655760FF74A5CA0A2AD /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = E063E732AB41D3E77D7B559E /* AppEnvironment.swift */; };
+		363A6A389F9327E7EDDA4441 /* SidebarData.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5E9F94B6B0FF9636C147EC8 /* SidebarData.swift */; };
+		37451F769C843BE631B677CD /* String+Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D84E2C35DAEA51E7BE330F0 /* String+Utilities.swift */; };
 		37AD1C9A50C321BF0CBB8DAE /* NoteDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6139F408840C5340655BE1A3 /* NoteDetailView.swift */; };
 		37C5C8877E66E5B05E6E6DD4 /* RestoreNoteUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E279E59A042CD38DBAF8E14 /* RestoreNoteUseCase.swift */; };
 		3ACAADD190977A80E94FB733 /* AppIcons.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F16FAEA627F69C7DFEC82F /* AppIcons.swift */; };
+		3B917223491BA39049AAE5B1 /* ToDoPresentationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC0857394FB8D39E661F5CC3 /* ToDoPresentationModels.swift */; };
+		3BEBE13107CE2877AD26ABC0 /* LabelsLocalDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5C99EE5B7B8A7DABCFE82AE /* LabelsLocalDataSource.swift */; };
+		3C0B8F6F56EF6A83B0BA01E1 /* LabelID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D04296E9B23A97E21A05A74 /* LabelID.swift */; };
 		3F8A56BD058C92079F90072C /* RemoveAttachmentUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862BB091BF6AB3B2FD3E3055 /* RemoveAttachmentUseCase.swift */; };
+		3FE85B6F0084DD9C73925CCD /* RefreshToDoNotificationsUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9688C1EAB6F87D1F590EF53E /* RefreshToDoNotificationsUseCase.swift */; };
+		3FFD824949B6F3B6BF66B91D /* ListAllToDosUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B141262D19610B5E8A3D3B7 /* ListAllToDosUseCase.swift */; };
 		41F37D2CB40FEF060FDAF8B5 /* LabelsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE9A2922AE967DFDB4EB982A /* LabelsRepository.swift */; };
+		4246DD927DBE6B09A60B1072 /* TogglePinUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0C554C518EE6D9110C30795 /* TogglePinUseCase.swift */; };
 		432382AB7BD137AB98A38B38 /* SearchRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C09ECFFBDE2A18B552FE1C06 /* SearchRepository.swift */; };
+		43712C414F0F6996680901D1 /* DateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBFFD1343A53AA6DC9B3DE28 /* DateService.swift */; };
+		43AFE8695A86753B1D9DEBF2 /* SearchLocalDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D3BEDCC61D8CB83172BD7E /* SearchLocalDataSource.swift */; };
+		4497203B6E237FD51788D115 /* QuickCaptureViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 768FA9A78AB39C03422AAF7E /* QuickCaptureViewModel.swift */; };
 		45BA1307EDF6129177C8EA09 /* ListAllToDosUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B141262D19610B5E8A3D3B7 /* ListAllToDosUseCase.swift */; };
+		45E3AE91904993B477279EB4 /* LabelChipView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F9C49FF6FB13AA676BC78D1 /* LabelChipView.swift */; };
 		46CB5902991713B8CB87B880 /* NoteMetadataSectionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0850BE4CC1AAFFABB77C6C51 /* NoteMetadataSectionsView.swift */; };
 		47A90FFEF3C1245F098B3CE3 /* SearchIndexRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD698DBABCDEC1B30C8D4D33 /* SearchIndexRepository.swift */; };
 		488CAA563615D6167B117990 /* SidebarData.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5E9F94B6B0FF9636C147EC8 /* SidebarData.swift */; };
 		48D7CB72EA7F3006275FAC78 /* RemoveToDoUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACB20DDB6EC3307FA629F5 /* RemoveToDoUseCase.swift */; };
 		49645C4F4CCE735377366340 /* ListToDosForNoteUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30661ABE89BAA029CE6E3D61 /* ListToDosForNoteUseCase.swift */; };
 		49B1711309729E2A162592EE /* NotesLocalDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAD042E22A4567FED99D3084 /* NotesLocalDataSource.swift */; };
+		4A9E063EE8EC0F5A7320389F /* Attachment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AC6FF974A7D1590944D5137 /* Attachment.swift */; };
 		4BA8F683B744F75EF0ACF577 /* CopyAttachmentUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59CBFD2CF4BFE3644D1146DB /* CopyAttachmentUseCase.swift */; };
+		4BB99D3913EDA7487A327B48 /* ReorderToDosUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D76467E5F5415A66AEC6878 /* ReorderToDosUseCase.swift */; };
+		4C80879D870B3EC1C1444360 /* SnoozeToDoUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524B6BB0F6485AFFFB0A4EA0 /* SnoozeToDoUseCase.swift */; };
+		4C8EBA6531E2B01FC2CB6443 /* AttachmentsLocalDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AFD8B2AB840F623A9C6C805 /* AttachmentsLocalDataSource.swift */; };
+		4CD39561C48655FD65E0CB57 /* NoteMetadataSectionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0850BE4CC1AAFFABB77C6C51 /* NoteMetadataSectionsView.swift */; };
 		4D19E93739AE94D110395AD2 /* UpdateManualSnippetUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9179B07B89EFB4698609B1C8 /* UpdateManualSnippetUseCase.swift */; };
 		4D71BF16C62601435692EF83 /* ReorderToDosUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D76467E5F5415A66AEC6878 /* ReorderToDosUseCase.swift */; };
+		4D91BA175A029AB2B3A4E6AA /* CreateToDoUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29D2DDAB345A44433D19DBC8 /* CreateToDoUseCase.swift */; };
 		4F516536BEC6462078DCEC41 /* SyncStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D3EFB2ECA0275A15170DD83 /* SyncStatus.swift */; };
 		4F67C4A884A989798276078F /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = E063E732AB41D3E77D7B559E /* AppEnvironment.swift */; };
 		50D6299AAA7457499EF2E335 /* CopySnippetUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14379894560E7E909A04E78A /* CopySnippetUseCase.swift */; };
 		51313A523F5913778E94481B /* BootstrapApplicationUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5EFBD4377F0C489BC0E813B /* BootstrapApplicationUseCase.swift */; };
 		54673899144C76C637154FB9 /* ToDo.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF76A7EB4F48B15D5EAB37DC /* ToDo.swift */; };
+		54D8BBB32AFF92257E3FA38F /* AttachmentPresentationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 558E5024291C402040ACA856 /* AttachmentPresentationModels.swift */; };
 		5534A9143CA8C47CEEC2BDC8 /* ToDoID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6028376AD0EE79306F205669 /* ToDoID.swift */; };
+		562EBC7553FDBEACD15F4BB2 /* IPhoneRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A844EE7B40C54CD75E0C4C9 /* IPhoneRootView.swift */; };
 		564927526A24F8A5271B5CE9 /* AttachmentsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A63EF3E0E7A3609AF3CFBB54 /* AttachmentsRepository.swift */; };
+		58DB40F9BB3B6037E815635E /* MyNotesApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54832C40E43DFA02106BC84A /* MyNotesApp.swift */; };
 		58E3018A8F3C8C1059EFB104 /* DeleteLabelUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7020C4099A736E421167E9F4 /* DeleteLabelUseCase.swift */; };
 		5996A08CCB0D1BFE1690BB71 /* LabelID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D04296E9B23A97E21A05A74 /* LabelID.swift */; };
+		59BCF8357BA1EC6FFBD63CBC /* OpenAttachmentUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF3AD346BAAC8D4E0DE00E4 /* OpenAttachmentUseCase.swift */; };
 		5A07F091DDA85D5C07F7BA9B /* Attachment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AC6FF974A7D1590944D5137 /* Attachment.swift */; };
+		5BF392940B64146746F72C81 /* LabelsPlaceholderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BC59BF347D4B23D0925E39D /* LabelsPlaceholderView.swift */; };
 		5CE170B03FF262728CC4485C /* SidebarViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94043513337E5132C91668F2 /* SidebarViewModel.swift */; };
 		5D01E32B095BE676D7054C51 /* SearchPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = B81E17344C5819FA192CB3C8 /* SearchPolicy.swift */; };
 		5D29809158D6CF94BA31E8B1 /* AppSpacing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90D6826CA2ECD695A37FDE21 /* AppSpacing.swift */; };
 		5D8B53C2E0AF091CAAAA25A1 /* SectionCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE917CB668F1CA6CD2FE1B62 /* SectionCard.swift */; };
+		5E8BC8A34B82012FB743F520 /* SearchIndexRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD698DBABCDEC1B30C8D4D33 /* SearchIndexRepository.swift */; };
+		60256489DF903429186E6A6A /* LabelsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE9A2922AE967DFDB4EB982A /* LabelsRepository.swift */; };
 		609E1035A7B6B6BD3F145F1D /* SeedSampleDataUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 960FF60E9215D0B51F352C61 /* SeedSampleDataUseCase.swift */; };
 		60B697760CD4305B41FA46AB /* ToDoLocalDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D69DCD6DBD61AE9ABDFA0A2 /* ToDoLocalDataSource.swift */; };
+		613162D0131C7F39C0C5710E /* SectionCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE917CB668F1CA6CD2FE1B62 /* SectionCard.swift */; };
 		61A4517B57C4D446CC323E83 /* LoadSidebarDataUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = B25DC336457298FD6C10CD44 /* LoadSidebarDataUseCase.swift */; };
+		6253A3157D6513D91154862C /* QuickCaptureWindowScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = D442480F083AB5FFE6222491 /* QuickCaptureWindowScene.swift */; };
 		6316959068AEF341255D95C2 /* ToDoPresentationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC0857394FB8D39E661F5CC3 /* ToDoPresentationModels.swift */; };
+		63ABDA0508CE662FF44ED6C6 /* CreateSnippetUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC195BC7977889F2ED634412 /* CreateSnippetUseCase.swift */; };
+		640943FC1A83967A6567A2F8 /* SyncMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 914603AB4B7ABB4DC4C1FC4C /* SyncMapper.swift */; };
 		643233A6ECBCB172B6742F0E /* QuickCaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96CB62CFA040A5FE01F70B0C /* QuickCaptureView.swift */; };
+		64554AFEBCE4513575811560 /* ListNoteSnapshotsUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92987D11A88232ED41FC5BEF /* ListNoteSnapshotsUseCase.swift */; };
 		6492E3F17BE036D39B4F18E9 /* AppEnvironment+ViewModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = D91A3DD6AB60AFF24ED335AF /* AppEnvironment+ViewModels.swift */; };
 		650F35885558A867DBA3BB3B /* QuickCaptureWindowScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = D442480F083AB5FFE6222491 /* QuickCaptureWindowScene.swift */; };
 		65A8F8AD26653B2F2C853F5C /* ToDoRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A531FBDF95D187089C8CE32 /* ToDoRepository.swift */; };
+		65AD9C42034944DF0DC0B786 /* LabelAppearanceCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = D636EB8AD417FBF66046E680 /* LabelAppearanceCatalog.swift */; };
+		66D26A188DAFA58D44296F97 /* RemoveAttachmentUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862BB091BF6AB3B2FD3E3055 /* RemoveAttachmentUseCase.swift */; };
 		66DAF5D71914A9A75152FCEC /* SyncMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 914603AB4B7ABB4DC4C1FC4C /* SyncMapper.swift */; };
 		67AC66B9AED6E1E4145C2FC1 /* FileService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7F71DDC0CCC06E672E763FF /* FileService.swift */; };
+		6825FF9E497535038945A151 /* ToDosListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A63E513512CEF32A77AD166 /* ToDosListViewModel.swift */; };
 		68947BE787AB61C376006359 /* GetNoteSnapshotUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = F120B99DF2932B612BF25412 /* GetNoteSnapshotUseCase.swift */; };
+		68BBB74278A6D216EF98E7B8 /* ToDoRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A531FBDF95D187089C8CE32 /* ToDoRepository.swift */; };
 		6940B06420D61815B3C27A36 /* MarkdownService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CDBFAD3EAC0ECB901B56A7F /* MarkdownService.swift */; };
 		695C3629534DEFCC49D98001 /* NoteDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F508774CD67034C7CB9E1267 /* NoteDetailViewModel.swift */; };
 		6A64E07D3A66E4AEEC68B972 /* SyncStateRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD80532EF17F4A5E7F125D9A /* SyncStateRepository.swift */; };
+		6B3DDFCB89E4B06F20DE3A77 /* NoteEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F69675CD92C287026B52276 /* NoteEditorView.swift */; };
 		6B5A7ECE30390A27B279B9DB /* SearchLocalDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D3BEDCC61D8CB83172BD7E /* SearchLocalDataSource.swift */; };
+		6B6451E7AC88D3AE13665C2A /* ToDo.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF76A7EB4F48B15D5EAB37DC /* ToDo.swift */; };
+		6D239A5293F8A8767519B0B5 /* SampleDataFactory+Artifacts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50CB17AE1ABDD12106149E7C /* SampleDataFactory+Artifacts.swift */; };
 		6E7052E3DC0304DAB45BA3C6 /* ListLabelsUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35E3C87130740EDB73279115 /* ListLabelsUseCase.swift */; };
+		73EC70066C7DC7613176B529 /* NotesLocalDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAD042E22A4567FED99D3084 /* NotesLocalDataSource.swift */; };
+		750440E084A9C2E51241DA46 /* SyncStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D3EFB2ECA0275A15170DD83 /* SyncStatus.swift */; };
+		76B3FB0D93172D93C01C2CE7 /* InitialSchemaMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCE85285559EA6F73DD7F502 /* InitialSchemaMigration.swift */; };
 		76DD6F2031DD4FF4A3C1DDA9 /* AttachmentEditSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C03607680EBEB118551262D /* AttachmentEditSheet.swift */; };
 		770958E7A1751D8AF7A1E012 /* SyncQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38CAE56421B17D6408C38D38 /* SyncQueue.swift */; };
 		7757F11AE5F7B8C743102967 /* ArchiveSnippetUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 296673DC1C3F9AF738BBB421 /* ArchiveSnippetUseCase.swift */; };
 		78EFC52DCE6ED3DBE1B297BD /* ConflictResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AFDCD987B0BD0EDF493ADE1 /* ConflictResolver.swift */; };
+		78FCAF449A5B69B2F5D5F18A /* AppIcons.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F16FAEA627F69C7DFEC82F /* AppIcons.swift */; };
 		79A8D2CE70750EDC407B13C9 /* ToDoNotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09083545629AC1085C9AF2FA /* ToDoNotificationService.swift */; };
+		7BD0626E95680B380BDF543E /* IndexNoteForSearchUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59F4F2F3CEEE9E6A92E1F08E /* IndexNoteForSearchUseCase.swift */; };
 		7CC2EB0323A9D105DDE8B065 /* NoteReadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD8D469629487567A1E97E84 /* NoteReadView.swift */; };
+		7D2A6D7E55461D823F6B8A98 /* UpdateAttachmentUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F4C2CFDBB62EE6B1DA5421E /* UpdateAttachmentUseCase.swift */; };
+		7FBCC17E445537557E6D4075 /* SampleDataFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24B5ECEDC1266994FF62DE88 /* SampleDataFactory.swift */; };
 		815629A7E2921C9CE0969A80 /* OpenAttachmentUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF3AD346BAAC8D4E0DE00E4 /* OpenAttachmentUseCase.swift */; };
 		8166B2A684FED1D4B8977DA1 /* RemoveSnippetUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4B6F70EFCB53BCC34850B44 /* RemoveSnippetUseCase.swift */; };
+		82079DD1101DE4F0C547801D /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82759201B890A920423D9E44 /* SidebarView.swift */; };
 		83451FAC9B233417DFC12A23 /* Label.swift in Sources */ = {isa = PBXBuildFile; fileRef = C516B14AAA57CF3EF8A4C5D0 /* Label.swift */; };
 		85083218B44F0F5292C1B8B0 /* NoteTasksSectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7966EA4318D1EDE9A06ABC80 /* NoteTasksSectionView.swift */; };
+		85125207AE12F0B9FD093FED /* EmptySelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F948665E7AC75525D6B0BA9C /* EmptySelectionView.swift */; };
 		886215C874C2EEBC3CF11BF0 /* NoteRowModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1B8C479B40A528547C06224 /* NoteRowModel.swift */; };
 		8A7FAB37AAC080A845652A9F /* SearchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65633E1C1A400D9AAD2490DF /* SearchViewModel.swift */; };
 		8B7030E39AED9BF9E5D00E4D /* UpdateToDoUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF4AFC39035B0BF4B1F27B9B /* UpdateToDoUseCase.swift */; };
@@ -91,42 +177,80 @@
 		8C4CAC3A4AC4081FBFB3FEA5 /* QuickLookService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03434F0360B65814CAFC2753 /* QuickLookService.swift */; };
 		8D74A99F593A710A1B2BB395 /* CreateSnippetUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC195BC7977889F2ED634412 /* CreateSnippetUseCase.swift */; };
 		8DDA69547E33750F613CEA8B /* Highlightr in Frameworks */ = {isa = PBXBuildFile; productRef = A0499577E6B8CD9C1416AFCC /* Highlightr */; };
+		8DED606599AF79A4FC76C5EE /* StorageCleanupUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEC6396EC7F622B444B26958 /* StorageCleanupUseCase.swift */; };
+		8E8CD2DC21FCFACE84129367 /* AttachmentSectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74824EC5EAE39490EDD0C6E4 /* AttachmentSectionView.swift */; };
 		8EEF94EDCCA0CA0772C14D7A /* ToDosListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A63E513512CEF32A77AD166 /* ToDosListViewModel.swift */; };
+		8F58DACD0A3B1809B2FA706D /* NoteRowModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1B8C479B40A528547C06224 /* NoteRowModel.swift */; };
+		906343671FD800C797E4D81E /* AttachmentsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A63EF3E0E7A3609AF3CFBB54 /* AttachmentsRepository.swift */; };
 		90A742D54AC49939B43253B5 /* SampleDataFactory+Notes.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0B2A24B55CC5EA684997471 /* SampleDataFactory+Notes.swift */; };
+		91AC1FACA8F4E18DE9FAE77E /* MyNotesMenuBarExtra.swift in Sources */ = {isa = PBXBuildFile; fileRef = E01639F7E3872DACB5639CE0 /* MyNotesMenuBarExtra.swift */; };
+		938F4AAA231A3136519DE7ED /* InfoBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2B22871A0D7ABE2BC4697C0 /* InfoBadge.swift */; };
+		9393E4D16FB31244206CCDE6 /* ToggleFavoriteUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C705E1004124A0571A4A4EAA /* ToggleFavoriteUseCase.swift */; };
+		947DB8C0B63CB6939AEAA46E /* AppEnvironment+Bootstrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D260C79822832CAFED178A /* AppEnvironment+Bootstrap.swift */; };
+		94D984997972DC7B7F384007 /* SnippetsPlaceholderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F41AEAD71DC8FAA89342B14B /* SnippetsPlaceholderView.swift */; };
+		95545D07C2F1E54F9639ACB1 /* NoteEditorViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 575F2ADFE9B216251D321ED4 /* NoteEditorViewModel.swift */; };
+		959E1C7E911C63269687172B /* RestoreToDoUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C8ECD491CE6DCADED7D4F0 /* RestoreToDoUseCase.swift */; };
 		99D6B1F3C681E7F4F8EAD6DD /* NoteID.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3DC7E2B82D1182D01983D54 /* NoteID.swift */; };
+		9BB6C0AEA76D951F4A9AA7AE /* RootSplitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B33FC63DE87B8B7917FA9C2 /* RootSplitView.swift */; };
+		9BD6C43D2081A05625983573 /* ConflictResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AFDCD987B0BD0EDF493ADE1 /* ConflictResolver.swift */; };
 		9D82A6F29F72FACCD938A1D2 /* FTSSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C49A361AE90889997B7EE7D /* FTSSchema.swift */; };
 		9E451A0392FDE330E87F9163 /* AttachmentPresentationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 558E5024291C402040ACA856 /* AttachmentPresentationModels.swift */; };
+		9F40DC3696454F5477B9C887 /* QuickCaptureUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56A0A1D33F54AD6BE5478A60 /* QuickCaptureUseCase.swift */; };
 		9F9EC91896B7DCC4A12616B2 /* SyntaxHighlightService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0FB4A22200AE3A1D010CEFF /* SyntaxHighlightService.swift */; };
 		9FC9B2EA33B3F456AC9CE1E5 /* InitialSchemaMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCE85285559EA6F73DD7F502 /* InitialSchemaMigration.swift */; };
 		A38778F3319B7D4644E12DB3 /* RefreshToDoNotificationsUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9688C1EAB6F87D1F590EF53E /* RefreshToDoNotificationsUseCase.swift */; };
 		A46122BCF5EC0367024B851B /* AppColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31A239E769E52968BC8992A5 /* AppColors.swift */; };
 		A569D2595316E5FE2F2EA84C /* SnippetsPlaceholderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F41AEAD71DC8FAA89342B14B /* SnippetsPlaceholderView.swift */; };
 		A56E2C6EA7958AB81FCB08B4 /* QuickCaptureViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 768FA9A78AB39C03422AAF7E /* QuickCaptureViewModel.swift */; };
+		A6FBF0E8F1F4A869AD6E2C4D /* AssignLabelsUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2278B001D0535F095D725798 /* AssignLabelsUseCase.swift */; };
 		A7D3252E67482857255DD770 /* ArchiveAttachmentUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 540F5D2FD5BE953AF9DD269B /* ArchiveAttachmentUseCase.swift */; };
+		A7EC052533453995D184467C /* CreateLabelUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42813EE80F14170B634A3C06 /* CreateLabelUseCase.swift */; };
 		A7FCE89B663A59C829D2E121 /* UpdateAttachmentUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F4C2CFDBB62EE6B1DA5421E /* UpdateAttachmentUseCase.swift */; };
+		AA40E19ECA427799FB183267 /* SampleDataFactory+Notes.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0B2A24B55CC5EA684997471 /* SampleDataFactory+Notes.swift */; };
 		AA979506405C5D3EBFD60A8B /* SnippetSectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B46C8F1932EBF223A8B6D93D /* SnippetSectionView.swift */; };
+		AB4869EA107EEC94A209859A /* SyntaxHighlightService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0FB4A22200AE3A1D010CEFF /* SyntaxHighlightService.swift */; };
+		AB8CCDD79D029AFD7CC1508A /* Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5A3B38576A683AC439028C0 /* Note.swift */; };
+		AC3100724E7A040F7F957A29 /* FTSSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C49A361AE90889997B7EE7D /* FTSSchema.swift */; };
 		AC3F9BE472CA7295743ACDF1 /* LabelsLocalDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5C99EE5B7B8A7DABCFE82AE /* LabelsLocalDataSource.swift */; };
 		AC4C642872F9830CC6C1FA82 /* SyntaxHighlightedCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CD44A300CC211F7C231619D /* SyntaxHighlightedCodeView.swift */; };
+		AD14B63E3F36BE492C2B5584 /* DeleteToDoUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECE6CCAB374B88F725249DDA /* DeleteToDoUseCase.swift */; };
+		ADFAA49827743F8CF3F680B7 /* SidebarSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD56B9B17656E13320766D15 /* SidebarSelection.swift */; };
+		ADFD4AB9F5F1F2A0D4C52A14 /* CommonEnums.swift in Sources */ = {isa = PBXBuildFile; fileRef = F770E98BB5DCC4F977525B72 /* CommonEnums.swift */; };
+		B12D3D2BD6F7E7BB3F28FF21 /* NoteTasksSectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7966EA4318D1EDE9A06ABC80 /* NoteTasksSectionView.swift */; };
 		B245BB5D40883119239CA419 /* DatabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62C5C5DCDF1F1F886E56E8A0 /* DatabaseManager.swift */; };
 		B2AD02EAD1EC98B9E71F3FA6 /* SearchDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26B5944B7A2109D0DCF84582 /* SearchDocument.swift */; };
+		B3ACEFB0CB16557428251382 /* PanelSurfaceModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8292300A02A22C8B338F9D1 /* PanelSurfaceModifier.swift */; };
+		B59809AC81B9456892A5065B /* ImportAttachmentUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AF65F0BEFCA60423681FD6A /* ImportAttachmentUseCase.swift */; };
+		B609D554B0D5ACDE9BEF3427 /* BootstrapApplicationUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5EFBD4377F0C489BC0E813B /* BootstrapApplicationUseCase.swift */; };
 		B68FFAEE70990332A2D85A87 /* ToggleFavoriteUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C705E1004124A0571A4A4EAA /* ToggleFavoriteUseCase.swift */; };
 		B69D8E715284D3AF3E606055 /* CreateLabelUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42813EE80F14170B634A3C06 /* CreateLabelUseCase.swift */; };
+		B70A84C89CBEDDE6C6712671 /* ToDoID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6028376AD0EE79306F205669 /* ToDoID.swift */; };
 		B8188AFBB8F6777955F2AA92 /* PrepareAttachmentPreviewUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 279E136F4A6AAEAF25604E0B /* PrepareAttachmentPreviewUseCase.swift */; };
+		B8443F0280A68CBA62466AEE /* QuickLookService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03434F0360B65814CAFC2753 /* QuickLookService.swift */; };
 		B8BB02EB7CB9C39635B8BC7B /* SnoozeToDoUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524B6BB0F6485AFFFB0A4EA0 /* SnoozeToDoUseCase.swift */; };
+		BA692D4F907A6414781F12D6 /* UpdateLabelUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BC748BF9772A31730026F67 /* UpdateLabelUseCase.swift */; };
 		BC51CA12B47A0414E349D21C /* AppCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2E13D35CB467CC47A34C9A8 /* AppCoordinator.swift */; };
 		BC5711DDC40E7357CC6F67D0 /* LabelIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB20B8C4C82F7FFD5D89FDFC /* LabelIconView.swift */; };
 		BD2B86196A55C4E2A7624909 /* Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5A3B38576A683AC439028C0 /* Note.swift */; };
 		BD4B77255A981E15F76E7504 /* Date+Formatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA05A727839690F573A355D /* Date+Formatting.swift */; };
 		BE6CBF178F91D37A1B38C5B6 /* AttachmentsPlaceholderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59308C780349344750D08422 /* AttachmentsPlaceholderView.swift */; };
 		BFF3462EAC6A823256583363 /* SearchResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BE530599DD1AA5D54332F12 /* SearchResult.swift */; };
+		C01D62ACE991FEE6C6751417 /* PrepareAttachmentPreviewUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 279E136F4A6AAEAF25604E0B /* PrepareAttachmentPreviewUseCase.swift */; };
+		C04F1F6AA86F85537A1DA3EB /* ListLabelsUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35E3C87130740EDB73279115 /* ListLabelsUseCase.swift */; };
 		C04FC82DD0940226E9F2B567 /* CreateNoteUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06998C65634FBBB781CB2013 /* CreateNoteUseCase.swift */; };
+		C06FF5BFAA78B12ADA312D08 /* NoteSnippet.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE57C2F28D16083B7C93B78C /* NoteSnippet.swift */; };
 		C0A41ACA106FEA2DE378DF2B /* SampleDataFactory+Labels.swift in Sources */ = {isa = PBXBuildFile; fileRef = C991DA52FEDF2567D12F7344 /* SampleDataFactory+Labels.swift */; };
 		C0DA1341ADB49ED1BBA565DD /* ListNoteSnapshotsUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92987D11A88232ED41FC5BEF /* ListNoteSnapshotsUseCase.swift */; };
+		C1356BDA6D281A750AA4B39A /* CloudKitSyncEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2D726D8F642F06F91C56FB /* CloudKitSyncEngine.swift */; };
 		C159654D788C41D580EB0B4E /* InfoBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2B22871A0D7ABE2BC4697C0 /* InfoBadge.swift */; };
 		C2DEA607941E7AAF8BAE1309 /* NoteDetailHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9242CF9935867DFA97978167 /* NoteDetailHeaderView.swift */; };
+		C2EA2698E41D9B810C77C346 /* SnippetDetectionPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD717FD2714383779D703257 /* SnippetDetectionPolicy.swift */; };
+		C4BAD59FF578A23A54873118 /* AppTypography.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F921DA436ACFEDE300C943E /* AppTypography.swift */; };
 		C5D1A7B30A4466497A104705 /* NoteEditorViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 575F2ADFE9B216251D321ED4 /* NoteEditorViewModel.swift */; };
 		C6F6D9980EB2A1053A6C104D /* NotesListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEF80E11A4340E08067EE23B /* NotesListView.swift */; };
+		C7048073F8141F16A1A635F1 /* ListToDosForNoteUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30661ABE89BAA029CE6E3D61 /* ListToDosForNoteUseCase.swift */; };
 		C744F2ED66E5118FFBD1F3C0 /* QuickCaptureUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56A0A1D33F54AD6BE5478A60 /* QuickCaptureUseCase.swift */; };
+		C80863D511D84E73C84CD0C6 /* LabelIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB20B8C4C82F7FFD5D89FDFC /* LabelIconView.swift */; };
 		C95A1506FA82FE8374B6B088 /* String+Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D84E2C35DAEA51E7BE330F0 /* String+Utilities.swift */; };
 		CA4EE58AE7DA8C7B304CBBF5 /* EmptySelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F948665E7AC75525D6B0BA9C /* EmptySelectionView.swift */; };
 		CB0D082BD45939A52D1E815C /* AttachmentsLocalDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AFD8B2AB840F623A9C6C805 /* AttachmentsLocalDataSource.swift */; };
@@ -134,33 +258,65 @@
 		D138C2F0896644FA629C6DF2 /* EmptyTrashUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4836086395CF9F8FDF505DE8 /* EmptyTrashUseCase.swift */; };
 		D3727127F191A6F90E650D96 /* NoteSnippet.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE57C2F28D16083B7C93B78C /* NoteSnippet.swift */; };
 		D3C8314B4A8795FC387323A3 /* SampleDataFactory+Artifacts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50CB17AE1ABDD12106149E7C /* SampleDataFactory+Artifacts.swift */; };
+		D4AE0C6AA227CB4A998F7524 /* CreateManualSnippetUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA5B1D06E2F776DC0D385A3 /* CreateManualSnippetUseCase.swift */; };
+		D4E9C0C1BDF06FA17503A1A1 /* SidebarViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94043513337E5132C91668F2 /* SidebarViewModel.swift */; };
 		D55615F1D315F0002DC78338 /* SearchResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EAC91AF4C2799531102B154 /* SearchResultsView.swift */; };
 		D5DB672E86C14A6D324D497D /* SettingsPlaceholderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0752F4BCD8A08DF51DA7D809 /* SettingsPlaceholderView.swift */; };
 		D68C52F83F5C9797173AA979 /* LabelAppearanceCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = D636EB8AD417FBF66046E680 /* LabelAppearanceCatalog.swift */; };
+		D70E221D0CBBC4B6E0447618 /* CopySnippetUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14379894560E7E909A04E78A /* CopySnippetUseCase.swift */; };
 		D7124C1035D248F94E0745FE /* DateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBFFD1343A53AA6DC9B3DE28 /* DateService.swift */; };
+		D741F882984129BEFD69C7CF /* UpdateToDoUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF4AFC39035B0BF4B1F27B9B /* UpdateToDoUseCase.swift */; };
 		DAB7357568736E6C3A7EA53E /* TaskDetailRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77AFE29A34214F8C2B35419B /* TaskDetailRoute.swift */; };
 		DB2D2606DFAFB888D703838A /* ManualSnippetDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6475FFE98ACA40971ABBEF /* ManualSnippetDraft.swift */; };
 		DB783DE5F14F9DCC1245B23C /* CreateManualSnippetUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA5B1D06E2F776DC0D385A3 /* CreateManualSnippetUseCase.swift */; };
 		DC03B08FA19A9743AB992F99 /* SyncLocalDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC6669A0E35DF79EE64D69D2 /* SyncLocalDataSource.swift */; };
+		DC99528B3D50C2662B59F33F /* MarkdownService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CDBFAD3EAC0ECB901B56A7F /* MarkdownService.swift */; };
+		DF22D694C62E595F6B5B8007 /* GetNoteSnapshotUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = F120B99DF2932B612BF25412 /* GetNoteSnapshotUseCase.swift */; };
 		DF4DA7ADF09538FB3C951B27 /* LabelsPlaceholderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BC59BF347D4B23D0925E39D /* LabelsPlaceholderView.swift */; };
 		DF4FC9F96D56A716919FDCB5 /* NoteEditorHostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 659CAF26CCD3E3971A5FA2F3 /* NoteEditorHostView.swift */; };
 		DFE5FB110A1CD70222ADF0F3 /* IPhoneRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A844EE7B40C54CD75E0C4C9 /* IPhoneRootView.swift */; };
 		E0182C0348DE374AD99DEF3E /* SnippetDetectionPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD717FD2714383779D703257 /* SnippetDetectionPolicy.swift */; };
+		E07D30D497ECD36AB83B5488 /* Highlightr in Frameworks */ = {isa = PBXBuildFile; productRef = 2BEB00EEB0FADBA1126D8817 /* Highlightr */; };
 		E12151B7C7040558E9C66727 /* CommonEnums.swift in Sources */ = {isa = PBXBuildFile; fileRef = F770E98BB5DCC4F977525B72 /* CommonEnums.swift */; };
+		E164C94F06F0199897543A16 /* NoteEditorHostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 659CAF26CCD3E3971A5FA2F3 /* NoteEditorHostView.swift */; };
 		E195B181D7AA1EDDE4255F80 /* NoteEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F69675CD92C287026B52276 /* NoteEditorView.swift */; };
+		E1D56136A3A071B911FDD088 /* AppEnvironment+ViewModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = D91A3DD6AB60AFF24ED335AF /* AppEnvironment+ViewModels.swift */; };
+		E3C3607AA7DF013AB3062903 /* ToDoLocalDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D69DCD6DBD61AE9ABDFA0A2 /* ToDoLocalDataSource.swift */; };
+		E5BDCB832574CCF4BA35E39F /* NoteReadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD8D469629487567A1E97E84 /* NoteReadView.swift */; };
 		E67715DB6D5914D64E280B95 /* CreateToDoUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29D2DDAB345A44433D19DBC8 /* CreateToDoUseCase.swift */; };
+		E702A7D8DF9EB517C311672F /* LoadNoteDraftUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68251C4F41F137E7A852F49 /* LoadNoteDraftUseCase.swift */; };
+		E783F9DA463F03254DC74463 /* Label.swift in Sources */ = {isa = PBXBuildFile; fileRef = C516B14AAA57CF3EF8A4C5D0 /* Label.swift */; };
+		E784051CD6C095FFF07D3AAA /* TaskDetailRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77AFE29A34214F8C2B35419B /* TaskDetailRoute.swift */; };
+		E835A39D2E05D2F740029BF8 /* LoadSidebarDataUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = B25DC336457298FD6C10CD44 /* LoadSidebarDataUseCase.swift */; };
+		E8880D55D923A9CE8654BED8 /* QuickCaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96CB62CFA040A5FE01F70B0C /* QuickCaptureView.swift */; };
 		E9938301CEBCB5CD6D469398 /* UpdateLabelUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BC748BF9772A31730026F67 /* UpdateLabelUseCase.swift */; };
+		EAB487A36409117CF1E84EF5 /* ArchiveSnippetUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 296673DC1C3F9AF738BBB421 /* ArchiveSnippetUseCase.swift */; };
 		EBB23412EB8E229A03D49961 /* MyNotesApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54832C40E43DFA02106BC84A /* MyNotesApp.swift */; };
+		EC68D1913DE28BB31CBAF3F7 /* NoteDetailScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A476AA58A5A1CC4752513D71 /* NoteDetailScreen.swift */; };
+		EC8171B2B20ED4FB919BE710 /* ClipboardService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE2EE7AC78BF4F8D53280633 /* ClipboardService.swift */; };
 		ECBDACA8A602787C3379D4B2 /* LabelChipView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F9C49FF6FB13AA676BC78D1 /* LabelChipView.swift */; };
+		ECD5C8ABD4CE881F26F88995 /* NotesListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEF80E11A4340E08067EE23B /* NotesListView.swift */; };
 		ED5612D6A43606750F78715E /* AttachmentSectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74824EC5EAE39490EDD0C6E4 /* AttachmentSectionView.swift */; };
 		EF1F89AA8D330CB7133D88F1 /* IndexNoteForSearchUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59F4F2F3CEEE9E6A92E1F08E /* IndexNoteForSearchUseCase.swift */; };
 		EF3CA7B889632236C712B4D5 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82759201B890A920423D9E44 /* SidebarView.swift */; };
 		EFE2D104EE8F30DD310C174B /* CompleteToDoUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D6F941B3F5ABE67741814D /* CompleteToDoUseCase.swift */; };
+		F08FD7DE2C4356453BB211FB /* ToDosListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6311E9536DA12B141DD2A7A /* ToDosListView.swift */; };
+		F097A42AC9B481DC3BF9062A /* AttachmentEditSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C03607680EBEB118551262D /* AttachmentEditSheet.swift */; };
+		F0E00A8C2CF0FD4AAFE3DE6A /* NotesListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 052DB6F2342A213E127FCE1C /* NotesListViewModel.swift */; };
+		F1E198600695067418AF819C /* SettingsPlaceholderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0752F4BCD8A08DF51DA7D809 /* SettingsPlaceholderView.swift */; };
 		F27DDBE1D696947E34D0379D /* SchemaDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47F354CF7594D6BC76116FBB /* SchemaDefinition.swift */; };
+		F417D15B3B29DA522DFF701D /* SnippetSyntaxLanguage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1E46A7EBABF211DB25D46FD /* SnippetSyntaxLanguage.swift */; };
+		F589E45F75BCB962EBD88801 /* CreateNoteUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06998C65634FBBB781CB2013 /* CreateNoteUseCase.swift */; };
+		F5C209AC78B1CDF154249499 /* AttachmentsPlaceholderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59308C780349344750D08422 /* AttachmentsPlaceholderView.swift */; };
+		F84AAFECB0F192A88A1D1F22 /* SearchResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EAC91AF4C2799531102B154 /* SearchResultsView.swift */; };
 		FA116A7964F56316557C3E56 /* CloudKitSyncEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2D726D8F642F06F91C56FB /* CloudKitSyncEngine.swift */; };
+		FB339F2CA99B7EE8A1100C6D /* AttachmentEditDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = 267CFD460D094AA1C29D6BE6 /* AttachmentEditDraft.swift */; };
 		FB9B2DF31D904C51F92C9378 /* DeleteToDoUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECE6CCAB374B88F725249DDA /* DeleteToDoUseCase.swift */; };
 		FCE0DBF06BED195610366FBF /* ClipboardService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE2EE7AC78BF4F8D53280633 /* ClipboardService.swift */; };
+		FE160271AC264151F49F7A85 /* SearchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65633E1C1A400D9AAD2490DF /* SearchViewModel.swift */; };
 		FE16063272B9E8AAF5D89956 /* LoadNoteDraftUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68251C4F41F137E7A852F49 /* LoadNoteDraftUseCase.swift */; };
+		FE967582E713A7E6C7F722E8 /* SearchNotesUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73455E7424BCDAAA3FDC5691 /* SearchNotesUseCase.swift */; };
+		FEC2336F7FF8CEADDA032787 /* NotesRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A9FAC6DAA7ED6A72F7FC450 /* NotesRepository.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -176,6 +332,7 @@
 		1BC748BF9772A31730026F67 /* UpdateLabelUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateLabelUseCase.swift; sourceTree = "<group>"; };
 		1CD44A300CC211F7C231619D /* SyntaxHighlightedCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyntaxHighlightedCodeView.swift; sourceTree = "<group>"; };
 		202A09B03A5B1FC07B112A44 /* AttachmentID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachmentID.swift; sourceTree = "<group>"; };
+		222D3D03F88C30B4C073E221 /* MyNotes-macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "MyNotes-macOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2278B001D0535F095D725798 /* AssignLabelsUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssignLabelsUseCase.swift; sourceTree = "<group>"; };
 		24B5ECEDC1266994FF62DE88 /* SampleDataFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleDataFactory.swift; sourceTree = "<group>"; };
 		267CFD460D094AA1C29D6BE6 /* AttachmentEditDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachmentEditDraft.swift; sourceTree = "<group>"; };
@@ -318,10 +475,19 @@
 		F948665E7AC75525D6B0BA9C /* EmptySelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptySelectionView.swift; sourceTree = "<group>"; };
 		FD698DBABCDEC1B30C8D4D33 /* SearchIndexRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchIndexRepository.swift; sourceTree = "<group>"; };
 		FE57C2F28D16083B7C93B78C /* NoteSnippet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteSnippet.swift; sourceTree = "<group>"; };
+		FEC6396EC7F622B444B26958 /* StorageCleanupUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageCleanupUseCase.swift; sourceTree = "<group>"; };
 		FF4AFC39035B0BF4B1F27B9B /* UpdateToDoUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateToDoUseCase.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		937C8D00486FEA399BA9EEF5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E07D30D497ECD36AB83B5488 /* Highlightr in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		B3FDC58CD9E5C7A6132BD81F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -408,6 +574,7 @@
 		2B33057B12DA3BF3E8EE9AC4 /* Products */ = {
 			isa = PBXGroup;
 			children = (
+				222D3D03F88C30B4C073E221 /* MyNotes-macOS.app */,
 				66D89DCC6E258247DC2F7244 /* MyNotes.app */,
 			);
 			name = Products;
@@ -768,6 +935,7 @@
 				73455E7424BCDAAA3FDC5691 /* SearchNotesUseCase.swift */,
 				960FF60E9215D0B51F352C61 /* SeedSampleDataUseCase.swift */,
 				524B6BB0F6485AFFFB0A4EA0 /* SnoozeToDoUseCase.swift */,
+				FEC6396EC7F622B444B26958 /* StorageCleanupUseCase.swift */,
 				C705E1004124A0571A4A4EAA /* ToggleFavoriteUseCase.swift */,
 				D0C554C518EE6D9110C30795 /* TogglePinUseCase.swift */,
 				6F4C2CFDBB62EE6B1DA5421E /* UpdateAttachmentUseCase.swift */,
@@ -865,6 +1033,26 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		08A5FB100C0A1FADA2C5BB56 /* MyNotes-macOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1F32D06B904128E93F17C617 /* Build configuration list for PBXNativeTarget "MyNotes-macOS" */;
+			buildPhases = (
+				C83837F965CDB16C070B8CBF /* Generate macOS App Icon */,
+				7F7723049857DDEC6742D7DE /* Sources */,
+				937C8D00486FEA399BA9EEF5 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "MyNotes-macOS";
+			packageProductDependencies = (
+				2BEB00EEB0FADBA1126D8817 /* Highlightr */,
+			);
+			productName = "MyNotes-macOS";
+			productReference = 222D3D03F88C30B4C073E221 /* MyNotes-macOS.app */;
+			productType = "com.apple.product-type.application";
+		};
 		1CA78E1EFC38581FB7429807 /* MyNotes */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 337C2A0F667E6BF6A6534255 /* Build configuration list for PBXNativeTarget "MyNotes" */;
@@ -894,6 +1082,10 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
+					08A5FB100C0A1FADA2C5BB56 = {
+						DevelopmentTeam = 9FP39GTDT5;
+						ProvisioningStyle = Automatic;
+					};
 					1CA78E1EFC38581FB7429807 = {
 						DevelopmentTeam = 9FP39GTDT5;
 						ProvisioningStyle = Automatic;
@@ -918,6 +1110,7 @@
 			projectRoot = "";
 			targets = (
 				1CA78E1EFC38581FB7429807 /* MyNotes */,
+				08A5FB100C0A1FADA2C5BB56 /* MyNotes-macOS */,
 			);
 		};
 /* End PBXProject section */
@@ -941,9 +1134,188 @@
 			shellPath = /bin/sh;
 			shellScript = "set -euo pipefail\n\ncase \"${PLATFORM_NAME:-}\" in\n  iphoneos)\n    ACTOOL_PLATFORM=\"iphoneos\"\n    ;;\n  iphonesimulator)\n    ACTOOL_PLATFORM=\"iphonesimulator\"\n    ;;\n  *)\n    exit 0\n    ;;\nesac\n\nASSET_CATALOG_DIR=\"$SRCROOT/MyNotes/Resources/Assets.xcassets\"\nOUTPUT_DIR=\"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH\"\n\nif [[ -d \"$ASSET_CATALOG_DIR\" ]]; then\n  /usr/bin/xcrun actool \"$ASSET_CATALOG_DIR\" \\\n    --compile \"$OUTPUT_DIR\" \\\n    --platform \"$ACTOOL_PLATFORM\" \\\n    --minimum-deployment-target \"$IPHONEOS_DEPLOYMENT_TARGET\" \\\n    --target-device iphone \\\n    --app-icon AppIcon \\\n    --output-partial-info-plist \"$TARGET_TEMP_DIR/assetcatalog_generated_info.plist\"\nfi\n";
 		};
+		C83837F965CDB16C070B8CBF /* Generate macOS App Icon */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Generate macOS App Icon";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -euo pipefail\n\nOUTPUT_DIR=\"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH\"\nmkdir -p \"$OUTPUT_DIR\"\n\nSOURCE_ICON=\"$SRCROOT/MyNotes/Resources/AppIcon-macOS-source.png\"\nif [[ ! -f \"$SOURCE_ICON\" ]]; then\n  SOURCE_ICON=\"$SRCROOT/MyNotes/Resources/Assets.xcassets/AppIcon.appiconset/Icon-1024.png\"\nfi\nif [[ ! -f \"$SOURCE_ICON\" ]]; then\n  exit 0\nfi\n\nWORK_DIR=\"$TARGET_TEMP_DIR/AppIcon.iconset\"\nrm -rf \"$WORK_DIR\"\nmkdir -p \"$WORK_DIR\"\n\n/usr/bin/sips -z 16 16     \"$SOURCE_ICON\" --out \"$WORK_DIR/icon_16x16.png\" >/dev/null\n/usr/bin/sips -z 32 32     \"$SOURCE_ICON\" --out \"$WORK_DIR/icon_16x16@2x.png\" >/dev/null\n/usr/bin/sips -z 32 32     \"$SOURCE_ICON\" --out \"$WORK_DIR/icon_32x32.png\" >/dev/null\n/usr/bin/sips -z 64 64     \"$SOURCE_ICON\" --out \"$WORK_DIR/icon_32x32@2x.png\" >/dev/null\n/usr/bin/sips -z 128 128   \"$SOURCE_ICON\" --out \"$WORK_DIR/icon_128x128.png\" >/dev/null\n/usr/bin/sips -z 256 256   \"$SOURCE_ICON\" --out \"$WORK_DIR/icon_128x128@2x.png\" >/dev/null\n/usr/bin/sips -z 256 256   \"$SOURCE_ICON\" --out \"$WORK_DIR/icon_256x256.png\" >/dev/null\n/usr/bin/sips -z 512 512   \"$SOURCE_ICON\" --out \"$WORK_DIR/icon_256x256@2x.png\" >/dev/null\n/usr/bin/sips -z 512 512   \"$SOURCE_ICON\" --out \"$WORK_DIR/icon_512x512.png\" >/dev/null\n/bin/cp \"$SOURCE_ICON\" \"$WORK_DIR/icon_512x512@2x.png\"\n\n/usr/bin/iconutil -c icns \"$WORK_DIR\" -o \"$OUTPUT_DIR/AppIcon.icns\"\n";
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		7F7723049857DDEC6742D7DE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0ED9C109B9041B4B9266905F /* AppColors.swift in Sources */,
+				0676B8EF4F7A50A3E3FC2D06 /* AppCoordinator.swift in Sources */,
+				947DB8C0B63CB6939AEAA46E /* AppEnvironment+Bootstrap.swift in Sources */,
+				E1D56136A3A071B911FDD088 /* AppEnvironment+ViewModels.swift in Sources */,
+				35EB8655760FF74A5CA0A2AD /* AppEnvironment.swift in Sources */,
+				78FCAF449A5B69B2F5D5F18A /* AppIcons.swift in Sources */,
+				0D218F34A0025FDFC2AB5A2A /* AppSpacing.swift in Sources */,
+				C4BAD59FF578A23A54873118 /* AppTypography.swift in Sources */,
+				152705042A16A4B83D7AACD6 /* ArchiveAttachmentUseCase.swift in Sources */,
+				EAB487A36409117CF1E84EF5 /* ArchiveSnippetUseCase.swift in Sources */,
+				A6FBF0E8F1F4A869AD6E2C4D /* AssignLabelsUseCase.swift in Sources */,
+				4A9E063EE8EC0F5A7320389F /* Attachment.swift in Sources */,
+				FB339F2CA99B7EE8A1100C6D /* AttachmentEditDraft.swift in Sources */,
+				F097A42AC9B481DC3BF9062A /* AttachmentEditSheet.swift in Sources */,
+				0C053A3EBAABB924A1AFAEA3 /* AttachmentID.swift in Sources */,
+				54D8BBB32AFF92257E3FA38F /* AttachmentPresentationModels.swift in Sources */,
+				8E8CD2DC21FCFACE84129367 /* AttachmentSectionView.swift in Sources */,
+				4C8EBA6531E2B01FC2CB6443 /* AttachmentsLocalDataSource.swift in Sources */,
+				F5C209AC78B1CDF154249499 /* AttachmentsPlaceholderView.swift in Sources */,
+				906343671FD800C797E4D81E /* AttachmentsRepository.swift in Sources */,
+				B609D554B0D5ACDE9BEF3427 /* BootstrapApplicationUseCase.swift in Sources */,
+				EC8171B2B20ED4FB919BE710 /* ClipboardService.swift in Sources */,
+				C1356BDA6D281A750AA4B39A /* CloudKitSyncEngine.swift in Sources */,
+				32E4250EF5715198F3D3E9B2 /* Color+LabelHex.swift in Sources */,
+				ADFD4AB9F5F1F2A0D4C52A14 /* CommonEnums.swift in Sources */,
+				124523978DAB2B3DFE284AC2 /* CompleteToDoUseCase.swift in Sources */,
+				9BD6C43D2081A05625983573 /* ConflictResolver.swift in Sources */,
+				2F670CE88A870BD302C64CB3 /* CopyAttachmentUseCase.swift in Sources */,
+				D70E221D0CBBC4B6E0447618 /* CopySnippetUseCase.swift in Sources */,
+				A7EC052533453995D184467C /* CreateLabelUseCase.swift in Sources */,
+				D4AE0C6AA227CB4A998F7524 /* CreateManualSnippetUseCase.swift in Sources */,
+				F589E45F75BCB962EBD88801 /* CreateNoteUseCase.swift in Sources */,
+				63ABDA0508CE662FF44ED6C6 /* CreateSnippetUseCase.swift in Sources */,
+				4D91BA175A029AB2B3A4E6AA /* CreateToDoUseCase.swift in Sources */,
+				1DE1070EDCBB2245C5C94957 /* DatabaseManager.swift in Sources */,
+				0636CC0744FE362E914C669F /* Date+Formatting.swift in Sources */,
+				43712C414F0F6996680901D1 /* DateService.swift in Sources */,
+				04F4E38889E086539ACCB17B /* DeleteLabelUseCase.swift in Sources */,
+				15C071CEAAB5A35A322B46D7 /* DeleteNoteUseCase.swift in Sources */,
+				AD14B63E3F36BE492C2B5584 /* DeleteToDoUseCase.swift in Sources */,
+				85125207AE12F0B9FD093FED /* EmptySelectionView.swift in Sources */,
+				1EDDF110A0E9B45B53678999 /* EmptyTrashUseCase.swift in Sources */,
+				AC3100724E7A040F7F957A29 /* FTSSchema.swift in Sources */,
+				0F4B70E8F94838A8AD255B94 /* FileService.swift in Sources */,
+				DF22D694C62E595F6B5B8007 /* GetNoteSnapshotUseCase.swift in Sources */,
+				562EBC7553FDBEACD15F4BB2 /* IPhoneRootView.swift in Sources */,
+				B59809AC81B9456892A5065B /* ImportAttachmentUseCase.swift in Sources */,
+				7BD0626E95680B380BDF543E /* IndexNoteForSearchUseCase.swift in Sources */,
+				938F4AAA231A3136519DE7ED /* InfoBadge.swift in Sources */,
+				76B3FB0D93172D93C01C2CE7 /* InitialSchemaMigration.swift in Sources */,
+				E783F9DA463F03254DC74463 /* Label.swift in Sources */,
+				65AD9C42034944DF0DC0B786 /* LabelAppearanceCatalog.swift in Sources */,
+				45E3AE91904993B477279EB4 /* LabelChipView.swift in Sources */,
+				3C0B8F6F56EF6A83B0BA01E1 /* LabelID.swift in Sources */,
+				C80863D511D84E73C84CD0C6 /* LabelIconView.swift in Sources */,
+				3BEBE13107CE2877AD26ABC0 /* LabelsLocalDataSource.swift in Sources */,
+				5BF392940B64146746F72C81 /* LabelsPlaceholderView.swift in Sources */,
+				60256489DF903429186E6A6A /* LabelsRepository.swift in Sources */,
+				3FFD824949B6F3B6BF66B91D /* ListAllToDosUseCase.swift in Sources */,
+				C04F1F6AA86F85537A1DA3EB /* ListLabelsUseCase.swift in Sources */,
+				64554AFEBCE4513575811560 /* ListNoteSnapshotsUseCase.swift in Sources */,
+				C7048073F8141F16A1A635F1 /* ListToDosForNoteUseCase.swift in Sources */,
+				E702A7D8DF9EB517C311672F /* LoadNoteDraftUseCase.swift in Sources */,
+				E835A39D2E05D2F740029BF8 /* LoadSidebarDataUseCase.swift in Sources */,
+				0520D534BDAB53C4E5C712CC /* ManualSnippetDraft.swift in Sources */,
+				DC99528B3D50C2662B59F33F /* MarkdownService.swift in Sources */,
+				58DB40F9BB3B6037E815635E /* MyNotesApp.swift in Sources */,
+				91AC1FACA8F4E18DE9FAE77E /* MyNotesMenuBarExtra.swift in Sources */,
+				AB8CCDD79D029AFD7CC1508A /* Note.swift in Sources */,
+				070B28D568E2D0A3824A37F3 /* NoteDetailHeaderView.swift in Sources */,
+				EC68D1913DE28BB31CBAF3F7 /* NoteDetailScreen.swift in Sources */,
+				08773891FEBB37F7F753907E /* NoteDetailView.swift in Sources */,
+				02A20EE576391E820E32ED68 /* NoteDetailViewModel.swift in Sources */,
+				E164C94F06F0199897543A16 /* NoteEditorHostView.swift in Sources */,
+				6B3DDFCB89E4B06F20DE3A77 /* NoteEditorView.swift in Sources */,
+				95545D07C2F1E54F9639ACB1 /* NoteEditorViewModel.swift in Sources */,
+				2520D9128252444083531201 /* NoteID.swift in Sources */,
+				4CD39561C48655FD65E0CB57 /* NoteMetadataSectionsView.swift in Sources */,
+				E5BDCB832574CCF4BA35E39F /* NoteReadView.swift in Sources */,
+				8F58DACD0A3B1809B2FA706D /* NoteRowModel.swift in Sources */,
+				C06FF5BFAA78B12ADA312D08 /* NoteSnippet.swift in Sources */,
+				B12D3D2BD6F7E7BB3F28FF21 /* NoteTasksSectionView.swift in Sources */,
+				ECD5C8ABD4CE881F26F88995 /* NotesListView.swift in Sources */,
+				F0E00A8C2CF0FD4AAFE3DE6A /* NotesListViewModel.swift in Sources */,
+				73EC70066C7DC7613176B529 /* NotesLocalDataSource.swift in Sources */,
+				FEC2336F7FF8CEADDA032787 /* NotesRepository.swift in Sources */,
+				59BCF8357BA1EC6FFBD63CBC /* OpenAttachmentUseCase.swift in Sources */,
+				B3ACEFB0CB16557428251382 /* PanelSurfaceModifier.swift in Sources */,
+				C01D62ACE991FEE6C6751417 /* PrepareAttachmentPreviewUseCase.swift in Sources */,
+				9F40DC3696454F5477B9C887 /* QuickCaptureUseCase.swift in Sources */,
+				E8880D55D923A9CE8654BED8 /* QuickCaptureView.swift in Sources */,
+				4497203B6E237FD51788D115 /* QuickCaptureViewModel.swift in Sources */,
+				6253A3157D6513D91154862C /* QuickCaptureWindowScene.swift in Sources */,
+				B8443F0280A68CBA62466AEE /* QuickLookService.swift in Sources */,
+				3FE85B6F0084DD9C73925CCD /* RefreshToDoNotificationsUseCase.swift in Sources */,
+				66D26A188DAFA58D44296F97 /* RemoveAttachmentUseCase.swift in Sources */,
+				169141B4FAE7E41200BF34BC /* RemoveSnippetUseCase.swift in Sources */,
+				0D1C51BCADBA0704F1563DCA /* RemoveToDoUseCase.swift in Sources */,
+				4BB99D3913EDA7487A327B48 /* ReorderToDosUseCase.swift in Sources */,
+				248C5B8D0955105EEB60FA81 /* RestoreNoteUseCase.swift in Sources */,
+				959E1C7E911C63269687172B /* RestoreToDoUseCase.swift in Sources */,
+				9BB6C0AEA76D951F4A9AA7AE /* RootSplitView.swift in Sources */,
+				6D239A5293F8A8767519B0B5 /* SampleDataFactory+Artifacts.swift in Sources */,
+				09A671A35EF45CA6AF364927 /* SampleDataFactory+Labels.swift in Sources */,
+				AA40E19ECA427799FB183267 /* SampleDataFactory+Notes.swift in Sources */,
+				7FBCC17E445537557E6D4075 /* SampleDataFactory.swift in Sources */,
+				2F540E5C4D97A6F7CC3C6A5A /* SchemaDefinition.swift in Sources */,
+				2BF0A7FA56AAFD3A82B0B0AB /* SearchDocument.swift in Sources */,
+				5E8BC8A34B82012FB743F520 /* SearchIndexRepository.swift in Sources */,
+				43AFE8695A86753B1D9DEBF2 /* SearchLocalDataSource.swift in Sources */,
+				FE967582E713A7E6C7F722E8 /* SearchNotesUseCase.swift in Sources */,
+				13DAED801BC089B6A1BB0B47 /* SearchPolicy.swift in Sources */,
+				020E6D741C45BAB1C148DE3D /* SearchRepository.swift in Sources */,
+				20096982C59D06AD4C5E580A /* SearchResult.swift in Sources */,
+				F84AAFECB0F192A88A1D1F22 /* SearchResultsView.swift in Sources */,
+				FE160271AC264151F49F7A85 /* SearchViewModel.swift in Sources */,
+				613162D0131C7F39C0C5710E /* SectionCard.swift in Sources */,
+				100AD7E33CEE29F05BD43863 /* SeedSampleDataUseCase.swift in Sources */,
+				F1E198600695067418AF819C /* SettingsPlaceholderView.swift in Sources */,
+				363A6A389F9327E7EDDA4441 /* SidebarData.swift in Sources */,
+				ADFAA49827743F8CF3F680B7 /* SidebarSelection.swift in Sources */,
+				82079DD1101DE4F0C547801D /* SidebarView.swift in Sources */,
+				D4E9C0C1BDF06FA17503A1A1 /* SidebarViewModel.swift in Sources */,
+				C2EA2698E41D9B810C77C346 /* SnippetDetectionPolicy.swift in Sources */,
+				25B8B1ABE05C2259941D0267 /* SnippetSectionView.swift in Sources */,
+				F417D15B3B29DA522DFF701D /* SnippetSyntaxLanguage.swift in Sources */,
+				94D984997972DC7B7F384007 /* SnippetsPlaceholderView.swift in Sources */,
+				4C80879D870B3EC1C1444360 /* SnoozeToDoUseCase.swift in Sources */,
+				8DED606599AF79A4FC76C5EE /* StorageCleanupUseCase.swift in Sources */,
+				37451F769C843BE631B677CD /* String+Utilities.swift in Sources */,
+				08D3F664B79E397711A4919B /* SyncLocalDataSource.swift in Sources */,
+				640943FC1A83967A6567A2F8 /* SyncMapper.swift in Sources */,
+				28813B70AAD30E4C65584489 /* SyncPolicy.swift in Sources */,
+				0608B9EE6A53FB35064AD77E /* SyncQueue.swift in Sources */,
+				0374F487A26B7E793F7E5791 /* SyncStateRepository.swift in Sources */,
+				750440E084A9C2E51241DA46 /* SyncStatus.swift in Sources */,
+				AB4869EA107EEC94A209859A /* SyntaxHighlightService.swift in Sources */,
+				2A044CE74B3D54E848E59F5C /* SyntaxHighlightedCodeView.swift in Sources */,
+				E784051CD6C095FFF07D3AAA /* TaskDetailRoute.swift in Sources */,
+				6B6451E7AC88D3AE13665C2A /* ToDo.swift in Sources */,
+				B70A84C89CBEDDE6C6712671 /* ToDoID.swift in Sources */,
+				E3C3607AA7DF013AB3062903 /* ToDoLocalDataSource.swift in Sources */,
+				33479F634131989D83B9B97E /* ToDoNotificationService.swift in Sources */,
+				3B917223491BA39049AAE5B1 /* ToDoPresentationModels.swift in Sources */,
+				68BBB74278A6D216EF98E7B8 /* ToDoRepository.swift in Sources */,
+				F08FD7DE2C4356453BB211FB /* ToDosListView.swift in Sources */,
+				6825FF9E497535038945A151 /* ToDosListViewModel.swift in Sources */,
+				9393E4D16FB31244206CCDE6 /* ToggleFavoriteUseCase.swift in Sources */,
+				4246DD927DBE6B09A60B1072 /* TogglePinUseCase.swift in Sources */,
+				7D2A6D7E55461D823F6B8A98 /* UpdateAttachmentUseCase.swift in Sources */,
+				BA692D4F907A6414781F12D6 /* UpdateLabelUseCase.swift in Sources */,
+				15182C95F9C154125E19281E /* UpdateManualSnippetUseCase.swift in Sources */,
+				31A189B701F7977333A4092A /* UpdateNoteUseCase.swift in Sources */,
+				D741F882984129BEFD69C7CF /* UpdateToDoUseCase.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		83885C5D16A7670279B87882 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1076,6 +1448,7 @@
 				167425D5750F0B35F1F5BA49 /* SnippetSyntaxLanguage.swift in Sources */,
 				A569D2595316E5FE2F2EA84C /* SnippetsPlaceholderView.swift in Sources */,
 				B8BB02EB7CB9C39635B8BC7B /* SnoozeToDoUseCase.swift in Sources */,
+				2048820971F955A13365603E /* StorageCleanupUseCase.swift in Sources */,
 				C95A1506FA82FE8374B6B088 /* String+Utilities.swift in Sources */,
 				DC03B08FA19A9743AB992F99 /* SyncLocalDataSource.swift in Sources */,
 				66DAF5D71914A9A75152FCEC /* SyncMapper.swift in Sources */,
@@ -1111,6 +1484,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = MyNotes/MyNotes.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 0.9.12;
@@ -1130,6 +1504,32 @@
 				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
+		};
+		55F27917B2C192DE7312790D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "MyNotes/MyNotes-macOS.entitlements";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 0.9.12;
+				DEVELOPMENT_TEAM = 9FP39GTDT5;
+				ENABLE_APP_SANDBOX = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "MyNotes/Info-macOS.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 0.9.12;
+				PRODUCT_BUNDLE_IDENTIFIER = com.grigorym.MyNotes;
+				PRODUCT_NAME = MyNotes;
+				SDKROOT = macosx;
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+			};
+			name = Debug;
 		};
 		70B20D7EEF84A6FE4D959386 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -1183,21 +1583,48 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.1;
 			};
 			name = Debug;
 		};
+		87B143883D3EBBA425E0FEA4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "MyNotes/MyNotes-macOS.entitlements";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 0.9.12;
+				DEVELOPMENT_TEAM = 9FP39GTDT5;
+				ENABLE_APP_SANDBOX = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "MyNotes/Info-macOS.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 0.9.12;
+				PRODUCT_BUNDLE_IDENTIFIER = com.grigorym.MyNotes;
+				PRODUCT_NAME = MyNotes;
+				SDKROOT = macosx;
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+			};
+			name = Release;
+		};
 		D2564C7CA0B8DA5F776643C1 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = MyNotes/MyNotes.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 0.9.12;
@@ -1264,10 +1691,10 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.1;
@@ -1277,6 +1704,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		1F32D06B904128E93F17C617 /* Build configuration list for PBXNativeTarget "MyNotes-macOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				55F27917B2C192DE7312790D /* Debug */,
+				87B143883D3EBBA425E0FEA4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		337C2A0F667E6BF6A6534255 /* Build configuration list for PBXNativeTarget "MyNotes" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -1305,6 +1741,10 @@
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		2BEB00EEB0FADBA1126D8817 /* Highlightr */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Highlightr;
+		};
 		A0499577E6B8CD9C1416AFCC /* Highlightr */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Highlightr;

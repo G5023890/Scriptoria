@@ -43,6 +43,35 @@ struct NotesLocalDataSource {
         }
     }
 
+    func allNotes() throws -> [Note] {
+        try databaseManager.read { db in
+            try db.query(
+                statement: """
+                SELECT
+                    id,
+                    title,
+                    body_markdown,
+                    body_plain_text,
+                    preview_text,
+                    primary_type,
+                    snippet_language_hint,
+                    is_pinned,
+                    is_favorite,
+                    is_archived,
+                    is_deleted,
+                    deleted_at,
+                    created_at,
+                    updated_at,
+                    sort_date,
+                    version
+                FROM notes
+                ORDER BY created_at ASC;
+                """,
+                map: Self.mapNote
+            )
+        }
+    }
+
     func create(_ note: Note) throws {
         try databaseManager.write { db in
             try upsert(note, using: db)

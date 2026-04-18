@@ -69,6 +69,7 @@ final class AppEnvironment {
     let copySnippetUseCase: CopySnippetUseCase
     let quickCaptureUseCase: QuickCaptureUseCase
     let seedSampleDataUseCase: SeedSampleDataUseCase
+    let storageCleanupUseCase: StorageCleanupUseCase
     let bootstrapApplicationUseCase: BootstrapApplicationUseCase
 
     init(
@@ -137,6 +138,7 @@ final class AppEnvironment {
         copySnippetUseCase: CopySnippetUseCase,
         quickCaptureUseCase: QuickCaptureUseCase,
         seedSampleDataUseCase: SeedSampleDataUseCase,
+        storageCleanupUseCase: StorageCleanupUseCase,
         bootstrapApplicationUseCase: BootstrapApplicationUseCase
     ) {
         self.dateService = dateService
@@ -204,6 +206,7 @@ final class AppEnvironment {
         self.copySnippetUseCase = copySnippetUseCase
         self.quickCaptureUseCase = quickCaptureUseCase
         self.seedSampleDataUseCase = seedSampleDataUseCase
+        self.storageCleanupUseCase = storageCleanupUseCase
         self.bootstrapApplicationUseCase = bootstrapApplicationUseCase
     }
 }

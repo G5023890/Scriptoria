@@ -7,6 +7,11 @@ struct LabelsLocalDataSource {
         self.databaseManager = databaseManager
     }
 
+    struct NoteLabelAssignment: Hashable, Sendable {
+        let noteID: NoteID
+        let labelID: LabelID
+    }
+
     func allLabels() throws -> [Label] {
         try databaseManager.read { db in
             try db.query(
@@ -24,6 +29,29 @@ struct LabelsLocalDataSource {
                     version
                 FROM labels
                 WHERE is_deleted = 0
+                ORDER BY name COLLATE NOCASE ASC;
+                """,
+                map: Self.mapLabel
+            )
+        }
+    }
+
+    func allLabelsIncludingDeleted() throws -> [Label] {
+        try databaseManager.read { db in
+            try db.query(
+                statement: """
+                SELECT
+                    id,
+                    name,
+                    color,
+                    icon_name,
+                    is_system,
+                    created_at,
+                    updated_at,
+                    is_deleted,
+                    deleted_at,
+                    version
+                FROM labels
                 ORDER BY name COLLATE NOCASE ASC;
                 """,
                 map: Self.mapLabel
@@ -186,6 +214,52 @@ struct LabelsLocalDataSource {
                   AND label_id = ?;
                 """,
                 bindings: [
+                    .text(noteID.rawValue),
+                    .text(labelID.rawValue)
+                ]
+            )
+        }
+    }
+
+    func allNoteLabelAssignments() throws -> [NoteLabelAssignment] {
+        try databaseManager.read { db in
+            try db.query(
+                statement: """
+                SELECT note_id, label_id
+                FROM note_labels
+                ORDER BY note_id ASC, label_id ASC;
+                """
+            ) { row in
+                NoteLabelAssignment(
+                    noteID: NoteID(rawValue: try row.requiredString("note_id")),
+                    labelID: LabelID(rawValue: try row.requiredString("label_id"))
+                )
+            }
+        }
+    }
+
+    func add(labelID: LabelID, to noteID: NoteID) throws {
+        try databaseManager.write { db in
+            try db.execute(
+                statement: """
+                INSERT OR IGNORE INTO note_labels (note_id, label_id)
+                SELECT ?, ?
+                WHERE EXISTS (
+                    SELECT 1
+                    FROM notes
+                    WHERE id = ?
+                      AND is_deleted = 0
+                )
+                  AND EXISTS (
+                    SELECT 1
+                    FROM labels
+                    WHERE id = ?
+                      AND is_deleted = 0
+                );
+                """,
+                bindings: [
+                    .text(noteID.rawValue),
+                    .text(labelID.rawValue),
                     .text(noteID.rawValue),
                     .text(labelID.rawValue)
                 ]

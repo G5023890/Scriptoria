@@ -1,7 +1,9 @@
+import Combine
 import SwiftUI
 
 @MainActor
 struct IPhoneRootView: View {
+    @Environment(\.scenePhase) private var scenePhase
     @Bindable var coordinator: AppCoordinator
     let environment: AppEnvironment
 
@@ -162,6 +164,35 @@ struct IPhoneRootView: View {
             case .browse, .tasks:
                 isBottomSearchPresented = false
                 searchViewModel.updateQuery("")
+            }
+        }
+        .onChange(of: scenePhase) {
+            switch scenePhase {
+            case .active:
+                environment.syncStatusStore.markDebugTrigger(.active)
+#if !os(macOS)
+                AppRuntime.shared.startActiveSyncPollingIfNeeded(trigger: .active)
+#endif
+
+                Task {
+                    await environment.performSyncIfNeeded()
+                    await reloadSidebar()
+                    await reloadLists()
+                    syncNavigationState()
+                }
+            case .inactive, .background:
+#if !os(macOS)
+                AppRuntime.shared.stopActiveSyncPolling()
+#endif
+            @unknown default:
+                break
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .scriptoriaDidApplyRemoteSync)) { _ in
+            Task {
+                await reloadSidebar()
+                await reloadLists()
+                syncNavigationState()
             }
         }
     }

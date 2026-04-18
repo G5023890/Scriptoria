@@ -67,6 +67,43 @@ struct SyncLocalDataSource {
         }
     }
 
+    func compactQueue() throws {
+        try databaseManager.write { db in
+            try db.execute(
+                statement: """
+                UPDATE sync_queue
+                SET status = ?,
+                    next_retry_at = NULL
+                WHERE status = ?;
+                """,
+                bindings: [
+                    .text(SyncQueueItem.Status.pending.rawValue),
+                    .text(SyncQueueItem.Status.processing.rawValue)
+                ]
+            )
+
+            try db.execute(
+                statement: """
+                DELETE FROM sync_queue
+                WHERE id IN (
+                    SELECT id
+                    FROM (
+                        SELECT
+                            id,
+                            ROW_NUMBER() OVER (
+                                PARTITION BY entity_type, entity_id
+                                ORDER BY created_at DESC, id DESC
+                            ) AS row_number
+                        FROM sync_queue
+                    )
+                    WHERE row_number > 1
+                );
+                """,
+                bindings: []
+            )
+        }
+    }
+
     func pendingItems(readyBefore now: Date, limit: Int) throws -> [SyncQueueItem] {
         try databaseManager.read { db in
             try db.query(
@@ -86,7 +123,12 @@ struct SyncLocalDataSource {
                 FROM sync_queue
                 WHERE status IN (?, ?)
                   AND (next_retry_at IS NULL OR next_retry_at <= ?)
-                ORDER BY created_at ASC
+                ORDER BY
+                  CASE status
+                    WHEN 'pending' THEN 0
+                    ELSE 1
+                  END ASC,
+                  created_at DESC
                 LIMIT ?;
                 """,
                 bindings: [

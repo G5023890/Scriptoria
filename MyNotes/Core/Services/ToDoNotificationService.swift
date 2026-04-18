@@ -81,7 +81,7 @@ final class LocalToDoNotificationScheduler: NSObject, ToDoNotificationScheduling
         }
     }
 
-    private let center: UNUserNotificationCenter
+    private let center: UNUserNotificationCenter?
     private let calendar: Calendar
     private var onOpenToDo: (@MainActor (NoteID, ToDoID) -> Void)?
     private var onSnoozeToDo: (@MainActor (ToDoID, ToDoNotificationSnoozePreset) async -> Void)?
@@ -89,13 +89,13 @@ final class LocalToDoNotificationScheduler: NSObject, ToDoNotificationScheduling
     private var pendingResponse: PendingResponse?
 
     init(
-        center: UNUserNotificationCenter = .current(),
+        center: UNUserNotificationCenter?,
         calendar: Calendar = .current
     ) {
         self.center = center
         self.calendar = calendar
         super.init()
-        center.delegate = self
+        self.center?.delegate = self
         registerCategories()
     }
 
@@ -107,7 +107,7 @@ final class LocalToDoNotificationScheduler: NSObject, ToDoNotificationScheduling
         self.onOpenToDo = onOpenToDo
         self.onSnoozeToDo = onSnoozeToDo
         self.onCompleteToDo = onCompleteToDo
-        center.delegate = self
+        center?.delegate = self
         registerCategories()
 
         if let pendingResponse {
@@ -119,6 +119,8 @@ final class LocalToDoNotificationScheduler: NSObject, ToDoNotificationScheduling
     }
 
     func sync(with items: [ScheduledToDoNotification], promptIfNeeded: Bool) async {
+        guard let center else { return }
+
         let settings = await notificationSettings()
         let isAuthorized = await authorizationGranted(settings: settings, promptIfNeeded: promptIfNeeded)
 
@@ -145,6 +147,8 @@ final class LocalToDoNotificationScheduler: NSObject, ToDoNotificationScheduling
     }
 
     private func registerCategories() {
+        guard let center else { return }
+
         let actions: [UNNotificationAction] = [
             UNNotificationAction(
                 identifier: Constants.actionComplete,
@@ -242,7 +246,11 @@ final class LocalToDoNotificationScheduler: NSObject, ToDoNotificationScheduling
     }
 
     private func notificationSettings() async -> UNNotificationSettings {
-        await withCheckedContinuation { continuation in
+        guard let center else {
+            preconditionFailure("Notification center unavailable outside app bundle")
+        }
+
+        return await withCheckedContinuation { continuation in
             center.getNotificationSettings { settings in
                 continuation.resume(returning: settings)
             }
@@ -250,7 +258,11 @@ final class LocalToDoNotificationScheduler: NSObject, ToDoNotificationScheduling
     }
 
     private func pendingNotificationRequests() async -> [UNNotificationRequest] {
-        await withCheckedContinuation { continuation in
+        guard let center else {
+            preconditionFailure("Notification center unavailable outside app bundle")
+        }
+
+        return await withCheckedContinuation { continuation in
             center.getPendingNotificationRequests { requests in
                 continuation.resume(returning: requests)
             }
@@ -258,7 +270,11 @@ final class LocalToDoNotificationScheduler: NSObject, ToDoNotificationScheduling
     }
 
     private func requestAuthorization() async throws -> Bool {
-        try await withCheckedThrowingContinuation { continuation in
+        guard let center else {
+            return false
+        }
+
+        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Bool, Error>) in
             center.requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
                 if let error {
                     continuation.resume(throwing: error)
@@ -270,6 +286,10 @@ final class LocalToDoNotificationScheduler: NSObject, ToDoNotificationScheduling
     }
 
     private func addNotification(for entry: NotificationScheduleEntry) async throws {
+        guard let center else {
+            return
+        }
+
         let item = entry.item
         let content = UNMutableNotificationContent()
         content.title = item.title

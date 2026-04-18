@@ -9,6 +9,10 @@ protocol SyncStateRepository: Sendable {
 
 enum SyncStateKey: String, Sendable {
     case databaseChangeToken
+    case databaseSubscriptionInstalled
+    case zoneChangeToken
+    case hasCompletedInitialCloudSync
+    case hasCompletedInitialStorageCleanup
     case lastSuccessfulSyncDate
     case lastFailureSummary
 }

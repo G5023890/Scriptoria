@@ -33,8 +33,25 @@ protocol FileService {
     ) throws
     func importAttachment(from sourceURL: URL, noteID: NoteID, attachmentID: AttachmentID) throws -> ImportedAttachmentFile
     func absoluteURL(for relativePath: String) throws -> URL
+    func writeFile(atRelativePath relativePath: String, from sourceURL: URL) throws
+    func temporaryFileURL(forFileNamed fileName: String) throws -> URL
     func readTextFile(atRelativePath relativePath: String, maxCharacters: Int) throws -> String?
     func deleteItem(atRelativePath relativePath: String) throws
+    func cleanupStorage(
+        retainingAttachmentRelativePaths retainedRelativePaths: Set<String>,
+        maximumRetainedBackups: Int,
+        purgeCloudKitAssetCache: Bool
+    ) throws -> StorageCleanupReport
+}
+
+struct StorageCleanupReport: Sendable {
+    var orphanedAttachmentFilesRemoved: Int = 0
+    var emptyAttachmentDirectoriesRemoved: Int = 0
+    var backupArtifactsRemoved: Int = 0
+    var temporarySyncFilesRemoved: Int = 0
+    var cloudKitCacheEntriesRemoved: Int = 0
+
+    static let empty = StorageCleanupReport()
 }
 
 struct LocalFileService: FileService {
@@ -165,6 +182,31 @@ struct LocalFileService: FileService {
         try applicationSupportDirectory().appendingPathComponent(relativePath)
     }
 
+    func writeFile(atRelativePath relativePath: String, from sourceURL: URL) throws {
+        try ensureBaseDirectories()
+
+        let destinationURL = try absoluteURL(for: relativePath)
+        let parentDirectory = destinationURL.deletingLastPathComponent()
+        try fileManager.createDirectory(at: parentDirectory, withIntermediateDirectories: true, attributes: nil)
+
+        if fileManager.fileExists(atPath: destinationURL.path) {
+            try fileManager.removeItem(at: destinationURL)
+        }
+        try fileManager.copyItem(at: sourceURL, to: destinationURL)
+    }
+
+    func temporaryFileURL(forFileNamed fileName: String) throws -> URL {
+        let directory = fileManager.temporaryDirectory
+            .appendingPathComponent("ScriptoriaCloudKit", isDirectory: true)
+        try fileManager.createDirectory(at: directory, withIntermediateDirectories: true, attributes: nil)
+
+        let destinationURL = directory.appendingPathComponent("\(UUID().uuidString.lowercased())-\(fileName)")
+        if fileManager.fileExists(atPath: destinationURL.path) {
+            try fileManager.removeItem(at: destinationURL)
+        }
+        return destinationURL
+    }
+
     func readTextFile(atRelativePath relativePath: String, maxCharacters: Int = 4_000) throws -> String? {
         let url = try absoluteURL(for: relativePath)
         let data = try Data(contentsOf: url, options: .mappedIfSafe)
@@ -184,6 +226,36 @@ struct LocalFileService: FileService {
         let url = try absoluteURL(for: relativePath)
         guard fileManager.fileExists(atPath: url.path) else { return }
         try fileManager.removeItem(at: url)
+    }
+
+    func cleanupStorage(
+        retainingAttachmentRelativePaths retainedRelativePaths: Set<String>,
+        maximumRetainedBackups: Int = 2,
+        purgeCloudKitAssetCache: Bool
+    ) throws -> StorageCleanupReport {
+        try ensureBaseDirectories()
+
+        var report = StorageCleanupReport.empty
+        let baseDirectory = try applicationSupportDirectory()
+
+        report.orphanedAttachmentFilesRemoved += try cleanupOrphanedAttachmentFiles(
+            in: baseDirectory,
+            retainingRelativePaths: retainedRelativePaths
+        )
+        report.emptyAttachmentDirectoriesRemoved += try removeEmptyAttachmentDirectories(in: baseDirectory)
+        report.backupArtifactsRemoved += try trimBackupArtifacts(
+            in: baseDirectory,
+            maximumRetainedBackups: maximumRetainedBackups
+        )
+        report.temporarySyncFilesRemoved += try clearTemporarySyncFiles()
+
+        if purgeCloudKitAssetCache {
+            report.cloudKitCacheEntriesRemoved += try purgeCloudKitAssetCacheIfPresent(
+                applicationSupportDirectory: baseDirectory
+            )
+        }
+
+        return report
     }
 
     private var resourceBundle: Bundle {
@@ -285,5 +357,149 @@ struct LocalFileService: FileService {
         let duration = asset.duration.seconds
         guard duration.isFinite else { return nil }
         return duration
+    }
+
+    private func cleanupOrphanedAttachmentFiles(
+        in baseDirectory: URL,
+        retainingRelativePaths retainedRelativePaths: Set<String>
+    ) throws -> Int {
+        let attachmentsRoot = baseDirectory.appendingPathComponent("attachments", isDirectory: true)
+        guard fileManager.fileExists(atPath: attachmentsRoot.path) else { return 0 }
+
+        let enumerator = fileManager.enumerator(
+            at: attachmentsRoot,
+            includingPropertiesForKeys: [.isRegularFileKey],
+            options: [.skipsHiddenFiles]
+        )
+
+        var removedCount = 0
+        while let fileURL = enumerator?.nextObject() as? URL {
+            let values = try fileURL.resourceValues(forKeys: [.isRegularFileKey])
+            guard values.isRegularFile == true else { continue }
+
+            let relativePath = normalizedRelativePath(from: baseDirectory, to: fileURL)
+            guard !retainedRelativePaths.contains(relativePath) else { continue }
+
+            try fileManager.removeItem(at: fileURL)
+            removedCount += 1
+        }
+
+        return removedCount
+    }
+
+    private func removeEmptyAttachmentDirectories(in baseDirectory: URL) throws -> Int {
+        let attachmentsRoot = baseDirectory.appendingPathComponent("attachments", isDirectory: true)
+        guard fileManager.fileExists(atPath: attachmentsRoot.path) else { return 0 }
+
+        let enumerator = fileManager.enumerator(
+            at: attachmentsRoot,
+            includingPropertiesForKeys: [.isDirectoryKey],
+            options: [.skipsHiddenFiles]
+        )
+
+        var directories: [URL] = []
+        while let directoryURL = enumerator?.nextObject() as? URL {
+            let values = try directoryURL.resourceValues(forKeys: [.isDirectoryKey])
+            if values.isDirectory == true {
+                directories.append(directoryURL)
+            }
+        }
+
+        var removedCount = 0
+        for directoryURL in directories.sorted(by: { $0.path.count > $1.path.count }) {
+            guard directoryURL != attachmentsRoot else { continue }
+            let contents = try fileManager.contentsOfDirectory(atPath: directoryURL.path)
+            guard contents.isEmpty else { continue }
+            try fileManager.removeItem(at: directoryURL)
+            removedCount += 1
+        }
+
+        return removedCount
+    }
+
+    private func trimBackupArtifacts(
+        in baseDirectory: URL,
+        maximumRetainedBackups: Int
+    ) throws -> Int {
+        let backupsDirectory = baseDirectory.appendingPathComponent("backups", isDirectory: true)
+        guard fileManager.fileExists(atPath: backupsDirectory.path) else { return 0 }
+
+        let children = try fileManager.contentsOfDirectory(
+            at: backupsDirectory,
+            includingPropertiesForKeys: [.contentModificationDateKey],
+            options: [.skipsHiddenFiles]
+        )
+
+        guard children.count > maximumRetainedBackups else { return 0 }
+
+        let sortedChildren = try children.sorted { lhs, rhs in
+            let lhsDate = try lhs.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate ?? .distantPast
+            let rhsDate = try rhs.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate ?? .distantPast
+            return lhsDate > rhsDate
+        }
+
+        var removedCount = 0
+        for child in sortedChildren.dropFirst(maximumRetainedBackups) {
+            try fileManager.removeItem(at: child)
+            removedCount += 1
+        }
+
+        return removedCount
+    }
+
+    private func clearTemporarySyncFiles() throws -> Int {
+        let directory = fileManager.temporaryDirectory
+            .appendingPathComponent("ScriptoriaCloudKit", isDirectory: true)
+        guard fileManager.fileExists(atPath: directory.path) else { return 0 }
+
+        let children = try fileManager.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)
+        for child in children {
+            try fileManager.removeItem(at: child)
+        }
+        return children.count
+    }
+
+    private func purgeCloudKitAssetCacheIfPresent(applicationSupportDirectory: URL) throws -> Int {
+        guard let cloudKitCacheDirectory = cloudKitCacheDirectory(
+            from: applicationSupportDirectory
+        ) else {
+            return 0
+        }
+
+        guard fileManager.fileExists(atPath: cloudKitCacheDirectory.path) else { return 0 }
+        let children = try fileManager.contentsOfDirectory(
+            at: cloudKitCacheDirectory,
+            includingPropertiesForKeys: nil,
+            options: [.skipsHiddenFiles]
+        )
+
+        for child in children {
+            try fileManager.removeItem(at: child)
+        }
+
+        return children.count
+    }
+
+    private func cloudKitCacheDirectory(from applicationSupportDirectory: URL) -> URL? {
+        let libraryDirectory = applicationSupportDirectory
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+
+        guard libraryDirectory.lastPathComponent == "Library" else {
+            return nil
+        }
+
+        return libraryDirectory.appendingPathComponent("Caches/CloudKit", isDirectory: true)
+    }
+
+    private func normalizedRelativePath(from baseDirectory: URL, to fileURL: URL) -> String {
+        let basePath = baseDirectory.standardizedFileURL.path
+        let filePath = fileURL.standardizedFileURL.path
+
+        guard filePath.hasPrefix(basePath) else {
+            return fileURL.lastPathComponent
+        }
+
+        return String(filePath.dropFirst(basePath.count + 1))
     }
 }

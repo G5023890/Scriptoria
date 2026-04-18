@@ -20,6 +20,10 @@ let package = Package(
                 .product(name: "Highlightr", package: "Highlightr")
             ],
             path: "MyNotes",
+            exclude: [
+                "Info.plist",
+                "MyNotes.entitlements"
+            ],
             resources: [
                 .process("Resources")
             ],

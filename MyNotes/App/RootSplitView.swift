@@ -3,6 +3,7 @@ import SwiftUI
 
 @MainActor
 struct RootSplitView: View {
+    @Environment(\.scenePhase) private var scenePhase
     @Bindable var coordinator: AppCoordinator
     let environment: AppEnvironment
 
@@ -146,6 +147,27 @@ struct RootSplitView: View {
         .task(id: coordinator.newNoteRequestID) {
             guard coordinator.consumeNewNoteRequest() != nil else { return }
             await createNewNoteInline()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .scriptoriaDidApplyRemoteSync)) { _ in
+            Task {
+                await reloadSidebar()
+                await reloadList()
+                await noteDetailViewModel.load(
+                    noteID: coordinator.selectedNoteID,
+                    preserveMode: true
+                )
+            }
+        }
+        .onChange(of: scenePhase) {
+            switch scenePhase {
+            case .active:
+                AppRuntime.shared.startActiveSyncPollingIfNeeded(trigger: .active)
+                Task {
+                    await environment.performSyncIfNeeded()
+                }
+            default:
+                AppRuntime.shared.stopActiveSyncPolling()
+            }
         }
     }
 
