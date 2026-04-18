@@ -43,7 +43,7 @@ Most tools force you to choose one mode of thinking.
 
 - Create notes instantly from the toolbar or with `Cmd+N`
 - Edit title and body
-- Switch between `Read`, `Edit`, and `Split` modes
+- Switch between `Read` and `Edit` modes
 - Keep archived note items grouped in a dedicated bottom `Архив` section
 - Pin important notes
 - Mark favorites
@@ -135,7 +135,7 @@ More screenshots for label editing and task-focused flows will be added in the n
 
 - sidebar for smart collections and labels
 - main list for notes or global tasks
-- detail area for reading, editing, and split view
+- detail area for reading and editing
 
 The sidebar currently includes:
 

@@ -66,7 +66,6 @@ enum NoteSortOrder: String, Codable, Sendable {
 enum NoteDetailMode: String, CaseIterable, Hashable, Sendable, Identifiable {
     case read
     case edit
-    case split
 
     var id: String { rawValue }
 
@@ -74,7 +73,6 @@ enum NoteDetailMode: String, CaseIterable, Hashable, Sendable, Identifiable {
         switch self {
         case .read: "Read"
         case .edit: "Edit"
-        case .split: "Split"
         }
     }
 }

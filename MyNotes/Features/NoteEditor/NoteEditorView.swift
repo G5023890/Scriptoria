@@ -13,26 +13,8 @@ struct NoteEditorPane: View {
                 EmptyView()
             case .edit:
                 editor
-            case .split:
-                splitEditor
             }
         }
-    }
-
-    @ViewBuilder
-    private var splitEditor: some View {
-        #if os(macOS)
-        HSplitView {
-            editor
-            preview
-        }
-        #else
-        VStack(spacing: 0) {
-            editor
-            Divider()
-            preview
-        }
-        #endif
     }
 
     private var editor: some View {
@@ -141,23 +123,6 @@ struct NoteEditorPane: View {
                 }
             )
         }
-    }
-
-    private var preview: some View {
-        ScrollView {
-            if let markdown = viewModel.draft?.bodyMarkdown, !markdown.isEmpty {
-                NoteRenderedContentView(markdown: markdown)
-                    .padding(AppSpacing.medium)
-            } else {
-                ContentUnavailableView(
-                    "Preview Is Empty",
-                    systemImage: "doc.plaintext",
-                    description: Text("Markdown preview updates as you edit the draft.")
-                )
-                .padding(AppSpacing.medium)
-            }
-        }
-        .modifier(PanelSurfaceModifier())
     }
 
 }
