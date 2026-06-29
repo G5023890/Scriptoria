@@ -53,6 +53,7 @@ final class NoteEditorViewModel {
     let syntaxHighlightService: any SyntaxHighlightService
     private let onSave: @MainActor () async -> Void
     private var autosaveTask: Task<Void, Never>?
+    private var lastLoadedLabelIDs = Set<LabelID>()
 
     init(
         noteID: NoteID,
@@ -114,9 +115,7 @@ final class NoteEditorViewModel {
 
     func load() async {
         do {
-            draft = try await loadNoteDraftUseCase.execute(noteID: noteID)
-            availableLabels = try await listLabelsUseCase.execute()
-            rebuildPresentationState()
+            try await reloadFromStore(mergingIntoExistingDraft: false)
             lastSavedText = "Loaded"
         } catch {
             draft = nil
@@ -126,6 +125,14 @@ final class NoteEditorViewModel {
             snippetItems = []
             availableLabels = []
             activeAttachmentEditDraft = nil
+        }
+    }
+
+    func refreshFromStoreAfterRemoteSync() async {
+        do {
+            try await reloadFromStore(mergingIntoExistingDraft: true)
+        } catch {
+            errorMessage = "Remote update refresh failed: \(error.localizedDescription)"
         }
     }
 
@@ -543,6 +550,40 @@ final class NoteEditorViewModel {
 
     func clearError() {
         errorMessage = nil
+    }
+
+    private func reloadFromStore(mergingIntoExistingDraft: Bool) async throws {
+        let latestDraft = try await loadNoteDraftUseCase.execute(noteID: noteID)
+        let latestLabels = try await listLabelsUseCase.execute()
+        availableLabels = latestLabels
+
+        guard let latestDraft else {
+            draft = nil
+            rebuildPresentationState()
+            lastLoadedLabelIDs = []
+            return
+        }
+
+        let latestLabelIDs = Set(latestDraft.labels.map(\.id))
+        defer {
+            lastLoadedLabelIDs = latestLabelIDs
+            rebuildPresentationState()
+        }
+
+        guard
+            mergingIntoExistingDraft,
+            var currentDraft = draft,
+            currentDraft.hasChanges
+        else {
+            draft = latestDraft
+            return
+        }
+
+        if Set(currentDraft.labels.map(\.id)) == lastLoadedLabelIDs {
+            currentDraft.labels = latestDraft.labels
+        }
+
+        draft = currentDraft
     }
 
     func presentNewToDoSheet() {

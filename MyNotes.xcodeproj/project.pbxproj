@@ -1132,7 +1132,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -euo pipefail\n\ncase \"${PLATFORM_NAME:-}\" in\n  iphoneos)\n    ACTOOL_PLATFORM=\"iphoneos\"\n    ;;\n  iphonesimulator)\n    ACTOOL_PLATFORM=\"iphonesimulator\"\n    ;;\n  *)\n    exit 0\n    ;;\nesac\n\nASSET_CATALOG_DIR=\"$SRCROOT/MyNotes/Resources/Assets.xcassets\"\nOUTPUT_DIR=\"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH\"\n\nif [[ -d \"$ASSET_CATALOG_DIR\" ]]; then\n  /usr/bin/xcrun actool \"$ASSET_CATALOG_DIR\" \\\n    --compile \"$OUTPUT_DIR\" \\\n    --platform \"$ACTOOL_PLATFORM\" \\\n    --minimum-deployment-target \"$IPHONEOS_DEPLOYMENT_TARGET\" \\\n    --target-device iphone \\\n    --app-icon AppIcon \\\n    --output-partial-info-plist \"$TARGET_TEMP_DIR/assetcatalog_generated_info.plist\"\nfi\n";
+			shellScript = "set -euo pipefail\n\ncase \"${PLATFORM_NAME:-}\" in\n  iphoneos)\n    ACTOOL_PLATFORM=\"iphoneos\"\n    ;;\n  *)\n    exit 0\n    ;;\nesac\n\nASSET_CATALOG_DIR=\"$SRCROOT/MyNotes/Resources/Assets.xcassets\"\nOUTPUT_DIR=\"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH\"\n\nif [[ -d \"$ASSET_CATALOG_DIR\" ]]; then\n  /usr/bin/xcrun actool \"$ASSET_CATALOG_DIR\" \\\n    --compile \"$OUTPUT_DIR\" \\\n    --platform \"$ACTOOL_PLATFORM\" \\\n    --minimum-deployment-target \"$IPHONEOS_DEPLOYMENT_TARGET\" \\\n    --target-device iphone \\\n    --app-icon AppIcon \\\n    --output-partial-info-plist \"$TARGET_TEMP_DIR/assetcatalog_generated_info.plist\"\nfi\n";
 		};
 		C83837F965CDB16C070B8CBF /* Generate macOS App Icon */ = {
 			isa = PBXShellScriptBuildPhase;

@@ -32,14 +32,13 @@ final class AppRuntime {
 
         activePollingTimer = Timer.scheduledTimer(withTimeInterval: 15, repeats: true) { [weak self] _ in
             guard let self, let environment = self.environment else { return }
-            guard self.isApplicationActive else { return }
+            guard self.shouldRunActivePolling else { return }
 
             self.log("active polling tick")
             environment.syncStatusStore.markDebugTrigger(.timer)
             Task { @MainActor in
                 await environment.performSyncIfNeeded()
                 self.log("active polling sync finished")
-                NotificationCenter.default.post(name: .scriptoriaDidApplyRemoteSync, object: nil)
             }
         }
         RunLoop.main.add(activePollingTimer!, forMode: .common)
@@ -53,9 +52,9 @@ final class AppRuntime {
         environment?.syncStatusStore.markDebugTrigger(.stopped)
     }
 
-    private var isApplicationActive: Bool {
+    private var shouldRunActivePolling: Bool {
 #if os(macOS)
-        NSApp.isActive
+        true
 #else
         UIApplication.shared.applicationState == .active
 #endif
@@ -130,7 +129,6 @@ final class IOSAppDelegate: NSObject, UIApplicationDelegate {
                 AppRuntime.shared.log("running immediate active sync")
                 await environment.performSyncIfNeeded()
                 AppRuntime.shared.log("immediate active sync finished")
-                NotificationCenter.default.post(name: .scriptoriaDidApplyRemoteSync, object: nil)
             }
         }
     }
@@ -159,7 +157,6 @@ final class IOSAppDelegate: NSObject, UIApplicationDelegate {
             environment.syncStatusStore.markDebugTrigger(.push)
             await environment.performSyncIfNeeded()
             AppRuntime.shared.log("remote notification sync finished")
-            NotificationCenter.default.post(name: .scriptoriaDidApplyRemoteSync, object: nil)
             completionHandler(.newData)
         }
     }

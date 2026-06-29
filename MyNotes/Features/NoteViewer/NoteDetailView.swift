@@ -25,7 +25,11 @@ struct NoteDetailView: View {
 
     private var editorPreparationTaskID: String {
         let noteID = viewModel.snapshot?.note.id.rawValue ?? "none"
-        return "\(noteID)::\(viewModel.mode.rawValue)"
+        let labelSignature = viewModel.snapshot?.labels
+            .map(\.id.rawValue)
+            .sorted()
+            .joined(separator: ",") ?? "no-labels"
+        return "\(noteID)::\(viewModel.mode.rawValue)::\(labelSignature)"
     }
 
     private func detailShell(snapshot: NoteSnapshot) -> some View {
@@ -522,6 +526,7 @@ struct NoteDetailView: View {
         }
 
         if let editorViewModel, editorViewModel.noteID == noteID {
+            await editorViewModel.refreshFromStoreAfterRemoteSync()
             return
         }
 
@@ -621,38 +626,42 @@ private struct ManualSnippetSheet: View {
     let onSave: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: AppSpacing.medium) {
-            Text(isEditing ? "Edit Snippet" : "Add Snippet")
-                .font(AppTypography.hero)
+        ScrollView {
+            VStack(alignment: .leading, spacing: AppSpacing.medium) {
+                Text(isEditing ? "Edit Snippet" : "Add Snippet")
+                    .font(AppTypography.hero)
 
-            TextField("Title", text: $draft.title)
-                .textFieldStyle(.roundedBorder)
-
-            TextField("Description", text: $draft.description)
-                .textFieldStyle(.roundedBorder)
-
-            HStack(spacing: AppSpacing.small) {
-                TextField("Syntax language or auto", text: $draft.language)
+                TextField("Title", text: $draft.title)
                     .textFieldStyle(.roundedBorder)
 
-                Menu("Common Syntax") {
-                    ForEach(SnippetSyntaxLanguage.supportedOptions) { option in
-                        Button(option.title) {
-                            draft.language = option.id
+                TextField("Description", text: $draft.description)
+                    .textFieldStyle(.roundedBorder)
+
+                HStack(spacing: AppSpacing.small) {
+                    TextField("Syntax language or auto", text: $draft.language)
+                        .textFieldStyle(.roundedBorder)
+
+                    Menu("Common Syntax") {
+                        ForEach(SnippetSyntaxLanguage.supportedOptions) { option in
+                            Button(option.title) {
+                                draft.language = option.id
+                            }
                         }
                     }
                 }
+
+                Text("Use `auto` to detect syntax automatically, or choose a common language from the menu.")
+                    .font(AppTypography.caption)
+                    .foregroundStyle(.secondary)
+
+                TextEditor(text: $draft.code)
+                    .font(.system(.body, design: .monospaced))
+                    .frame(minHeight: 260)
+                    .modifier(PanelSurfaceModifier())
             }
-
-            Text("Use `auto` to detect syntax automatically, or choose a common language from the menu.")
-                .font(AppTypography.caption)
-                .foregroundStyle(.secondary)
-
-            TextEditor(text: $draft.code)
-                .font(.system(.body, design: .monospaced))
-                .frame(minHeight: 260)
-                .modifier(PanelSurfaceModifier())
-
+            .padding(AppSpacing.large)
+        }
+        .safeAreaInset(edge: .bottom) {
             HStack {
                 Spacer()
                 Button("Cancel", action: onCancel)
@@ -660,8 +669,11 @@ private struct ManualSnippetSheet: View {
                     .keyboardShortcut(.return, modifiers: [.command])
                     .disabled(isSaving || draft.code.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
+            .padding(.horizontal, AppSpacing.large)
+            .padding(.top, AppSpacing.small)
+            .padding(.bottom, AppSpacing.large)
+            .background(.regularMaterial)
         }
-        .padding(AppSpacing.large)
         #if os(macOS)
         .frame(width: 640, height: 520)
         #else

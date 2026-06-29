@@ -125,9 +125,44 @@ struct NoteDetailHeaderView: View {
             isShowingLabelsPopover.toggle()
         }
         .disabled(snapshot.note.isDeleted)
+        #if os(macOS)
         .popover(isPresented: $isShowingLabelsPopover, arrowEdge: .bottom) {
-            labelsPopover
+            LabelsPickerContent(
+                availableLabels: availableLabels,
+                selectedLabels: selectedLabels,
+                newLabelName: newLabelName,
+                isCreatingLabel: isCreatingLabel,
+                onToggleLabel: onToggleLabel,
+                onCreateLabel: onCreateLabel,
+                isFullWidthLayout: false
+            )
         }
+        #else
+        .sheet(isPresented: $isShowingLabelsPopover) {
+            NavigationStack {
+                LabelsPickerContent(
+                    availableLabels: availableLabels,
+                    selectedLabels: selectedLabels,
+                    newLabelName: newLabelName,
+                    isCreatingLabel: isCreatingLabel,
+                    onToggleLabel: onToggleLabel,
+                    onCreateLabel: onCreateLabel,
+                    isFullWidthLayout: true
+                )
+                .navigationTitle("Labels")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button("Done") {
+                            isShowingLabelsPopover = false
+                        }
+                    }
+                }
+            }
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
+        }
+        #endif
     }
 
     private func compactToolbarButton(systemImage: String, action: @escaping () -> Void) -> some View {
@@ -186,22 +221,26 @@ struct NoteDetailHeaderView: View {
         )
     }
 
-    private var labelsPopover: some View {
+}
+
+private struct LabelsPickerContent: View {
+    let availableLabels: [Label]
+    let selectedLabels: [Label]
+    let newLabelName: Binding<String>?
+    let isCreatingLabel: Bool
+    let onToggleLabel: (Label) -> Void
+    let onCreateLabel: () -> Void
+    let isFullWidthLayout: Bool
+
+    var body: some View {
         VStack(alignment: .leading, spacing: AppSpacing.medium) {
-            Text("Labels")
-                .font(AppTypography.section)
+            if !isFullWidthLayout {
+                Text("Labels")
+                    .font(AppTypography.section)
+            }
 
             if let newLabelName {
-                HStack(spacing: AppSpacing.small) {
-                    TextField("New label", text: newLabelName)
-                        .textFieldStyle(.roundedBorder)
-
-                    Button("Add", action: onCreateLabel)
-                        .disabled(
-                            isCreatingLabel ||
-                            newLabelName.wrappedValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                        )
-                }
+                labelCreationRow(newLabelName: newLabelName)
             }
 
             if availableLabels.isEmpty {
@@ -223,17 +262,49 @@ struct NoteDetailHeaderView: View {
                                     LabelIconView(label: label)
                                         .font(.system(size: 12, weight: .semibold))
                                     Text(label.name)
-                                    Spacer()
+                                    Spacer(minLength: 0)
                                 }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .contentShape(Rectangle())
                             }
                             .buttonStyle(.plain)
                         }
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .frame(maxHeight: 220)
+                .frame(maxWidth: .infinity, maxHeight: isFullWidthLayout ? .infinity : 220, alignment: .topLeading)
             }
         }
         .padding(AppSpacing.large)
-        .frame(width: 280)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        #if os(macOS)
+        .frame(width: isFullWidthLayout ? nil : 280)
+        #endif
+    }
+
+    @ViewBuilder
+    private func labelCreationRow(newLabelName: Binding<String>) -> some View {
+        if isFullWidthLayout {
+            VStack(alignment: .leading, spacing: AppSpacing.small) {
+                TextField("New label", text: newLabelName)
+                    .textFieldStyle(.roundedBorder)
+
+                Button("Add", action: onCreateLabel)
+                    .disabled(addButtonDisabled(newLabelName))
+            }
+        } else {
+            HStack(spacing: AppSpacing.small) {
+                TextField("New label", text: newLabelName)
+                    .textFieldStyle(.roundedBorder)
+
+                Button("Add", action: onCreateLabel)
+                    .disabled(addButtonDisabled(newLabelName))
+            }
+        }
+    }
+
+    private func addButtonDisabled(_ newLabelName: Binding<String>) -> Bool {
+        isCreatingLabel ||
+        newLabelName.wrappedValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 }

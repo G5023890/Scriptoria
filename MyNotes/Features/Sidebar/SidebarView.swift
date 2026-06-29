@@ -103,6 +103,9 @@ struct SidebarView: View {
                 Text(item.label.name)
                 Spacer()
                 InfoBadge(text: "\(item.noteCount)")
+                #if os(macOS)
+                editLabelButton(for: item)
+                #endif
             }
         } onTap: {
             viewModel.selection = .label(item.label.id)
@@ -135,14 +138,52 @@ struct SidebarView: View {
         .contextMenu {
             contextMenu()
         }
+        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+            if case let .label(labelID) = selection,
+               let item = viewModel.labels.first(where: { $0.label.id == labelID }) {
+                Button("Edit") {
+                    viewModel.beginEditing(for: item)
+                }
+
+                Button("Delete", role: .destructive) {
+                    Task {
+                        await viewModel.deleteLabel(item)
+                    }
+                }
+                .disabled(item.label.isSystem)
+            }
+        }
         #else
         content()
             .tag(selection)
+            .contentShape(Rectangle())
+            .onTapGesture(count: 2) {
+                guard case let .label(labelID) = selection,
+                      let item = viewModel.labels.first(where: { $0.label.id == labelID }) else {
+                    return
+                }
+                viewModel.beginEditing(for: item)
+            }
             .contextMenu {
                 contextMenu()
             }
         #endif
     }
+
+    #if os(macOS)
+    private func editLabelButton(for item: SidebarLabelSummary) -> some View {
+        Button {
+            viewModel.beginEditing(for: item)
+        } label: {
+            Image(systemName: "square.and.pencil")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(.secondary)
+                .frame(width: 24, height: 24)
+        }
+        .buttonStyle(.plain)
+        .help("Edit Label")
+    }
+    #endif
 
     @ViewBuilder
     private func editLabelSheet(for item: SidebarLabelSummary) -> some View {

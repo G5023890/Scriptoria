@@ -47,6 +47,7 @@ protocol SyncQueue: Sendable {
     func compactQueue() async throws
     func pendingItems(limit: Int) async throws -> [SyncQueueItem]
     func pendingCount() async throws -> Int
+    func pendingEntityIDs(for entityType: SyncQueueItem.EntityType) async throws -> Set<String>
     func markProcessing(itemID: String, attemptedAt: Date) async throws
     func markSucceeded(itemID: String) async throws
     func markFailed(itemID: String, attemptedAt: Date, errorSummary: String?) async throws
@@ -96,6 +97,13 @@ actor LocalSyncQueue: SyncQueue {
 
     func pendingCount() async throws -> Int {
         try dataSource.pendingCount(readyBefore: dateService.now())
+    }
+
+    func pendingEntityIDs(for entityType: SyncQueueItem.EntityType) async throws -> Set<String> {
+        try dataSource.entityIDs(
+            withStatuses: [.pending, .processing, .failed],
+            for: entityType
+        )
     }
 
     func markProcessing(itemID: String, attemptedAt: Date) async throws {

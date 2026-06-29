@@ -42,9 +42,6 @@ targets:
             iphoneos)
               ACTOOL_PLATFORM="iphoneos"
               ;;
-            iphonesimulator)
-              ACTOOL_PLATFORM="iphonesimulator"
-              ;;
             *)
               exit 0
               ;;

@@ -165,7 +165,15 @@ struct RootSplitView: View {
                 Task {
                     await environment.performSyncIfNeeded()
                 }
-            default:
+            case .inactive:
+                #if os(macOS)
+                AppRuntime.shared.startActiveSyncPollingIfNeeded(trigger: .active)
+                #else
+                AppRuntime.shared.stopActiveSyncPolling()
+                #endif
+            case .background:
+                AppRuntime.shared.stopActiveSyncPolling()
+            @unknown default:
                 AppRuntime.shared.stopActiveSyncPolling()
             }
         }

@@ -12,6 +12,7 @@ enum SyncStateKey: String, Sendable {
     case databaseSubscriptionInstalled
     case zoneChangeToken
     case hasCompletedInitialCloudSync
+    case hasCompletedAuthoritativeNoteLabelSnapshot
     case hasCompletedInitialStorageCleanup
     case lastSuccessfulSyncDate
     case lastFailureSummary

@@ -40,9 +40,17 @@ enum SyncEngineError: LocalizedError {
 }
 
 actor DefaultCloudKitSyncEngine: CloudKitSyncEngine {
+    private struct SnapshotFetchResult {
+        let records: [CKRecord]
+        let isAuthoritative: Bool
+    }
+
     private enum Constants {
         static let zoneName = "ScriptoriaZone"
         static let usesCustomZone = false
+        static let noteLabelReconcileProtectionInterval: TimeInterval = 45
+        static let pendingPushBatchLimit = 10
+        static let missingAttachmentRepairBatchLimit = 3
     }
 
     private enum TokenCodec {
@@ -75,6 +83,7 @@ actor DefaultCloudKitSyncEngine: CloudKitSyncEngine {
 
     private var isSyncInProgress = false
     private var needsFollowUpSync = false
+    private var recentlyPushedNoteLabelNoteIDs: [NoteID: Date] = [:]
 
     init(
         configuration: CloudKitSyncConfiguration,
@@ -146,8 +155,13 @@ actor DefaultCloudKitSyncEngine: CloudKitSyncEngine {
                     try await processPendingSyncQueueCycle()
                     shouldPurgeCloudKitCache = try await pullLatestChangesCycle()
                 } else {
-                    shouldPurgeCloudKitCache = try await pullLatestChangesCycle()
-                    try await processPendingSyncQueueCycle()
+                    if pendingCount > 0 {
+                        try await processPendingSyncQueueCycle()
+                        shouldPurgeCloudKitCache = try await pullLatestChangesCycle()
+                    } else {
+                        shouldPurgeCloudKitCache = try await pullLatestChangesCycle()
+                        try await processPendingSyncQueueCycle()
+                    }
                 }
 
                 try await performStorageCleanup(purgeCloudKitAssetCache: shouldPurgeCloudKitCache)
@@ -173,7 +187,7 @@ actor DefaultCloudKitSyncEngine: CloudKitSyncEngine {
 
     private func processPendingSyncQueueCycle() async throws {
         try await syncQueue.compactQueue()
-        let items = try await syncQueue.pendingItems(limit: 100)
+        let items = try await syncQueue.pendingItems(limit: Constants.pendingPushBatchLimit)
         var firstFailure: String?
         var processedAtLeastOneItem = false
 
@@ -307,12 +321,20 @@ actor DefaultCloudKitSyncEngine: CloudKitSyncEngine {
     }
 
     private func pullFullSnapshotCycle() async throws -> Bool {
-        let notes = try await fetchAllRecordsAllowingEmptyType(ofType: SyncMapper.RecordType.note)
-        let labels = try await fetchAllRecordsAllowingEmptyType(ofType: SyncMapper.RecordType.label)
-        let toDos = try await fetchAllRecordsAllowingEmptyType(ofType: SyncMapper.RecordType.toDo)
-        let attachments = try await fetchAllRecordsAllowingEmptyType(ofType: SyncMapper.RecordType.attachment)
-        let snippets = try await fetchAllRecordsAllowingEmptyType(ofType: SyncMapper.RecordType.snippet)
-        let noteLabels = try await fetchAllRecordsAllowingEmptyType(ofType: SyncMapper.RecordType.noteLabel)
+        let notesResponse = try await fetchAllRecordsAllowingEmptyType(ofType: SyncMapper.RecordType.note)
+        let notes = notesResponse.records
+        let labels = try await fetchAllRecordsAllowingEmptyType(ofType: SyncMapper.RecordType.label).records
+        let toDos = try await fetchAllRecordsAllowingEmptyType(ofType: SyncMapper.RecordType.toDo).records
+        let attachmentsResponse = try await fetchAllRecordsAllowingEmptyType(ofType: SyncMapper.RecordType.attachment)
+        let attachments = attachmentsResponse.records
+        let snippets = try await fetchAllRecordsAllowingEmptyType(ofType: SyncMapper.RecordType.snippet).records
+        let noteLabelsResponse = try await fetchAllRecordsAllowingEmptyType(ofType: SyncMapper.RecordType.noteLabel)
+        let hadPriorAuthoritativeNoteLabelSnapshot =
+            try await syncStateRepository.value(for: .hasCompletedAuthoritativeNoteLabelSnapshot) == "1"
+        let locallyDirtyNoteLabelNoteIDs = try await Set(
+            syncQueue.pendingEntityIDs(for: .noteLabel).map(NoteID.init(rawValue:))
+        )
+        let protectedNoteLabelNoteIDs = protectedNoteLabelNoteIDs(at: dateService.now())
 
         var affectedNoteIDs = Set<NoteID>()
         var shouldRefreshNotifications = false
@@ -330,8 +352,27 @@ actor DefaultCloudKitSyncEngine: CloudKitSyncEngine {
             }
         }
 
-        let noteLabelNoteIDs = try await reconcileNoteLabelAssignments(with: noteLabels)
+        let repairedNoteIDs = try await enqueueRepairSnapshotIfNeeded(
+            remoteNotes: notesResponse.records,
+            isAuthoritativeSnapshot: notesResponse.isAuthoritative
+        )
+        affectedNoteIDs.formUnion(repairedNoteIDs)
+        try await enqueueMissingAttachmentRepairsIfNeeded(
+            remoteAttachments: attachmentsResponse.records,
+            isAuthoritativeSnapshot: attachmentsResponse.isAuthoritative
+        )
+
+        let noteLabelNoteIDs = try await reconcileNoteLabelAssignments(
+            with: noteLabelsResponse.records,
+            isAuthoritativeSnapshot: noteLabelsResponse.isAuthoritative,
+            hadPriorAuthoritativeSnapshot: hadPriorAuthoritativeNoteLabelSnapshot,
+            locallyDirtyNoteIDs: locallyDirtyNoteLabelNoteIDs.union(protectedNoteLabelNoteIDs)
+        )
         affectedNoteIDs.formUnion(noteLabelNoteIDs)
+
+        if noteLabelsResponse.isAuthoritative {
+            try await syncStateRepository.setValue("1", for: .hasCompletedAuthoritativeNoteLabelSnapshot)
+        }
 
         try await refreshDerivedState(for: affectedNoteIDs)
 
@@ -398,6 +439,14 @@ actor DefaultCloudKitSyncEngine: CloudKitSyncEngine {
             let noteID = NoteID(rawValue: item.entityID)
             let note = try notesDataSource.note(id: noteID)
             let labels = try labelsDataSource.labels(for: noteID).map(\.id)
+            let remoteRecords = try await fetchAllRecords(ofType: SyncMapper.RecordType.noteLabel)
+                .filter { record in
+                    syncMapper.noteLabelPayload(from: record)?.noteID == noteID
+                }
+            let remoteLabelIDs = Set(
+                remoteRecords.compactMap(syncMapper.noteLabelPayload(from:)).map(\.labelID)
+            )
+            let localLabelIDs = Set(labels)
             let records = syncMapper.noteLabelRecords(
                 noteID: noteID,
                 labelIDs: labels,
@@ -405,7 +454,18 @@ actor DefaultCloudKitSyncEngine: CloudKitSyncEngine {
                 updatedAt: note?.updatedAt ?? dateService.now(),
                 zoneID: activeZoneID
             )
-            try await push(records: records, deleting: [])
+            let staleRecordIDs = remoteRecords.filter { record in
+                guard let payload = syncMapper.noteLabelPayload(from: record) else { return false }
+                return !localLabelIDs.contains(payload.labelID)
+            }.map(\.recordID)
+
+            if !staleRecordIDs.isEmpty {
+                print("CloudKit noteLabel push removing \(staleRecordIDs.count) stale record(s) for note \(noteID.rawValue)")
+            }
+
+            let recordsToSave = localLabelIDs == remoteLabelIDs ? [] : records
+            try await push(records: recordsToSave, deleting: staleRecordIDs)
+            protectNoteLabelReconcile(for: noteID, at: dateService.now())
         }
     }
 
@@ -449,6 +509,10 @@ actor DefaultCloudKitSyncEngine: CloudKitSyncEngine {
 
         case SyncMapper.RecordType.toDo:
             guard let payload = syncMapper.toDoPayload(from: record) else { return [] }
+            guard try await ensureNoteExistsLocally(noteID: payload.toDo.noteID) else {
+                print("CloudKit skipped ToDo \(payload.toDo.id.rawValue) because note \(payload.toDo.noteID.rawValue) is missing locally")
+                return []
+            }
             if let local = try toDoDataSource.todo(id: payload.toDo.id) {
                 try toDoDataSource.update(conflictResolver.resolveToDo(local: local, remote: payload.toDo))
             } else {
@@ -458,6 +522,13 @@ actor DefaultCloudKitSyncEngine: CloudKitSyncEngine {
 
         case SyncMapper.RecordType.attachment:
             guard let payload = syncMapper.attachmentPayload(from: record) else { return [] }
+            guard try await ensureNoteExistsLocally(noteID: payload.attachment.noteID) else {
+                print(
+                    "CloudKit skipped attachment \(payload.attachment.id.rawValue) because note " +
+                    "\(payload.attachment.noteID.rawValue) is missing locally"
+                )
+                return []
+            }
             let existingAttachment = try attachmentsDataSource.attachment(id: payload.attachment.id)
             let resolvedAttachment: Attachment
             if let existingAttachment {
@@ -482,6 +553,10 @@ actor DefaultCloudKitSyncEngine: CloudKitSyncEngine {
 
         case SyncMapper.RecordType.snippet:
             guard let payload = syncMapper.snippetPayload(from: record) else { return [] }
+            guard try await ensureNoteExistsLocally(noteID: payload.snippet.noteID) else {
+                print("CloudKit skipped snippet \(payload.snippet.id) because note \(payload.snippet.noteID.rawValue) is missing locally")
+                return []
+            }
             let existing = try attachmentsDataSource.snippet(id: payload.snippet.id)
             if existing != nil {
                 try attachmentsDataSource.saveSnippet(
@@ -494,6 +569,14 @@ actor DefaultCloudKitSyncEngine: CloudKitSyncEngine {
 
         case SyncMapper.RecordType.noteLabel:
             guard let payload = syncMapper.noteLabelPayload(from: record) else { return [] }
+            guard try await ensureNoteExistsLocally(noteID: payload.noteID) else {
+                print("CloudKit skipped noteLabel for note \(payload.noteID.rawValue) because note is missing locally")
+                return []
+            }
+            guard try await ensureLabelExistsLocally(labelID: payload.labelID) else {
+                print("CloudKit skipped noteLabel for label \(payload.labelID.rawValue) because label is missing locally")
+                return []
+            }
             try labelsDataSource.add(labelID: payload.labelID, to: payload.noteID)
             return [payload.noteID]
 
@@ -740,14 +823,51 @@ actor DefaultCloudKitSyncEngine: CloudKitSyncEngine {
         return records
     }
 
-    private func fetchAllRecordsAllowingEmptyType(ofType recordType: String) async throws -> [CKRecord] {
+    private func fetchAllRecordsAllowingEmptyType(ofType recordType: String) async throws -> SnapshotFetchResult {
         do {
-            return try await fetchAllRecords(ofType: recordType)
+            return SnapshotFetchResult(
+                records: try await fetchAllRecords(ofType: recordType),
+                isAuthoritative: true
+            )
         } catch {
             if cloudKitHTTPStatus(from: error) == 500 || (error as? CKError)?.code == .serverRejectedRequest {
-                return []
+                print("CloudKit \(recordType) fetch returned non-authoritative empty snapshot: \(error.localizedDescription)")
+                return SnapshotFetchResult(records: [], isAuthoritative: false)
             }
             throw error
+        }
+    }
+
+    private func fetchRecord(withID recordID: CKRecord.ID) async throws -> CKRecord? {
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<CKRecord?, Error>) in
+            let operation = CKFetchRecordsOperation(recordIDs: [recordID])
+            var fetchedRecord: CKRecord?
+
+            operation.perRecordResultBlock = { _, result in
+                switch result {
+                case .success(let record):
+                    fetchedRecord = record
+                case .failure(let error):
+                    if let ckError = error as? CKError, ckError.code == .unknownItem {
+                        return
+                    }
+                }
+            }
+
+            operation.fetchRecordsResultBlock = { result in
+                switch result {
+                case .success:
+                    continuation.resume(returning: fetchedRecord)
+                case .failure(let error):
+                    if let ckError = error as? CKError, ckError.code == .unknownItem {
+                        continuation.resume(returning: nil)
+                    } else {
+                        continuation.resume(throwing: error)
+                    }
+                }
+            }
+
+            configuredDatabase().add(operation)
         }
     }
 
@@ -827,7 +947,12 @@ actor DefaultCloudKitSyncEngine: CloudKitSyncEngine {
         }
     }
 
-    private func reconcileNoteLabelAssignments(with remoteRecords: [CKRecord]) async throws -> Set<NoteID> {
+    private func reconcileNoteLabelAssignments(
+        with remoteRecords: [CKRecord],
+        isAuthoritativeSnapshot: Bool,
+        hadPriorAuthoritativeSnapshot: Bool,
+        locallyDirtyNoteIDs: Set<NoteID>
+    ) async throws -> Set<NoteID> {
         let remoteAssignments = remoteRecords.compactMap(syncMapper.noteLabelPayload(from:))
         let remoteByNote = Dictionary(grouping: remoteAssignments, by: \.noteID)
             .mapValues { Set($0.map(\.labelID)) }
@@ -836,21 +961,233 @@ actor DefaultCloudKitSyncEngine: CloudKitSyncEngine {
         let localByNote = Dictionary(grouping: localAssignments, by: \.noteID)
             .mapValues { Set($0.map(\.labelID)) }
 
+        if !isAuthoritativeSnapshot {
+            let noteIDs = Set(remoteByNote.keys)
+            for noteID in noteIDs {
+                if locallyDirtyNoteIDs.contains(noteID) {
+                    print("CloudKit noteLabel reconcile skipped non-authoritative snapshot for locally dirty note \(noteID.rawValue)")
+                    continue
+                }
+                let remoteLabelIDs = remoteByNote[noteID] ?? []
+                let localLabelIDs = localByNote[noteID] ?? []
+
+                for labelID in remoteLabelIDs.subtracting(localLabelIDs) {
+                    try labelsDataSource.add(labelID: labelID, to: noteID)
+                }
+            }
+            return noteIDs
+        }
+
+        if remoteAssignments.isEmpty && !localAssignments.isEmpty {
+            print(
+                "CloudKit noteLabel snapshot is authoritatively empty while local note_labels still contain " +
+                "\(localAssignments.count) assignments. Skipping destructive reconcile."
+            )
+            return Set(localByNote.keys)
+        }
+
+        let canDestructivelyRemove = hadPriorAuthoritativeSnapshot && !remoteAssignments.isEmpty
         let noteIDs = Set(remoteByNote.keys).union(localByNote.keys)
         for noteID in noteIDs {
+            if locallyDirtyNoteIDs.contains(noteID) {
+                print("CloudKit noteLabel reconcile skipped authoritative snapshot for locally dirty note \(noteID.rawValue)")
+                continue
+            }
+
             let remoteLabelIDs = remoteByNote[noteID] ?? []
             let localLabelIDs = localByNote[noteID] ?? []
 
-            for labelID in localLabelIDs.subtracting(remoteLabelIDs) {
-                try labelsDataSource.remove(labelID: labelID, from: noteID)
+            if canDestructivelyRemove {
+                for labelID in localLabelIDs.subtracting(remoteLabelIDs) {
+                    try labelsDataSource.remove(labelID: labelID, from: noteID)
+                }
             }
 
             for labelID in remoteLabelIDs.subtracting(localLabelIDs) {
                 try labelsDataSource.add(labelID: labelID, to: noteID)
             }
+
+            if remoteLabelIDs == localLabelIDs {
+                clearProtectedNoteLabelReconcile(for: noteID)
+            }
         }
 
         return noteIDs
+    }
+
+    private func protectNoteLabelReconcile(for noteID: NoteID, at date: Date) {
+        recentlyPushedNoteLabelNoteIDs[noteID] = date.addingTimeInterval(Constants.noteLabelReconcileProtectionInterval)
+        print("CloudKit noteLabel reconcile protected for recently pushed note \(noteID.rawValue)")
+    }
+
+    private func clearProtectedNoteLabelReconcile(for noteID: NoteID) {
+        recentlyPushedNoteLabelNoteIDs.removeValue(forKey: noteID)
+    }
+
+    private func protectedNoteLabelNoteIDs(at date: Date) -> Set<NoteID> {
+        recentlyPushedNoteLabelNoteIDs = recentlyPushedNoteLabelNoteIDs.filter { _, expiration in
+            expiration > date
+        }
+        return Set(recentlyPushedNoteLabelNoteIDs.keys)
+    }
+
+    private func ensureNoteExistsLocally(noteID: NoteID) async throws -> Bool {
+        if try notesDataSource.note(id: noteID) != nil {
+            return true
+        }
+
+        let recordID = syncMapper.recordID(for: .note, entityID: noteID.rawValue, zoneID: activeZoneID)
+        guard let record = try await fetchRecord(withID: recordID) else {
+            return false
+        }
+
+        _ = try await applyChangedRecord(record)
+        return try notesDataSource.note(id: noteID) != nil
+    }
+
+    private func ensureLabelExistsLocally(labelID: LabelID) async throws -> Bool {
+        if try labelsDataSource.label(id: labelID) != nil {
+            return true
+        }
+
+        let recordID = syncMapper.recordID(for: .label, entityID: labelID.rawValue, zoneID: activeZoneID)
+        guard let record = try await fetchRecord(withID: recordID) else {
+            return false
+        }
+
+        _ = try await applyChangedRecord(record)
+        return try labelsDataSource.label(id: labelID) != nil
+    }
+
+    private func enqueueRepairSnapshotIfNeeded(
+        remoteNotes: [CKRecord],
+        isAuthoritativeSnapshot: Bool
+    ) async throws -> Set<NoteID> {
+        guard isAuthoritativeSnapshot else { return [] }
+
+        let remoteNoteIDs = Set(remoteNotes.compactMap(syncMapper.notePayload(from:)).map(\.note.id))
+        let localNotes = try notesDataSource.allNotes()
+        let noteLabelAssignments = try labelsDataSource.allNoteLabelAssignments()
+        let allLabels = Dictionary(
+            uniqueKeysWithValues: try labelsDataSource.allLabelsIncludingDeleted().map { ($0.id, $0) }
+        )
+        let allToDos = try toDoDataSource.allToDosIncludingDeleted()
+        let allAttachments = try attachmentsDataSource.allAttachmentsIncludingDeleted()
+        let allSnippets = try attachmentsDataSource.allSnippetsIncludingDeleted()
+
+        var repairedNoteIDs = Set<NoteID>()
+
+        for note in localNotes where !note.isDeleted && !remoteNoteIDs.contains(note.id) {
+            repairedNoteIDs.insert(note.id)
+            print("CloudKit repair enqueued missing note snapshot for \(note.id.rawValue)")
+
+            _ = try await syncQueue.enqueuePendingLocalChange(
+                SyncEnqueueRequest(entityType: .note, entityID: note.id.rawValue, operation: .update, payloadVersion: note.version)
+            )
+
+            for assignment in noteLabelAssignments where assignment.noteID == note.id {
+                if let label = allLabels[assignment.labelID] {
+                    _ = try await syncQueue.enqueuePendingLocalChange(
+                        SyncEnqueueRequest(
+                            entityType: .label,
+                            entityID: label.id.rawValue,
+                            operation: label.isDeleted ? .delete : .update,
+                            payloadVersion: label.version
+                        )
+                    )
+                }
+            }
+
+            for toDo in allToDos where toDo.noteID == note.id {
+                _ = try await syncQueue.enqueuePendingLocalChange(
+                    SyncEnqueueRequest(
+                        entityType: .toDo,
+                        entityID: toDo.id.rawValue,
+                        operation: toDo.isDeleted ? .delete : .update,
+                        payloadVersion: toDo.version
+                    )
+                )
+            }
+
+            for attachment in allAttachments where attachment.noteID == note.id {
+                _ = try await syncQueue.enqueuePendingLocalChange(
+                    SyncEnqueueRequest(
+                        entityType: .attachment,
+                        entityID: attachment.id.rawValue,
+                        operation: attachment.isDeleted ? .delete : .update,
+                        payloadVersion: attachment.version
+                    )
+                )
+            }
+
+            for snippet in allSnippets where snippet.noteID == note.id {
+                _ = try await syncQueue.enqueuePendingLocalChange(
+                    SyncEnqueueRequest(
+                        entityType: .snippet,
+                        entityID: snippet.id,
+                        operation: snippet.isDeleted ? .delete : .update,
+                        payloadVersion: snippet.version
+                    )
+                )
+            }
+
+            _ = try await syncQueue.enqueuePendingLocalChange(
+                SyncEnqueueRequest(entityType: .noteLabel, entityID: note.id.rawValue, operation: .update, payloadVersion: note.version)
+            )
+        }
+
+        return repairedNoteIDs
+    }
+
+    private func enqueueMissingAttachmentRepairsIfNeeded(
+        remoteAttachments: [CKRecord],
+        isAuthoritativeSnapshot: Bool
+    ) async throws {
+        guard isAuthoritativeSnapshot else { return }
+
+        let remoteAttachmentIDs = Set(
+            remoteAttachments
+                .compactMap(syncMapper.attachmentPayload(from:))
+                .map(\.attachment.id)
+        )
+        let queuedAttachmentIDs = try await Set(
+            syncQueue.pendingEntityIDs(for: .attachment).map(AttachmentID.init(rawValue:))
+        )
+
+        guard queuedAttachmentIDs.count < Constants.missingAttachmentRepairBatchLimit else {
+            print("CloudKit repair deferred because \(queuedAttachmentIDs.count) attachment(s) are already queued")
+            return
+        }
+
+        let availableRepairSlots = Constants.missingAttachmentRepairBatchLimit - queuedAttachmentIDs.count
+        let repairCandidates = try attachmentsDataSource.allAttachmentsIncludingDeleted()
+            .filter { attachment in
+                !attachment.isDeleted
+                    && !remoteAttachmentIDs.contains(attachment.id)
+                    && !queuedAttachmentIDs.contains(attachment.id)
+            }
+            .sorted { lhs, rhs in
+                if lhs.updatedAt == rhs.updatedAt {
+                    return lhs.createdAt > rhs.createdAt
+                }
+                return lhs.updatedAt > rhs.updatedAt
+            }
+            .prefix(availableRepairSlots)
+
+        guard !repairCandidates.isEmpty else { return }
+        print("CloudKit repair enqueuing \(repairCandidates.count) missing attachment(s)")
+
+        for attachment in repairCandidates {
+            print("CloudKit repair enqueued missing attachment \(attachment.id.rawValue)")
+            _ = try await syncQueue.enqueuePendingLocalChange(
+                SyncEnqueueRequest(
+                    entityType: .attachment,
+                    entityID: attachment.id.rawValue,
+                    operation: .update,
+                    payloadVersion: attachment.version
+                )
+            )
+        }
     }
 
     private func configuredContainer() -> CKContainer {

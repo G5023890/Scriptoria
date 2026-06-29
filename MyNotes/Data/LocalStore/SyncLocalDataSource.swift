@@ -160,6 +160,31 @@ struct SyncLocalDataSource {
         }
     }
 
+    func entityIDs(
+        withStatuses statuses: [SyncQueueItem.Status],
+        for entityType: SyncQueueItem.EntityType
+    ) throws -> Set<String> {
+        guard !statuses.isEmpty else { return [] }
+
+        let placeholders = Array(repeating: "?", count: statuses.count).joined(separator: ", ")
+        let bindings = statuses.map { SQLiteValue.text($0.rawValue) } + [.text(entityType.rawValue)]
+
+        return try databaseManager.read { db in
+            let rows = try db.query(
+                statement: """
+                SELECT DISTINCT entity_id
+                FROM sync_queue
+                WHERE status IN (\(placeholders))
+                  AND entity_type = ?;
+                """,
+                bindings: bindings
+            ) { row in
+                try row.requiredString("entity_id")
+            }
+            return Set(rows)
+        }
+    }
+
     func markProcessing(itemID: String, attemptedAt: Date) throws {
         try databaseManager.write { db in
             try db.execute(
