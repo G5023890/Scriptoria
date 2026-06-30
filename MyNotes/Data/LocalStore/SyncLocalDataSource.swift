@@ -92,7 +92,7 @@ struct SyncLocalDataSource {
                             id,
                             ROW_NUMBER() OVER (
                                 PARTITION BY entity_type, entity_id
-                                ORDER BY created_at DESC, id DESC
+                                ORDER BY payload_version DESC, created_at DESC, id DESC
                             ) AS row_number
                         FROM sync_queue
                     )

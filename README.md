@@ -1,11 +1,11 @@
 # Scriptoria
 
-**A native macOS workspace for notes, tasks, snippets, attachments, and fast capture.**
+**A native Apple workspace for notes, tasks, snippets, attachments, and fast capture.**
 
 `Scriptoria` is built for people who collect ideas all day, move between writing and execution, and want one calm place for everything: notes, labels, tasks, code, files, and search.
 
 Current app bundle: `MyNotes`  
-Current release: `0.9.11`  
+Current release: `0.95 (0834300626)`
 Repository: [G5023890/Scriptoria](https://github.com/G5023890/Scriptoria)
 
 ## Hero
@@ -22,7 +22,7 @@ Most tools force you to choose one mode of thinking.
 
 ## Why It Feels Different
 
-- Native macOS app, not a wrapped web UI
+- Native macOS and iOS apps, not wrapped web UIs
 - Three-column workspace optimized for scanning and editing
 - Local-first behavior for fast interaction
 - Notes, labels, tasks, snippets, and files stay connected
@@ -150,36 +150,44 @@ The sidebar currently includes:
 
 Each collection shows a live count so the workspace stays scannable as it grows.
 
-## Release 0.9.11
+## Release 0.95 (0834300626)
 
-- Tasks now open a dedicated preview sheet when you tap a task row
-- Archived tasks use the same preview flow from the bottom `Архив` section
-- Task previews show the title, completion state, archive badge, due date, and full details
-- Snippet rows now preview from a row tap instead of a separate Preview button
-- Attachment rows now preview from a row tap instead of a separate Preview button
-- Attachment rows keep Open, Edit, Archive, and Remove actions in the trailing action strip
-- Snippet rows keep Edit, Copy, Archive, and Remove actions in the trailing action strip
-- New bottom `Архив` section still groups archived tasks, snippets, and attachments into one mixed list
-- Archive rows remain hidden from the active note sections until they are restored
-- Release build and install flow updated for version `0.9.11`
+- macOS and iOS now synchronize through a private custom CloudKit zone
+- Incremental pulls persist and reuse `CKServerChangeToken`
+- Local sync work is compacted and processed in deterministic parent-before-child order
+- Notes, labels, tasks, snippets, and attachments retain soft-delete records for sync
+- Attachment upload metadata is repaired from the local file when size or checksum is stale
+- Downloaded attachments must pass size and SHA-256 checksum validation before acceptance
+- Attachment repair work is bounded so it cannot indefinitely block newer changes
+- CloudKit zone callbacks are guarded against duplicate continuation completion
+- Sync-driven UI notifications are delivered on the main actor
+- Full snapshot transport remains available as reconciliation code rather than the normal sync path
+
+Known limitation: permanently purging an item before its soft-delete record has synchronized can
+remove the tombstone source. A dedicated tombstone table is planned before hard-delete workflows
+are treated as fully offline-safe.
 
 ## Roadmap
 
 Near-term priorities:
 
-- Enable real CloudKit transport on top of the existing sync scaffolding
-- Improve README visuals with real screenshots and usage examples
-- Expand release polish across label editing and detail workflows
-- Continue refining the native macOS visual language and interactions
+- Add a dedicated durable tombstone store for permanently purged entities
+- Expose full-snapshot reconciliation as an explicit repair operation
+- Add a manual Sync control on macOS and iOS
+- Expand automated offline, relaunch, conflict, delete, and attachment test coverage
+- Continue refining the native Liquid Glass visual language and interactions
 
 Already present in the codebase:
 
-- sync queue
-- CloudKit record mapping
-- conflict-resolution scaffolding
+- local outbox and sync queue
+- CloudKit custom zone and record mapping
+- persistent server change token
+- conflict-resolution policy
+- attachment integrity checks and bounded repair
 - sync status reporting
 
-Current status: CloudKit transport is scaffolded but still disabled by default, so `0.9.11` behaves as a local-first app.
+Current status: CloudKit transport is active for the private database. Normal operation uses
+incremental custom-zone changes; full snapshots are retained for repair and reconciliation.
 
 ## Technology
 
@@ -187,7 +195,7 @@ Current status: CloudKit transport is scaffolded but still disabled by default, 
 - SwiftUI
 - Observation
 - SQLite
-- CloudKit scaffolding
+- CloudKit
 - UserNotifications
 - Quick Look
 - `Highlightr`
@@ -206,8 +214,9 @@ Current status: CloudKit transport is scaffolded but still disabled by default, 
 
 Requirements:
 
-- macOS 26 beta or newer
-- Xcode toolchain with Swift Package Manager support
+- latest macOS and iOS beta releases
+- Xcode-beta
+- Swift Package Manager support
 - optional Apple Development signing identity for stable signed installs
 
 Debug build:
@@ -222,7 +231,7 @@ Build, sign, package, and install into `/Applications/MyNotes.app`:
 ./scripts/build_and_install_app.sh
 ```
 
-The install script:
+The macOS install script:
 
 - builds a release binary
 - creates a full `.app` bundle

@@ -1,4 +1,5 @@
 import CloudKit
+import CryptoKit
 import Foundation
 
 protocol CloudKitSyncEngine: Sendable {
@@ -47,7 +48,7 @@ actor DefaultCloudKitSyncEngine: CloudKitSyncEngine {
 
     private enum Constants {
         static let zoneName = "ScriptoriaZone"
-        static let usesCustomZone = false
+        static let usesCustomZone = true
         static let noteLabelReconcileProtectionInterval: TimeInterval = 45
         static let pendingPushBatchLimit = 10
         static let missingAttachmentRepairBatchLimit = 3
@@ -188,6 +189,7 @@ actor DefaultCloudKitSyncEngine: CloudKitSyncEngine {
     private func processPendingSyncQueueCycle() async throws {
         try await syncQueue.compactQueue()
         let items = try await syncQueue.pendingItems(limit: Constants.pendingPushBatchLimit)
+            .sorted(by: shouldProcessBefore)
         var firstFailure: String?
         var processedAtLeastOneItem = false
 
@@ -218,18 +220,21 @@ actor DefaultCloudKitSyncEngine: CloudKitSyncEngine {
     }
 
     private func performInitialBootstrapIfNeeded() async throws {
-        let hasCompletedInitialSync = try await syncStateRepository.value(for: .hasCompletedInitialCloudSync) == "1"
+        let initialSyncKey: SyncStateKey = Constants.usesCustomZone
+            ? .hasCompletedInitialCustomZoneCloudSync
+            : .hasCompletedInitialCloudSync
+        let hasCompletedInitialSync = try await syncStateRepository.value(for: initialSyncKey) == "1"
         guard !hasCompletedInitialSync else { return }
 
         if !Constants.usesCustomZone {
             try await enqueueLocalSnapshotForInitialUpload()
-            try await syncStateRepository.setValue("1", for: .hasCompletedInitialCloudSync)
+            try await syncStateRepository.setValue("1", for: initialSyncKey)
             return
         }
 
         _ = try await pullLatestChangesCycle(resetToken: true)
         try await enqueueLocalSnapshotForInitialUpload()
-        try await syncStateRepository.setValue("1", for: .hasCompletedInitialCloudSync)
+        try await syncStateRepository.setValue("1", for: initialSyncKey)
     }
 
     private func enqueueLocalSnapshotForInitialUpload() async throws {
@@ -387,8 +392,7 @@ actor DefaultCloudKitSyncEngine: CloudKitSyncEngine {
         case .note:
             let noteID = NoteID(rawValue: item.entityID)
             guard let note = try notesDataSource.note(id: noteID) else {
-                guard item.operation == .delete else { return }
-                try await push(records: [], deleting: [syncMapper.recordID(for: .note, entityID: item.entityID, zoneID: activeZoneID)])
+                print("CloudKit skipped missing local note \(item.entityID); durable tombstone unavailable")
                 return
             }
             try await push(records: [syncMapper.noteRecord(for: note, zoneID: activeZoneID)], deleting: [])
@@ -396,8 +400,7 @@ actor DefaultCloudKitSyncEngine: CloudKitSyncEngine {
         case .label:
             let labelID = LabelID(rawValue: item.entityID)
             guard let label = try labelsDataSource.label(id: labelID) else {
-                guard item.operation == .delete else { return }
-                try await push(records: [], deleting: [syncMapper.recordID(for: .label, entityID: item.entityID, zoneID: activeZoneID)])
+                print("CloudKit skipped missing local label \(item.entityID); durable tombstone unavailable")
                 return
             }
             try await push(records: [syncMapper.labelRecord(for: label, zoneID: activeZoneID)], deleting: [])
@@ -405,8 +408,7 @@ actor DefaultCloudKitSyncEngine: CloudKitSyncEngine {
         case .toDo:
             let toDoID = ToDoID(rawValue: item.entityID)
             guard let toDo = try toDoDataSource.todo(id: toDoID) else {
-                guard item.operation == .delete else { return }
-                try await push(records: [], deleting: [syncMapper.recordID(for: .toDo, entityID: item.entityID, zoneID: activeZoneID)])
+                print("CloudKit skipped missing local ToDo \(item.entityID); durable tombstone unavailable")
                 return
             }
             try await push(records: [syncMapper.toDoRecord(for: toDo, zoneID: activeZoneID)], deleting: [])
@@ -414,23 +416,24 @@ actor DefaultCloudKitSyncEngine: CloudKitSyncEngine {
         case .attachment:
             let attachmentID = AttachmentID(rawValue: item.entityID)
             guard let attachment = try attachmentsDataSource.attachment(id: attachmentID) else {
-                guard item.operation == .delete else { return }
-                try await push(records: [], deleting: [syncMapper.recordID(for: .attachment, entityID: item.entityID, zoneID: activeZoneID)])
+                print("CloudKit skipped missing local attachment \(item.entityID); durable tombstone unavailable")
                 return
             }
 
+            var recordAttachment = attachment
             let assetURL: URL?
             if attachment.isDeleted {
                 assetURL = nil
             } else {
-                assetURL = try? fileService.absoluteURL(for: attachment.relativePath)
+                let upload = try localAttachmentForUpload(attachment)
+                recordAttachment = upload.attachment
+                assetURL = upload.assetURL
             }
-            try await push(records: [syncMapper.attachmentRecord(for: attachment, assetFileURL: assetURL, zoneID: activeZoneID)], deleting: [])
+            try await push(records: [syncMapper.attachmentRecord(for: recordAttachment, assetFileURL: assetURL, zoneID: activeZoneID)], deleting: [])
 
         case .snippet:
             guard let snippet = try attachmentsDataSource.snippet(id: item.entityID) else {
-                guard item.operation == .delete else { return }
-                try await push(records: [], deleting: [syncMapper.recordID(for: .snippet, entityID: item.entityID, zoneID: activeZoneID)])
+                print("CloudKit skipped missing local snippet \(item.entityID); durable tombstone unavailable")
                 return
             }
             try await push(records: [syncMapper.snippetRecord(for: snippet, zoneID: activeZoneID)], deleting: [])
@@ -472,6 +475,18 @@ actor DefaultCloudKitSyncEngine: CloudKitSyncEngine {
     private func push(records: [CKRecord], deleting recordIDs: [CKRecord.ID]) async throws {
         guard !records.isEmpty || !recordIDs.isEmpty else { return }
         _ = try await modifyRecords(records: records, deleting: recordIDs)
+    }
+
+    private func shouldProcessBefore(_ lhs: SyncQueueItem, _ rhs: SyncQueueItem) -> Bool {
+        let lhsSortOrder = sortOrder(for: lhs.entityType)
+        let rhsSortOrder = sortOrder(for: rhs.entityType)
+        if lhsSortOrder != rhsSortOrder {
+            return lhsSortOrder < rhsSortOrder
+        }
+        if lhs.payloadVersion != rhs.payloadVersion {
+            return lhs.payloadVersion < rhs.payloadVersion
+        }
+        return lhs.createdAt < rhs.createdAt
     }
 
     private func applyChangedRecord(_ record: CKRecord) async throws -> Set<NoteID> {
@@ -548,6 +563,7 @@ actor DefaultCloudKitSyncEngine: CloudKitSyncEngine {
                     resolvedAttachment: resolvedAttachment
                 ) {
                 try fileService.writeFile(atRelativePath: resolvedAttachment.relativePath, from: assetURL)
+                try validateStoredAttachmentAsset(for: resolvedAttachment)
             }
             return [resolvedAttachment.noteID]
 
@@ -685,6 +701,17 @@ actor DefaultCloudKitSyncEngine: CloudKitSyncEngine {
         case SyncMapper.RecordType.snippet: 4
         case SyncMapper.RecordType.noteLabel: 5
         default: 99
+        }
+    }
+
+    private func sortOrder(for entityType: SyncQueueItem.EntityType) -> Int {
+        switch entityType {
+        case .note: 0
+        case .label: 1
+        case .toDo: 2
+        case .attachment: 3
+        case .snippet: 4
+        case .noteLabel: 5
         }
     }
 
@@ -909,6 +936,22 @@ actor DefaultCloudKitSyncEngine: CloudKitSyncEngine {
             var changed: [CKRecord] = []
             var deleted: [CKRecord.ID] = []
             var latestToken: CKServerChangeToken?
+            let callbackLock = NSLock()
+            var didFinish = false
+
+            func finish(_ result: Result<(changed: [CKRecord], deleted: [CKRecord.ID], newToken: CKServerChangeToken?), Error>) {
+                callbackLock.lock()
+                defer { callbackLock.unlock() }
+                guard !didFinish else { return }
+                didFinish = true
+
+                switch result {
+                case .success(let changes):
+                    continuation.resume(returning: changes)
+                case .failure(let error):
+                    continuation.resume(throwing: error)
+                }
+            }
 
             let options = CKFetchRecordZoneChangesOperation.ZoneOptions()
             options.previousServerChangeToken = token
@@ -929,7 +972,7 @@ actor DefaultCloudKitSyncEngine: CloudKitSyncEngine {
             }
             operation.recordZoneFetchCompletionBlock = { _, serverChangeToken, _, _, error in
                 if let error {
-                    continuation.resume(throwing: error)
+                    finish(.failure(error))
                     return
                 }
                 latestToken = serverChangeToken ?? latestToken
@@ -937,9 +980,9 @@ actor DefaultCloudKitSyncEngine: CloudKitSyncEngine {
             operation.fetchRecordZoneChangesResultBlock = { result in
                 switch result {
                 case .success:
-                    continuation.resume(returning: (changed, deleted, latestToken))
+                    finish(.success((changed, deleted, latestToken)))
                 case .failure(let error):
-                    continuation.resume(throwing: error)
+                    finish(.failure(error))
                 }
             }
 
@@ -1214,6 +1257,63 @@ actor DefaultCloudKitSyncEngine: CloudKitSyncEngine {
         }
 
         return true
+    }
+
+    private func localAttachmentForUpload(_ attachment: Attachment) throws -> (attachment: Attachment, assetURL: URL) {
+        let assetURL = try fileService.absoluteURL(for: attachment.relativePath)
+        let metadata = try attachmentAssetMetadata(at: assetURL)
+
+        guard attachment.fileSize != metadata.fileSize || attachment.checksum != metadata.checksum else {
+            return (attachment, assetURL)
+        }
+
+        var repairedAttachment = attachment
+        repairedAttachment.fileSize = metadata.fileSize
+        repairedAttachment.checksum = metadata.checksum
+        _ = try attachmentsDataSource.update(repairedAttachment)
+        print(
+            "CloudKit repaired local attachment metadata \(attachment.id.rawValue) " +
+            "size \(attachment.fileSize.map(String.init) ?? "nil")->\(metadata.fileSize) " +
+            "checksum \(attachment.checksum ?? "nil")->\(metadata.checksum)"
+        )
+        return (repairedAttachment, assetURL)
+    }
+
+    private func validateStoredAttachmentAsset(for attachment: Attachment) throws {
+        let assetURL = try fileService.absoluteURL(for: attachment.relativePath)
+        try validateAttachmentAsset(for: attachment, at: assetURL)
+    }
+
+    private func validateAttachmentAsset(for attachment: Attachment, at assetURL: URL) throws {
+        let attributes = try FileManager.default.attributesOfItem(atPath: assetURL.path)
+
+        if let expectedSize = attachment.fileSize,
+           let actualSize = (attributes[.size] as? NSNumber)?.int64Value,
+           actualSize != expectedSize {
+            throw SyncEngineError.queueItemFailure(
+                "attachment \(attachment.id.rawValue) file size mismatch expected=\(expectedSize) actual=\(actualSize)"
+            )
+        }
+
+        if let expectedChecksum = attachment.checksum, !expectedChecksum.isEmpty {
+            let actualChecksum = try sha256HexDigest(for: assetURL)
+            if actualChecksum != expectedChecksum {
+                throw SyncEngineError.queueItemFailure(
+                    "attachment \(attachment.id.rawValue) checksum mismatch expected=\(expectedChecksum) actual=\(actualChecksum)"
+                )
+            }
+        }
+    }
+
+    private func sha256HexDigest(for fileURL: URL) throws -> String {
+        let data = try Data(contentsOf: fileURL, options: .mappedIfSafe)
+        return SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
+    }
+
+    private func attachmentAssetMetadata(at assetURL: URL) throws -> (fileSize: Int64, checksum: String) {
+        let attributes = try FileManager.default.attributesOfItem(atPath: assetURL.path)
+        let fileSize = (attributes[.size] as? NSNumber)?.int64Value ?? 0
+        return (fileSize, try sha256HexDigest(for: assetURL))
     }
 
     private func performStorageCleanup(purgeCloudKitAssetCache: Bool) async throws {
