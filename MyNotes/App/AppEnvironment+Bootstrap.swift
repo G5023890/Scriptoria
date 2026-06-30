@@ -281,6 +281,9 @@ extension AppEnvironment {
         Task {
             await syncQueue.setAutoSyncHandler {
                 await cloudKitSyncEngine.performSyncIfNeeded()
+                await MainActor.run {
+                    NotificationCenter.default.post(name: .scriptoriaDidApplyRemoteSync, object: nil)
+                }
             }
         }
 
@@ -397,7 +400,9 @@ extension AppEnvironment {
 
     func performSyncIfNeeded() async {
         await cloudKitSyncEngine.performSyncIfNeeded()
-        NotificationCenter.default.post(name: .scriptoriaDidApplyRemoteSync, object: nil)
+        await MainActor.run {
+            NotificationCenter.default.post(name: .scriptoriaDidApplyRemoteSync, object: nil)
+        }
     }
 
     func processPendingSyncQueue() async {
