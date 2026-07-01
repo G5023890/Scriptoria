@@ -1,4 +1,80 @@
 import Foundation
+import Observation
+import StoreKit
+
+enum ScriptoriaProductID {
+    static let proMonthly = "com.grigorym.Scriptoria.pro.monthly"
+    static let proAnnual = "com.grigorym.Scriptoria.pro.annual"
+    static let proLifetime = "com.grigorym.Scriptoria.pro.lifetime"
+
+    static let proProducts: Set<String> = [
+        proMonthly,
+        proAnnual,
+        proLifetime
+    ]
+}
+
+enum ProAccessSource: String, Sendable {
+    case checking
+    case testFlight
+    case development
+    case subscription
+    case lifetime
+    case free
+    case unavailable
+}
+
+@MainActor
+@Observable
+final class ProAccessStore {
+    private(set) var isPro = true
+    private(set) var source: ProAccessSource = .checking
+
+    func refresh() async {
+        do {
+            let appTransaction = try await AppTransaction.shared
+            switch appTransaction {
+            case .verified(let transaction):
+                if transaction.environment == .sandbox {
+                    setAccess(isPro: true, source: .testFlight)
+                    return
+                }
+                if transaction.environment == .xcode {
+                    setAccess(isPro: true, source: .development)
+                    return
+                }
+            case .unverified:
+                break
+            }
+
+            for await entitlement in Transaction.currentEntitlements {
+                guard case .verified(let transaction) = entitlement else { continue }
+                guard ScriptoriaProductID.proProducts.contains(transaction.productID) else { continue }
+                guard transaction.revocationDate == nil else { continue }
+
+                let source: ProAccessSource = transaction.productID == ScriptoriaProductID.proLifetime
+                    ? .lifetime
+                    : .subscription
+                setAccess(isPro: true, source: source)
+                return
+            }
+
+            setAccess(isPro: false, source: .free)
+        } catch {
+            #if DEBUG
+            setAccess(isPro: true, source: .development)
+            #else
+            setAccess(isPro: false, source: .unavailable)
+            #endif
+        }
+    }
+
+    private func setAccess(isPro: Bool, source: ProAccessSource) {
+        self.isPro = isPro
+        self.source = source
+        NSLog("[ScriptoriaStore] Pro access=%@ source=%@", isPro.description, source.rawValue)
+    }
+}
 
 final class AppEnvironment {
     let dateService: any DateService
@@ -19,6 +95,7 @@ final class AppEnvironment {
     let syncQueue: any SyncQueue
     let syncStateRepository: any SyncStateRepository
     let syncStatusStore: SyncStatusStore
+    let proAccessStore: ProAccessStore
     let conflictResolver: ConflictResolver
     let cloudKitSyncEngine: any CloudKitSyncEngine
 
@@ -90,6 +167,7 @@ final class AppEnvironment {
         syncQueue: any SyncQueue,
         syncStateRepository: any SyncStateRepository,
         syncStatusStore: SyncStatusStore,
+        proAccessStore: ProAccessStore,
         conflictResolver: ConflictResolver,
         cloudKitSyncEngine: any CloudKitSyncEngine,
         searchPolicy: SearchPolicy,
@@ -158,6 +236,7 @@ final class AppEnvironment {
         self.syncQueue = syncQueue
         self.syncStateRepository = syncStateRepository
         self.syncStatusStore = syncStatusStore
+        self.proAccessStore = proAccessStore
         self.conflictResolver = conflictResolver
         self.cloudKitSyncEngine = cloudKitSyncEngine
         self.searchPolicy = searchPolicy

@@ -84,6 +84,7 @@ struct IPhoneRootView: View {
             .presentationDragIndicator(.visible)
         }
         .task {
+            await environment.proAccessStore.refresh()
             environment.configureToDoNotificationRouting(
                 onOpenToDo: { noteID, toDoID in
                     coordinator.revealToDo(noteID: noteID, toDoID: toDoID)

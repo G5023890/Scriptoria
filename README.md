@@ -4,9 +4,10 @@
 
 `Scriptoria` is built for people who collect ideas all day, move between writing and execution, and want one calm place for everything: notes, labels, tasks, code, files, and search.
 
-Current app bundle: `MyNotes`  
-Current release: `0.95 (0834300626)`
-Repository: [G5023890/Scriptoria](https://github.com/G5023890/Scriptoria)
+- Current app bundle: `MyNotes`
+- App Store Connect product: `Scriptoria Notes`
+- Current release: `0.95 (1253010726)`
+- Repository: [G5023890/Scriptoria](https://github.com/G5023890/Scriptoria)
 
 ## Hero
 
@@ -166,6 +167,19 @@ Each collection shows a live count so the workspace stays scannable as it grows.
 Known limitation: permanently purging an item before its soft-delete record has synchronized can
 remove the tombstone source. A dedicated tombstone table is planned before hard-delete workflows
 are treated as fully offline-safe.
+
+## TestFlight And Pro
+
+The iOS and macOS targets are prepared as one multiplatform App Store product with the shared
+bundle identifier `com.grigorym.MyNotes`.
+
+- TestFlight builds unlock Pro automatically through Apple's verified sandbox environment
+- Pro access lasts for the availability period of the installed TestFlight build
+- Production builds accept only verified subscription or lifetime-purchase entitlements
+- Planned products are Pro Monthly, Pro Annual, and Pro Lifetime
+- User data remains readable and exportable when Pro access is not active
+- App Store exports use the production CloudKit environment and preserve the project build number
+- iOS and macOS build `1253010726` were uploaded for internal TestFlight processing
 
 ## Roadmap
 

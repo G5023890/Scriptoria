@@ -40,6 +40,7 @@ extension AppEnvironment {
             searchPolicy: searchPolicy
         )
         let syncStatusStore = SyncStatusStore()
+        let proAccessStore = ProAccessStore()
         let syncQueue = LocalSyncQueue(dataSource: syncDataSource, dateService: dateService)
         let syncStateRepository = LocalSyncStateRepository(dataSource: syncDataSource, dateService: dateService)
         let conflictResolver = ConflictResolver()
@@ -305,6 +306,7 @@ extension AppEnvironment {
             syncQueue: syncQueue,
             syncStateRepository: syncStateRepository,
             syncStatusStore: syncStatusStore,
+            proAccessStore: proAccessStore,
             conflictResolver: conflictResolver,
             cloudKitSyncEngine: cloudKitSyncEngine,
             searchPolicy: searchPolicy,
