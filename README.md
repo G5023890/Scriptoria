@@ -4,9 +4,10 @@
 
 `Scriptoria` is built for people who collect ideas all day, move between writing and execution, and want one calm place for everything: notes, labels, tasks, code, files, and search.
 
-Current app bundle: `MyNotes`  
-Current release: `0.95 (1253010726)`
-Repository: [G5023890/Scriptoria](https://github.com/G5023890/Scriptoria)
+- Current app bundle: `MyNotes`
+- App Store Connect product: `Scriptoria Notes`
+- Current release: `0.95 (1253010726)`
+- Repository: [G5023890/Scriptoria](https://github.com/G5023890/Scriptoria)
 
 ## Hero
 
@@ -178,6 +179,7 @@ bundle identifier `com.grigorym.MyNotes`.
 - Planned products are Pro Monthly, Pro Annual, and Pro Lifetime
 - User data remains readable and exportable when Pro access is not active
 - App Store exports use the production CloudKit environment and preserve the project build number
+- iOS and macOS build `1253010726` were uploaded for internal TestFlight processing
 
 ## Roadmap
 
