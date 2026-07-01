@@ -62,6 +62,7 @@ struct RootSplitView: View {
             }
         })
         .task {
+            await environment.proAccessStore.refresh()
             environment.configureToDoNotificationRouting(
                 onOpenToDo: { noteID, toDoID in
                     coordinator.revealToDo(noteID: noteID, toDoID: toDoID)
