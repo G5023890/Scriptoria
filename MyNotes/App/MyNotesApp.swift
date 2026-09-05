@@ -2,6 +2,9 @@ import CloudKit
 import Foundation
 import SwiftUI
 #if os(macOS)
+import UniformTypeIdentifiers
+#endif
+#if os(macOS)
 import AppKit
 #else
 import UIKit
@@ -13,6 +16,7 @@ enum CloudKitPushConstants {
 
 extension Notification.Name {
     static let scriptoriaDidApplyRemoteSync = Notification.Name("scriptoria.didApplyRemoteSync")
+    static let scriptoriaRequestExportSelection = Notification.Name("scriptoria.requestExportSelection")
 }
 
 @MainActor
@@ -65,6 +69,82 @@ final class AppRuntime {
         let timestamp = formatter.string(from: Date())
         NSLog("[ScriptoriaSync][%@] %@", timestamp, message)
     }
+
+#if os(macOS)
+    @MainActor
+    func importDataArchive() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.folder]
+        panel.allowsMultipleSelection = false
+        panel.canChooseDirectories = false
+        guard panel.runModal() == .OK, let url = panel.url, let environment else { return }
+
+        Task { @MainActor in
+            do {
+                let result = try await environment.importNotes(from: url)
+                NotificationCenter.default.post(name: .scriptoriaDidApplyRemoteSync, object: nil)
+                showTransferAlert(
+                    title: "Import Complete",
+                    message: "Imported \(result.importedNotes) notes and \(result.importedAttachments) attachments. \(result.skippedNotes) newer local notes were kept."
+                )
+            } catch {
+                showTransferAlert(title: "Import Failed", message: error.localizedDescription)
+            }
+        }
+    }
+
+    @MainActor
+    func exportDataArchive(noteIDs: Set<NoteID>? = nil) {
+        guard let environment else { return }
+        Task { @MainActor in
+            do {
+                let result = try await environment.exportNotes(noteIDs: noteIDs)
+                guard saveDataArchive(result.archiveURL) else { return }
+                showTransferAlert(
+                    title: "Export Complete",
+                    message: "Saved \(result.noteCount) notes and \(result.attachmentCount) attachments."
+                )
+            } catch {
+                showTransferAlert(title: "Export Failed", message: error.localizedDescription)
+            }
+        }
+    }
+
+    @MainActor
+    func saveDataArchive(_ archiveURL: URL) -> Bool {
+        let panel = NSOpenPanel()
+        panel.canChooseDirectories = true
+        panel.canChooseFiles = false
+        panel.canCreateDirectories = true
+        panel.prompt = "Export Here"
+        guard panel.runModal() == .OK, let selectedDirectory = panel.url else { return false }
+        let scopedAccess = selectedDirectory.startAccessingSecurityScopedResource()
+        defer {
+            if scopedAccess { selectedDirectory.stopAccessingSecurityScopedResource() }
+        }
+        do {
+            let manager = FileManager.default
+            let destination = selectedDirectory.appendingPathComponent(archiveURL.lastPathComponent, isDirectory: true)
+            if manager.fileExists(atPath: destination.path) {
+                try manager.removeItem(at: destination)
+            }
+            try manager.copyItem(at: archiveURL, to: destination)
+            return true
+        } catch {
+            showTransferAlert(title: "Export Failed", message: error.localizedDescription)
+            return false
+        }
+    }
+
+    @MainActor
+    private func showTransferAlert(title: String, message: String) {
+        let alert = NSAlert()
+        alert.messageText = title
+        alert.informativeText = message
+        alert.addButton(withTitle: "OK")
+        alert.runModal()
+    }
+#endif
 }
 
 #if os(macOS)
@@ -93,6 +173,23 @@ struct MyNotesApp: App {
         .windowResizability(.contentSize)
 
         .commands {
+            CommandGroup(replacing: .newItem) {
+                Button("Import Data...") {
+                    AppRuntime.shared.importDataArchive()
+                }
+                .keyboardShortcut("i", modifiers: [.command, .shift])
+
+                Menu("Export") {
+                    Button("All Notes and Attachments...") {
+                        AppRuntime.shared.exportDataArchive()
+                    }
+                    Button("Selected Note...") {
+                        NotificationCenter.default.post(name: .scriptoriaRequestExportSelection, object: nil)
+                    }
+                }
+                .keyboardShortcut("e", modifiers: [.command, .shift])
+            }
+
             CommandMenu("Notes") {
                 Button("New Note") {
                     coordinator.requestNewNote()

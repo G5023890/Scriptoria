@@ -54,6 +54,189 @@ struct StorageCleanupReport: Sendable {
     static let empty = StorageCleanupReport()
 }
 
+enum ScriptoriaTransferError: LocalizedError {
+    case unsupportedFormat
+    case invalidManifest
+    case unsupportedSchema(Int)
+    case missingAttachment(String)
+    case invalidAttachment(String)
+
+    var errorDescription: String? {
+        switch self {
+        case .unsupportedFormat:
+            "This is not a Scriptoria export archive."
+        case .invalidManifest:
+            "The export archive has an invalid manifest."
+        case .unsupportedSchema(let version):
+            "This export uses unsupported schema version \(version)."
+        case .missingAttachment(let name):
+            "The export is missing attachment \(name)."
+        case .invalidAttachment(let name):
+            "Attachment \(name) did not pass its integrity check."
+        }
+    }
+}
+
+struct ScriptoriaTransferManifest: Codable, Sendable {
+    static let schemaVersion = 1
+
+    let schemaVersion: Int
+    let exportedAt: Date
+    let notes: [ScriptoriaTransferNote]
+    let labels: [Label]
+}
+
+struct ScriptoriaTransferNote: Codable, Sendable {
+    let note: Note
+    let labelIDs: [LabelID]
+    let todos: [ToDo]
+    let attachments: [Attachment]
+    let snippets: [NoteSnippet]
+}
+
+struct ScriptoriaTransferResult: Sendable {
+    let archiveURL: URL
+    let noteCount: Int
+    let attachmentCount: Int
+}
+
+struct ScriptoriaImportResult: Sendable {
+    let importedNotes: Int
+    let skippedNotes: Int
+    let importedAttachments: Int
+}
+
+/// A portable package directory containing manifest.json and the original attachment bytes.
+struct ScriptoriaDataTransferService {
+    private let fileService: any FileService
+    private let fileManager: FileManager
+
+    init(fileService: any FileService, fileManager: FileManager = .default) {
+        self.fileService = fileService
+        self.fileManager = fileManager
+    }
+
+    func export(
+        notes: [ScriptoriaTransferNote],
+        labels: [Label]
+    ) throws -> ScriptoriaTransferResult {
+        let stagingDirectory = try exportURL()
+        try fileManager.createDirectory(at: stagingDirectory, withIntermediateDirectories: true)
+
+        let attachmentsDirectory = stagingDirectory.appendingPathComponent("attachments", isDirectory: true)
+        try fileManager.createDirectory(at: attachmentsDirectory, withIntermediateDirectories: true)
+
+        var attachmentCount = 0
+        for attachment in notes.flatMap(\.attachments) where !attachment.isDeleted {
+            let sourceURL = try fileService.absoluteURL(for: attachment.relativePath)
+            guard fileManager.fileExists(atPath: sourceURL.path) else { continue }
+
+            let destinationURL = attachmentsDirectory.appendingPathComponent(attachment.id.rawValue)
+            try fileManager.copyItem(at: sourceURL, to: destinationURL)
+            attachmentCount += 1
+        }
+
+        let manifest = ScriptoriaTransferManifest(
+            schemaVersion: ScriptoriaTransferManifest.schemaVersion,
+            exportedAt: Date(),
+            notes: notes,
+            labels: labels
+        )
+        let manifestData = try JSONEncoder.scriptoria.encode(manifest)
+        try manifestData.write(to: stagingDirectory.appendingPathComponent("manifest.json"), options: .atomic)
+
+        return ScriptoriaTransferResult(
+            archiveURL: stagingDirectory,
+            noteCount: notes.count,
+            attachmentCount: attachmentCount
+        )
+    }
+
+    func readManifest(from archiveURL: URL) throws -> (manifest: ScriptoriaTransferManifest, directory: URL) {
+        guard archiveURL.hasDirectoryPath else {
+            throw ScriptoriaTransferError.unsupportedFormat
+        }
+        let manifestURL = archiveURL.appendingPathComponent("manifest.json")
+        guard fileManager.fileExists(atPath: manifestURL.path) else {
+            throw ScriptoriaTransferError.unsupportedFormat
+        }
+        let manifest = try JSONDecoder.scriptoria.decode(
+            ScriptoriaTransferManifest.self,
+            from: Data(contentsOf: manifestURL)
+        )
+        guard manifest.schemaVersion == ScriptoriaTransferManifest.schemaVersion else {
+            throw ScriptoriaTransferError.unsupportedSchema(manifest.schemaVersion)
+        }
+        return (manifest, archiveURL)
+    }
+
+    func validateAndCopyAttachment(
+        _ attachment: Attachment,
+        from directory: URL
+    ) throws {
+        guard !attachment.isDeleted else { return }
+        let sourceURL = directory
+            .appendingPathComponent("attachments", isDirectory: true)
+            .appendingPathComponent(attachment.id.rawValue)
+        guard fileManager.fileExists(atPath: sourceURL.path) else {
+            throw ScriptoriaTransferError.missingAttachment(attachment.originalFileName)
+        }
+
+        let values = try sourceURL.resourceValues(forKeys: [.fileSizeKey])
+        if let expectedSize = attachment.fileSize, values.fileSize.map(Int64.init) != expectedSize {
+            throw ScriptoriaTransferError.invalidAttachment(attachment.originalFileName)
+        }
+        if let expectedChecksum = attachment.checksum,
+           checksum(of: sourceURL) != expectedChecksum {
+            throw ScriptoriaTransferError.invalidAttachment(attachment.originalFileName)
+        }
+        try fileService.writeFile(atRelativePath: attachment.relativePath, from: sourceURL)
+    }
+
+    func removeTemporaryDirectory(_ directory: URL) {
+        guard directory.path.hasPrefix(fileManager.temporaryDirectory.path) else { return }
+        try? fileManager.removeItem(at: directory)
+    }
+
+    private func exportURL() throws -> URL {
+        let date = ISO8601DateFormatter().string(from: Date())
+            .replacingOccurrences(of: ":", with: "-")
+        let directory = fileManager.temporaryDirectory.appendingPathComponent("ScriptoriaExports", isDirectory: true)
+        try fileManager.createDirectory(at: directory, withIntermediateDirectories: true)
+        return directory.appendingPathComponent("Scriptoria-\(date)-\(UUID().uuidString.prefix(8)).scriptoria", isDirectory: true)
+    }
+
+    private func makeTemporaryDirectory(named name: String) throws -> URL {
+        let directory = fileManager.temporaryDirectory
+            .appendingPathComponent(name, isDirectory: true)
+            .appendingPathComponent(UUID().uuidString.lowercased(), isDirectory: true)
+        try fileManager.createDirectory(at: directory, withIntermediateDirectories: true)
+        return directory
+    }
+
+    private func checksum(of url: URL) -> String {
+        let digest = SHA256.hash(data: (try? Data(contentsOf: url, options: .mappedIfSafe)) ?? Data())
+        return digest.map { String(format: "%02x", $0) }.joined()
+    }
+}
+
+private extension JSONEncoder {
+    static var scriptoria: JSONEncoder {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        return encoder
+    }
+}
+
+private extension JSONDecoder {
+    static var scriptoria: JSONDecoder {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return decoder
+    }
+}
+
 struct LocalFileService: FileService {
     private let fileManager: FileManager
     private let folderName: String

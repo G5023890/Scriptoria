@@ -1,5 +1,9 @@
 import SwiftUI
 
+#if os(iOS)
+import UIKit
+#endif
+
 @MainActor
 struct NoteDetailScreen: View {
     @Bindable var coordinator: AppCoordinator
@@ -37,6 +41,10 @@ struct NoteDetailScreen: View {
             coordinator.selectedToDoID = focusedToDoID
             await viewModel.load(noteID: noteID)
         }
+        #if os(iOS)
+        .navigationBarBackButtonHidden(true)
+        .background(InteractivePopGestureEnabler())
+        #endif
         .onDisappear {
             if coordinator.selectedNoteID == noteID {
                 coordinator.selectedNoteID = nil
@@ -45,3 +53,33 @@ struct NoteDetailScreen: View {
         }
     }
 }
+
+#if os(iOS)
+private struct InteractivePopGestureEnabler: UIViewControllerRepresentable {
+    final class Controller: UIViewController {
+        override func viewDidAppear(_ animated: Bool) {
+            super.viewDidAppear(animated)
+            enableInteractivePopGesture()
+        }
+
+        func enableInteractivePopGesture() {
+            guard let navigationController,
+                  let gesture = navigationController.interactivePopGestureRecognizer else { return }
+
+            gesture.isEnabled = true
+            gesture.delegate = nil
+        }
+    }
+
+    func makeUIViewController(context: Context) -> UIViewController {
+        Controller()
+    }
+
+    func updateUIViewController(_ viewController: UIViewController, context: Context) {
+        guard let controller = viewController as? Controller else { return }
+        DispatchQueue.main.async {
+            controller.enableInteractivePopGesture()
+        }
+    }
+}
+#endif

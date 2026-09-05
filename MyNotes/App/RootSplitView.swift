@@ -12,6 +12,7 @@ struct RootSplitView: View {
     @State private var toDosListViewModel: ToDosListViewModel
     @State private var noteDetailViewModel: NoteDetailViewModel
     @State private var searchViewModel: SearchViewModel
+    @State private var isShowingExportSelection = false
 
     init(coordinator: AppCoordinator, environment: AppEnvironment) {
         self.coordinator = coordinator
@@ -159,6 +160,14 @@ struct RootSplitView: View {
                 )
             }
         }
+        #if os(macOS)
+        .onReceive(NotificationCenter.default.publisher(for: .scriptoriaRequestExportSelection)) { _ in
+            isShowingExportSelection = true
+        }
+        .sheet(isPresented: $isShowingExportSelection) {
+            ExportNotesSelectionSheet(environment: environment)
+        }
+        #endif
         .onChange(of: scenePhase) {
             switch scenePhase {
             case .active:
@@ -249,3 +258,94 @@ struct RootSplitView: View {
     }
 
 }
+
+#if os(macOS)
+@MainActor
+private struct ExportNotesSelectionSheet: View {
+    let environment: AppEnvironment
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var snapshots: [NoteSnapshot] = []
+    @State private var selectedIDs: Set<NoteID> = []
+    @State private var isExporting = false
+    @State private var errorMessage: String?
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    Toggle("Select All", isOn: Binding(
+                        get: { !snapshots.isEmpty && selectedIDs.count == snapshots.count },
+                        set: { selectedIDs = $0 ? Set(snapshots.map(\.id)) : [] }
+                    ))
+                }
+
+                Section("Notes") {
+                    ForEach(snapshots) { snapshot in
+                        Toggle(snapshot.note.displayTitle, isOn: Binding(
+                            get: { selectedIDs.contains(snapshot.id) },
+                            set: { isSelected in
+                                if isSelected {
+                                    selectedIDs.insert(snapshot.id)
+                                } else {
+                                    selectedIDs.remove(snapshot.id)
+                                }
+                            }
+                        ))
+                        .lineLimit(1)
+                    }
+                }
+            }
+            .overlay {
+                if snapshots.isEmpty {
+                    ContentUnavailableView("No Notes", systemImage: "note.text")
+                }
+            }
+            .navigationTitle("Export Notes")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Export") {
+                        Task { await exportSelectedNotes() }
+                    }
+                    .disabled(selectedIDs.isEmpty || isExporting)
+                }
+            }
+            .task {
+                do {
+                    snapshots = try await environment.listNoteSnapshotsUseCase.execute(
+                        collection: .allNotes,
+                        labelID: nil
+                    )
+                    selectedIDs = Set(snapshots.map(\.id))
+                } catch {
+                    errorMessage = error.localizedDescription
+                }
+            }
+            .alert("Export Failed", isPresented: Binding(
+                get: { errorMessage != nil },
+                set: { if !$0 { errorMessage = nil } }
+            )) {
+                Button("OK") { errorMessage = nil }
+            } message: {
+                Text(errorMessage ?? "")
+            }
+        }
+        .frame(minWidth: 420, minHeight: 460)
+    }
+
+    private func exportSelectedNotes() async {
+        isExporting = true
+        defer { isExporting = false }
+        do {
+            let result = try await environment.exportNotes(noteIDs: selectedIDs)
+            guard AppRuntime.shared.saveDataArchive(result.archiveURL) else { return }
+            dismiss()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+}
+#endif

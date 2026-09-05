@@ -126,6 +126,10 @@ struct NoteDetailView: View {
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
+                    #if os(iOS)
+                    .contentMargins(.horizontal, AppSpacing.large, for: .scrollContent)
+                    .contentMargins(.bottom, AppSpacing.large, for: .scrollContent)
+                    #endif
                 }
             } else if let editorViewModel {
                 NoteEditorPane(
@@ -547,12 +551,22 @@ private struct NoteDetailShellBody: View {
     let content: AnyView
 
     var body: some View {
+        #if os(iOS)
+        content
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .safeAreaInset(edge: .top, spacing: AppSpacing.large) {
+                header
+                    .padding(.horizontal, AppSpacing.large)
+                    .padding(.top, AppSpacing.large)
+            }
+        #else
         VStack(alignment: .leading, spacing: AppSpacing.large) {
             header
             content
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(AppSpacing.large)
+        #endif
     }
 }
 

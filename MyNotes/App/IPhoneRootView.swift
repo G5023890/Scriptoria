@@ -1,5 +1,6 @@
 import Combine
 import SwiftUI
+import UniformTypeIdentifiers
 
 @MainActor
 struct IPhoneRootView: View {
@@ -16,6 +17,10 @@ struct IPhoneRootView: View {
     @State private var taskPath: [TaskDetailRoute] = []
     @State private var isShowingQuickCapture = false
     @State private var isBottomSearchPresented = false
+    @State private var isImportingData = false
+    @State private var exportArchiveURL: URL?
+    @State private var isSharingExport = false
+    @State private var transferMessage: String?
 
     init(coordinator: AppCoordinator, environment: AppEnvironment) {
         self.coordinator = coordinator
@@ -71,6 +76,51 @@ struct IPhoneRootView: View {
             .padding(.trailing, 18)
             .padding(.bottom, 24)
             .accessibilityLabel("Quick Capture")
+        }
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Menu {
+                    Button {
+                        isImportingData = true
+                    } label: {
+                        SwiftUI.Label("Import Data", systemImage: "square.and.arrow.down")
+                    }
+
+                    Button {
+                        Task { await exportData(noteIDs: nil) }
+                    } label: {
+                        SwiftUI.Label("Export All Data", systemImage: "square.and.arrow.up")
+                    }
+
+                    if let selectedNoteID = coordinator.selectedNoteID {
+                        Button {
+                            Task { await exportData(noteIDs: [selectedNoteID]) }
+                        } label: {
+                            SwiftUI.Label("Export Selected Note", systemImage: "doc.badge.arrow.up")
+                        }
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
+                }
+                .accessibilityLabel("Data Transfer")
+            }
+        }
+        .fileImporter(
+            isPresented: $isImportingData,
+            allowedContentTypes: [.folder],
+            allowsMultipleSelection: false
+        ) { result in
+            guard case .success(let urls) = result, let url = urls.first else { return }
+            Task { await importData(from: url) }
+        }
+        .sheet(isPresented: $isSharingExport) { exportSheet }
+        .alert("Data Transfer", isPresented: Binding(
+            get: { transferMessage != nil },
+            set: { if !$0 { transferMessage = nil } }
+        )) {
+            Button("OK") { transferMessage = nil }
+        } message: {
+            Text(transferMessage ?? "")
         }
         .sheet(isPresented: $isShowingQuickCapture) {
             QuickCaptureView(
@@ -168,26 +218,7 @@ struct IPhoneRootView: View {
             }
         }
         .onChange(of: scenePhase) {
-            switch scenePhase {
-            case .active:
-                environment.syncStatusStore.markDebugTrigger(.active)
-#if !os(macOS)
-                AppRuntime.shared.startActiveSyncPollingIfNeeded(trigger: .active)
-#endif
-
-                Task {
-                    await environment.performSyncIfNeeded()
-                    await reloadSidebar()
-                    await reloadLists()
-                    syncNavigationState()
-                }
-            case .inactive, .background:
-#if !os(macOS)
-                AppRuntime.shared.stopActiveSyncPolling()
-#endif
-            @unknown default:
-                break
-            }
+            handleScenePhase(scenePhase)
         }
         .onReceive(NotificationCenter.default.publisher(for: .scriptoriaDidApplyRemoteSync)) { _ in
             Task {
@@ -204,6 +235,31 @@ struct IPhoneRootView: View {
             coordinator.selectedNoteID?.rawValue ?? "none",
             coordinator.selectedToDoID?.rawValue ?? "none"
         ].joined(separator: "::")
+    }
+
+    @ViewBuilder
+    private var exportSheet: some View {
+        NavigationStack {
+            VStack(spacing: 20) {
+                Image(systemName: "archivebox")
+                    .font(.system(size: 44))
+                    .foregroundStyle(Color.accentColor)
+                Text("Export Ready")
+                    .font(.title3.weight(.semibold))
+                Text(exportArchiveURL?.lastPathComponent ?? "Scriptoria export")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                if let exportArchiveURL {
+                    ShareLink(item: exportArchiveURL) {
+                        SwiftUI.Label("Share Export", systemImage: "square.and.arrow.up")
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+            }
+            .padding(28)
+            .navigationTitle("Export")
+        }
     }
 
     private var homeTab: some View {
@@ -223,6 +279,28 @@ struct IPhoneRootView: View {
                     onNoteChanged: handleNoteChanged
                 )
             }
+        }
+    }
+
+    private func handleScenePhase(_ phase: ScenePhase) {
+        switch phase {
+        case .active:
+            environment.syncStatusStore.markDebugTrigger(.active)
+#if !os(macOS)
+            AppRuntime.shared.startActiveSyncPollingIfNeeded(trigger: .active)
+#endif
+            Task {
+                await environment.performSyncIfNeeded()
+                await reloadSidebar()
+                await reloadLists()
+                syncNavigationState()
+            }
+        case .inactive, .background:
+#if !os(macOS)
+            AppRuntime.shared.stopActiveSyncPolling()
+#endif
+        @unknown default:
+            break
         }
     }
 
@@ -339,6 +417,27 @@ struct IPhoneRootView: View {
             coordinator.revealNote(note)
         } catch {
             print("New note creation failed: \(error)")
+        }
+    }
+
+    private func exportData(noteIDs: Set<NoteID>?) async {
+        do {
+            let result = try await environment.exportNotes(noteIDs: noteIDs)
+            exportArchiveURL = result.archiveURL
+            isSharingExport = true
+        } catch {
+            transferMessage = "Export failed: \(error.localizedDescription)"
+        }
+    }
+
+    private func importData(from url: URL) async {
+        do {
+            let result = try await environment.importNotes(from: url)
+            await reloadSidebar()
+            await reloadLists()
+            transferMessage = "Imported \(result.importedNotes) notes and \(result.importedAttachments) attachments. \(result.skippedNotes) newer local notes were kept."
+        } catch {
+            transferMessage = "Import failed: \(error.localizedDescription)"
         }
     }
 }

@@ -289,3 +289,104 @@ final class AppEnvironment {
         self.bootstrapApplicationUseCase = bootstrapApplicationUseCase
     }
 }
+
+extension AppEnvironment {
+    /// Creates a portable archive. Passing ids limits the archive to those notes.
+    func exportNotes(noteIDs: Set<NoteID>? = nil) async throws -> ScriptoriaTransferResult {
+        let snapshots = try await listNoteSnapshotsUseCase.execute(
+            collection: .allNotes,
+            labelID: nil
+        )
+        let selectedSnapshots = snapshots.filter { snapshot in
+            noteIDs?.contains(snapshot.note.id) ?? true
+        }
+        let labelIDs = Set(selectedSnapshots.flatMap { $0.labels.map(\.id) })
+        let labels = (try await labelsRepository.allLabels()).filter { labelIDs.contains($0.id) }
+        let notes = selectedSnapshots.map {
+            ScriptoriaTransferNote(
+                note: $0.note,
+                labelIDs: $0.labels.map(\.id),
+                todos: $0.todos,
+                attachments: $0.attachments,
+                snippets: $0.snippets
+            )
+        }
+        return try ScriptoriaDataTransferService(fileService: fileService).export(notes: notes, labels: labels)
+    }
+
+    /// Merges a Scriptoria archive by stable IDs. A newer local record always wins.
+    func importNotes(from archiveURL: URL, selectedNoteIDs: Set<NoteID>? = nil) async throws -> ScriptoriaImportResult {
+        let scopedAccess = archiveURL.startAccessingSecurityScopedResource()
+        defer {
+            if scopedAccess { archiveURL.stopAccessingSecurityScopedResource() }
+        }
+        let transferService = ScriptoriaDataTransferService(fileService: fileService)
+        let archive = try transferService.readManifest(from: archiveURL)
+        defer { transferService.removeTemporaryDirectory(archive.directory) }
+
+        for importedLabel in archive.manifest.labels where !importedLabel.isDeleted {
+            if let localLabel = try await labelsRepository.label(id: importedLabel.id) {
+                if importedLabel.updatedAt > localLabel.updatedAt || importedLabel.version > localLabel.version {
+                    try await labelsRepository.update(label: importedLabel)
+                }
+            } else {
+                try await labelsRepository.create(label: importedLabel)
+            }
+        }
+
+        var importedNotes = 0
+        var skippedNotes = 0
+        var importedAttachments = 0
+        for payload in archive.manifest.notes where selectedNoteIDs?.contains(payload.note.id) ?? true {
+            if let localNote = try await notesRepository.note(id: payload.note.id),
+               localNote.updatedAt > payload.note.updatedAt || localNote.version > payload.note.version {
+                skippedNotes += 1
+                continue
+            }
+
+            if try await notesRepository.note(id: payload.note.id) == nil {
+                try await notesRepository.create(note: payload.note)
+            } else {
+                try await notesRepository.update(note: payload.note)
+            }
+            try await labelsRepository.assign(labelIDs: payload.labelIDs, to: payload.note.id)
+
+            for todo in payload.todos where !todo.isDeleted {
+                if let localTodo = try await toDoRepository.todo(id: todo.id) {
+                    if todo.updatedAt > localTodo.updatedAt || todo.version > localTodo.version {
+                        try await toDoRepository.update(todo: todo)
+                    }
+                } else {
+                    try await toDoRepository.create(todo: todo)
+                }
+            }
+
+            for attachment in payload.attachments where !attachment.isDeleted {
+                if let localAttachment = try await attachmentsRepository.attachment(id: attachment.id),
+                   localAttachment.updatedAt > attachment.updatedAt || localAttachment.version > attachment.version {
+                    continue
+                }
+                try transferService.validateAndCopyAttachment(attachment, from: archive.directory)
+                if try await attachmentsRepository.attachment(id: attachment.id) == nil {
+                    try await attachmentsRepository.add(attachment: attachment)
+                } else {
+                    _ = try await attachmentsRepository.update(attachment: attachment)
+                }
+                importedAttachments += 1
+            }
+
+            let activeSnippets = payload.snippets.filter { !$0.isDeleted }
+            if !activeSnippets.isEmpty {
+                _ = try await attachmentsRepository.replaceSnippets(activeSnippets, for: payload.note.id)
+            }
+            try await indexNoteForSearchUseCase.execute(noteID: payload.note.id)
+            importedNotes += 1
+        }
+        await refreshToDoNotifications()
+        return ScriptoriaImportResult(
+            importedNotes: importedNotes,
+            skippedNotes: skippedNotes,
+            importedAttachments: importedAttachments
+        )
+    }
+}

@@ -21,9 +21,33 @@ struct NoteDetailHeaderView: View {
     let onToggleFavorite: () -> Void
 
     @State private var isShowingLabelsPopover = false
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     var body: some View {
-        VStack(alignment: .leading, spacing: AppSpacing.small) {
+        Group {
+            if horizontalSizeClass == .regular {
+                HStack(alignment: .center, spacing: AppSpacing.medium) {
+                    titleAndMetadata
+                    Spacer(minLength: AppSpacing.medium)
+                    modePicker
+                    controlBar
+                }
+            } else {
+                VStack(alignment: .leading, spacing: AppSpacing.small) {
+                    titleAndMetadata
+                    HStack(alignment: .center, spacing: AppSpacing.medium) {
+                        metadataRow
+                        Spacer(minLength: AppSpacing.small)
+                        modePicker
+                    }
+                    controlBar
+                }
+            }
+        }
+    }
+
+    private var titleAndMetadata: some View {
+        VStack(alignment: .leading, spacing: 4) {
             if let titleBinding, mode != .read {
                 TextField("Title", text: titleBinding)
                     .textFieldStyle(.roundedBorder)
@@ -31,31 +55,35 @@ struct NoteDetailHeaderView: View {
             } else {
                 Text(snapshot.note.displayTitle)
                     .font(AppTypography.hero)
+                    .lineLimit(1)
             }
 
-            HStack(alignment: .center, spacing: AppSpacing.medium) {
+            if horizontalSizeClass == .regular {
                 metadataRow
-                Spacer(minLength: AppSpacing.small)
-                modePicker
             }
-
-            controlBar
         }
+        .frame(minWidth: 140, maxWidth: 360, alignment: .leading)
     }
 
     @ViewBuilder
     private var metadataRow: some View {
         HStack(alignment: .center, spacing: AppSpacing.small) {
-            if snapshot.labels.isEmpty {
+            if selectedLabels.isEmpty {
                 Text("Unlabeled")
                     .font(AppTypography.caption)
                     .foregroundStyle(.secondary)
             } else {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: AppSpacing.small) {
-                        ForEach(snapshot.labels) { label in
-                            LabelChipView(label: label)
+                ViewThatFits(in: .horizontal) {
+                    ForEach(Array((0...selectedLabels.count).reversed()), id: \.self) { visibleCount in
+                        HStack(spacing: AppSpacing.small) {
+                            ForEach(Array(selectedLabels.prefix(visibleCount))) { label in
+                                LabelChipView(label: label)
+                            }
+                            if visibleCount < selectedLabels.count {
+                                HiddenNoteLabelsButton(labels: Array(selectedLabels.dropFirst(visibleCount)))
+                            }
                         }
+                        .fixedSize(horizontal: true, vertical: false)
                     }
                 }
                 .frame(maxWidth: 360, alignment: .leading)
@@ -105,6 +133,7 @@ struct NoteDetailHeaderView: View {
                     .fill(AppColors.chipBackground)
             )
         }
+        .fixedSize(horizontal: horizontalSizeClass == .regular, vertical: false)
     }
 
     private var modePicker: some View {
@@ -221,6 +250,39 @@ struct NoteDetailHeaderView: View {
         )
     }
 
+}
+
+private struct HiddenNoteLabelsButton: View {
+    let labels: [Label]
+    @State private var isPresented = false
+
+    var body: some View {
+        Button {
+            isPresented = true
+        } label: {
+            InfoBadge(text: "+\(labels.count)")
+                .frame(minHeight: 44)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Show hidden tags: \(labels.count)")
+        .popover(isPresented: $isPresented) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: AppSpacing.medium) {
+                    Text("Tags").font(.headline)
+                    ForEach(labels) { label in
+                        HStack(alignment: .top) {
+                            LabelIconView(label: label)
+                            Text(label.name).fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                    Button("Done") { isPresented = false }
+                }
+                .padding()
+            }
+            .frame(idealWidth: 300, idealHeight: 320)
+        }
+    }
 }
 
 private struct LabelsPickerContent: View {
